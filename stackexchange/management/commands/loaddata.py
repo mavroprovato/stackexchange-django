@@ -86,12 +86,10 @@ class Command(BaseCommand):
                     'id', 'title', 'body', 'type', 'created', 'last_edit', 'last_activity', 'score', 'view_count',
                     'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id'
                 ), params=lambda row: (
-                    row['Id'], row.get('Title'), row['Body'], {
-                        '1': 'question', '2': 'answer', '3': 'wiki', '4': 'tag_wiki_expert', '5': 'tag_wiki',
-                        '6': 'moderator_nomination', '7': 'wiki_placeholder', '8': 'privilege_wiki',
-                    }[row['PostTypeId']], row['CreationDate'], row.get('LastEditDate'), row['LastActivityDate'],
-                    row['Score'], row.get('ViewCount'), row.get('AnswerCount'), row.get('CommentCount'),
-                    row.get('FavoriteCount'), row.get('OwnerUserId'), row.get('LastEditorUserId')
+                    row['Id'], row.get('Title'), row['Body'], row['PostTypeId'], row['CreationDate'],
+                    row.get('LastEditDate'), row['LastActivityDate'], row['Score'], row.get('ViewCount'),
+                    row.get('AnswerCount'), row.get('CommentCount'), row.get('FavoriteCount'), row.get('OwnerUserId'),
+                    row.get('LastEditorUserId')
                 ))
         self.stdout.write(f"Posts loaded")
 
