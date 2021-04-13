@@ -8,7 +8,7 @@ class User(models.Model):
     website = models.URLField(help_text="The user web site", null=True, blank=True)
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
     about = models.TextField(help_text="The user about information", null=True, blank=True)
-    created = models.DateField(help_text="The user creation date")
+    created = models.DateField(help_text="The user creation date", auto_now_add=True)
     reputation = models.PositiveIntegerField(help_text="The user reputation")
     views = models.PositiveIntegerField(help_text="The user profile views")
     up_votes = models.PositiveIntegerField(help_text="The user up votes")
@@ -32,11 +32,11 @@ class Badge(models.Model):
     CLASS_SILVER = '2'
     CLASS_BRONZE = '3'
 
-    CLASS_CHOICES = [
+    CLASS_CHOICES = (
         (CLASS_GOLD, 'Gold'),
         (CLASS_SILVER, 'Silver'),
         (CLASS_BRONZE, 'Bronze'),
-    ]
+    )
     name = models.CharField(help_text="The badge name", max_length=255, unique=True)
     badge_class = models.CharField(help_text="The badge class", max_length=1, choices=CLASS_CHOICES)
     tag_based = models.BooleanField(help_text="If the badge is tag based")
@@ -57,7 +57,7 @@ class UserBadge(models.Model):
     """
     user = models.ForeignKey(User, help_text="The user", on_delete=models.CASCADE, related_name='user_badges')
     badge = models.ForeignKey(Badge, help_text="The badge", on_delete=models.CASCADE, related_name='user_badges')
-    date_awarded = models.DateTimeField(help_text="The date awarded")
+    date_awarded = models.DateTimeField(help_text="The date awarded", auto_now_add=True)
 
     class Meta:
         db_table = 'user_badges'
@@ -75,7 +75,7 @@ class Post(models.Model):
     TYPE_WIKI_PLACEHOLDER = '7'
     TYPE_PRIVILEGE_WIKI = '8'
 
-    TYPE_CHOICES = [
+    TYPE_CHOICES = (
         (TYPE_QUESTION, 'Question'),
         (TYPE_ANSWER, 'Answer'),
         (TYPE_WIKI, 'Wiki'),
@@ -83,13 +83,13 @@ class Post(models.Model):
         (TYPE_MODERATOR_NOMINATION, 'Moderator Nomination'),
         (TYPE_WIKI_PLACEHOLDER, 'Wiki Placeholder'),
         (TYPE_PRIVILEGE_WIKI, 'Privilege Wiki'),
-    ]
+    )
 
     title = models.CharField(help_text="The post title", max_length=1000, null=True, blank=True)
     body = models.TextField(help_text="The post body")
     type = models.CharField(help_text="The post type", max_length=1, choices=TYPE_CHOICES)
-    created = models.DateField(help_text="The post creation date")
-    last_edit = models.DateField(help_text="The post last edit date", null=True, blank=True)
+    created = models.DateField(help_text="The post creation date", auto_now_add=True)
+    last_edit = models.DateField(help_text="The post last edit date", null=True, blank=True, auto_now=True)
     last_activity = models.DateField(help_text="The post last activity date")
     score = models.IntegerField(help_text="The post score")
     view_count = models.PositiveIntegerField(help_text="The post view count", null=True, blank=True)
@@ -103,6 +103,151 @@ class Post(models.Model):
 
     class Meta:
         db_table = 'posts'
+
+
+class Comment(models.Model):
+    """The comment model
+    """
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_comments")
+    score = models.IntegerField(help_text="The comment score")
+    text = models.TextField(help_text="The comment text")
+    creation_date = models.DateTimeField(help_text="The date that the comment was created", auto_now_add=True)
+    user = models.ForeignKey(User, help_text="The user for the comment", on_delete=models.CASCADE,
+                             related_name='user_comments', null=True, blank=True)
+
+    class Meta:
+        db_table = 'comments'
+
+
+class PostHistory(models.Model):
+    """The post history model
+    """
+    TYPE_INITIAL_TITLE = '1'
+    TYPE_INITIAL_BODY = '2'
+    TYPE_INITIAL_TAGS = '3'
+    TYPE_EDIT_TITLE = '4'
+    TYPE_EDIT_BODY = '5'
+    TYPE_EDIT_TAGS = '6'
+    TYPE_ROLLBACK_TITLE = '7'
+    TYPE_ROLLBACK_BODY = '8'
+    TYPE_ROLLBACK_TAGS = '9'
+    TYPE_POST_CLOSED = '10'
+    TYPE_POST_REOPENED = '11'
+    TYPE_POST_DELETED = '12'
+    TYPE_POST_UNDELETED = '13'
+    TYPE_POST_LOCKED = '14'
+    TYPE_POST_UNLOCKED = '15'
+    TYPE_COMMUNITY_OWNED = '16'
+    TYPE_POST_MIGRATED = '17'
+    TYPE_QUESTION_MERGED = '18'
+    TYPE_QUESTION_PROTECTED = '19'
+    TYPE_QUESTION_UNPROTECTED = '20'
+    TYPE_POST_DISASSOCIATED = '21'
+    TYPE_QUESTION_UNMERGED = '22'
+
+    TYPE_CHOICES = (
+        (TYPE_INITIAL_TITLE, 'Initial Title'),
+        (TYPE_INITIAL_BODY, 'Initial Body'),
+        (TYPE_INITIAL_TAGS, 'Initial Tags'),
+        (TYPE_EDIT_TITLE, 'Edit Title'),
+        (TYPE_EDIT_BODY, 'Edit Body'),
+        (TYPE_EDIT_TAGS, 'Edit Tags'),
+        (TYPE_ROLLBACK_TITLE, 'Rollback Title'),
+        (TYPE_ROLLBACK_BODY, 'Rollback Body'),
+        (TYPE_ROLLBACK_TAGS, 'Rollback Tags'),
+        (TYPE_POST_CLOSED, 'Post Closed'),
+        (TYPE_POST_REOPENED, 'Post Reopened'),
+        (TYPE_POST_DELETED, 'Post Deleted'),
+        (TYPE_POST_UNDELETED, 'Post Undeleted'),
+        (TYPE_POST_LOCKED, 'Post Locked'),
+        (TYPE_POST_UNLOCKED, 'Post Unlocked'),
+        (TYPE_COMMUNITY_OWNED, 'Community Owned'),
+        (TYPE_POST_MIGRATED, 'Post Migrated'),
+        (TYPE_QUESTION_MERGED, 'Question Merged'),
+        (TYPE_QUESTION_PROTECTED, 'Question Protected'),
+        (TYPE_QUESTION_UNPROTECTED, 'Question Unprotected'),
+        (TYPE_POST_DISASSOCIATED, 'Post Disassociated'),
+        (TYPE_QUESTION_UNMERGED, 'Question Unmerged'),
+    )
+
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
+    type = models.CharField(help_text="The post history type", max_length=2, choices=TYPE_CHOICES)
+    revision_guid = models.CharField(help_text="The GUID of the action that created this history record", max_length=36)
+    creation_date = models.DateTimeField(help_text="The date that this history record was created", auto_now_add=True)
+    user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
+                             related_name='user_post_history', null=True, blank=True)
+    user_display_name = models.CharField(
+        help_text="The display name of the user that created this record, if the user has been removed and no longer "
+                  "referenced by id", max_length=255, null=True, blank=True)
+    comment = models.TextField(help_text="The comment of the user that has edited this post", null=True, blank=True)
+    text = models.TextField(help_text="The new value for a given revision", null=True, blank=True)
+
+    class Meta:
+        db_table = 'post_history'
+        verbose_name_plural = 'post history'
+
+
+class PostLink(models.Model):
+    """The post link model
+    """
+    TYPE_LINKED = '1'
+    TYPE_DUPLICATE = '3'
+
+    TYPE_CHOICES = (
+        (TYPE_LINKED, 'Linked'),
+        (TYPE_DUPLICATE, 'Duplicate'),
+    )
+
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_links")
+    related_post = models.ForeignKey(Post, help_text="The related post", on_delete=models.CASCADE,
+                                     related_name="related_post_links")
+    type = models.CharField(help_text="The post link type", max_length=1, choices=TYPE_CHOICES)
+
+    class Meta:
+        db_table = 'post_links'
+
+
+class PostVote(models.Model):
+    """The post vote model
+    """
+    TYPE_ACCEPTED_BY_ORIGINATOR = '1'
+    TYPE_UP_MOD = '2'
+    TYPE_DOWN_MOD = '3'
+    TYPE_OFFENSIVE = '4'
+    TYPE_FAVORITE = '5'
+    TYPE_CLOSE = '6'
+    TYPE_REOPEN = '7'
+    TYPE_BOUNTY_START = '8'
+    TYPE_BOUNTY_CLOSE = '9'
+    TYPE_DELETION = '10'
+    TYPE_UN_DELETION = '11'
+    TYPE_SPAM = '12'
+    TYPE_INFORM_MODERATOR = '13'
+
+    TYPE_CHOICES = (
+        (TYPE_ACCEPTED_BY_ORIGINATOR, 'AcceptedByOriginator'),
+        (TYPE_UP_MOD, 'UpMod'),
+        (TYPE_DOWN_MOD, 'DownMod'),
+        (TYPE_OFFENSIVE, 'Offensive'),
+        (TYPE_FAVORITE, 'Favorite'),
+        (TYPE_CLOSE, 'Close'),
+        (TYPE_REOPEN, 'Reopen'),
+        (TYPE_BOUNTY_START, 'Bounty Start'),
+        (TYPE_BOUNTY_CLOSE, 'Bounty Close'),
+        (TYPE_DELETION, 'Deletion'),
+        (TYPE_UN_DELETION, 'Un-deletion'),
+        (TYPE_SPAM, 'Spam'),
+        (TYPE_INFORM_MODERATOR, 'Inform Moderator'),
+    )
+
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_votes")
+    type = models.CharField(help_text="The post vote type", max_length=2, choices=TYPE_CHOICES)
+    user = models.ForeignKey(User, help_text="The user for the vote", on_delete=models.CASCADE,
+                             related_name='user_votes', null=True, blank=True)
+    creation_date = models.DateTimeField(help_text="The date that this vote was created", auto_now_add=True)
+
+    class Meta:
+        db_table = 'post_votes'
 
 
 class Tag(models.Model):

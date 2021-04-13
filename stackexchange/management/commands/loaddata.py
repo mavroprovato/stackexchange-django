@@ -24,12 +24,15 @@ class Command(BaseCommand):
 
         :param args: The arguments.
         :param options: The options.
-        :return:
         """
         import_dir = pathlib.Path(options['directory'])
         self.load_users(import_dir / "Users.xml")
         self.load_badges(import_dir / "Badges.xml")
         self.load_posts(import_dir / "Posts.xml")
+        self.load_comments(import_dir / "Comments.xml")
+        self.load_post_history(import_dir / "PostHistory.xml")
+        self.load_post_links(import_dir / "PostLinks.xml")
+        self.load_post_votes(import_dir / "Votes.xml")
         self.load_tags(import_dir / "Tags.xml", import_dir / "Posts.xml")
 
     def load_users(self, users_file: pathlib.Path):
@@ -93,6 +96,79 @@ class Command(BaseCommand):
                 ))
         self.stdout.write(f"Posts loaded")
 
+    def load_comments(self, comments_file: pathlib.Path):
+        """Load the comments.
+
+        :param comments_file: The comments file.
+        """
+        self.stdout.write(f"Loading comments")
+        with connection.cursor() as cursor:
+            with transaction.atomic():
+                self.insert_data(
+                    data=self.iterate_xml(comments_file), cursor=cursor, table_name='comments',
+                    table_columns=('id', 'post_id', 'score', 'text', 'creation_date', 'user_id'),
+                    params=lambda row: (
+                        row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row.get('UserId')
+                    )
+                )
+
+    def load_post_history(self, post_history_file: pathlib.Path):
+        """Load the post history.
+
+        :param post_history_file: The post history file.
+        """
+        self.stdout.write(f"Loading post history")
+        with connection.cursor() as cursor:
+            with transaction.atomic():
+                self.insert_data(
+                    data=self.iterate_xml(post_history_file), cursor=cursor, table_name='post_history',
+                    table_columns=(
+                        'id', 'post_id', 'type', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
+                        'comment', 'text'
+                    ), params=lambda row: (
+                        row['Id'], row['PostId'], row['PostHistoryTypeId'], row['RevisionGUID'], row['CreationDate'],
+                        row.get('UserId'), row.get('UserDisplayName'), row.get('Comment'), row.get('Text')
+                    )
+                )
+
+    def load_post_links(self, post_links_file: pathlib.Path):
+        """Load the post links.
+
+        :param post_links_file: The post links file.
+        """
+        self.stdout.write(f"Loading post links")
+        with connection.cursor() as cursor:
+            with transaction.atomic():
+                cursor.execute("SELECT id FROM posts")
+                post_ids = {row[0] for row in cursor.fetchall()}
+
+                self.insert_data(
+                    data=self.iterate_xml(post_links_file), cursor=cursor, table_name='post_links',
+                    table_columns=('id', 'post_id', 'related_post_id', 'type'),
+                    params=lambda row: (
+                        row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
+                    ) if int(row['PostId']) in post_ids and int(row['RelatedPostId']) in post_ids else None
+                )
+
+    def load_post_votes(self, post_votes_file: pathlib.Path):
+        """Load the post votes.
+
+        :param post_votes_file: The post votes file.
+        """
+        self.stdout.write(f"Loading post votes")
+        with connection.cursor() as cursor:
+            with transaction.atomic():
+                cursor.execute("SELECT id FROM posts")
+                post_ids = {row[0] for row in cursor.fetchall()}
+
+                self.insert_data(
+                    data=self.iterate_xml(post_votes_file), cursor=cursor, table_name='post_votes',
+                    table_columns=('id', 'post_id', 'type', 'user_id', 'creation_date'),
+                    params=lambda row: (
+                        row['Id'], row['PostId'], row['VoteTypeId'], row.get('UserId'), row['CreationDate']
+                    ) if int(row['PostId']) in post_ids else None
+                )
+
     def load_tags(self, tags_file: pathlib.Path, posts_file: pathlib.Path):
         """Load the tags.
 
@@ -102,11 +178,13 @@ class Command(BaseCommand):
         self.stdout.write(f"Loading tags")
         with connection.cursor() as cursor:
             with transaction.atomic():
-                self.insert_data(data=self.iterate_xml(tags_file), cursor=cursor, table_name='tags', table_columns=(
-                    'id', 'name', 'count', 'excerpt_id', 'wiki_id'
-                ), params=lambda row: (
-                    row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId'), row.get('WikiPostId')
-                ))
+                self.insert_data(
+                    data=self.iterate_xml(tags_file), cursor=cursor, table_name='tags',
+                    table_columns=('id', 'name', 'count', 'excerpt_id', 'wiki_id'),
+                    params=lambda row: (
+                        row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId'), row.get('WikiPostId')
+                    )
+                )
             with transaction.atomic():
                 self.insert_data(data=self.yield_post_tags(cursor, posts_file), cursor=cursor, table_name='post_tags',
                                  table_columns=('post_id', 'tag_id'), params=lambda row: (row['PostId'], row['TagId']))
@@ -136,7 +214,8 @@ class Command(BaseCommand):
     def insert_data(data, cursor, table_name, table_columns, params):
         cursor.execute(f"TRUNCATE TABLE {table_name} CASCADE")
         for row in data:
-            cursor.execute(f"""
-                INSERT INTO {table_name}({','.join(table_columns)})
-                VALUES ({','.join('%s' for _ in range(len(table_columns)))})
-            """, params(row))
+            if params(row):
+                cursor.execute(f"""
+                    INSERT INTO {table_name}({','.join(table_columns)})
+                    VALUES ({','.join('%s' for _ in range(len(table_columns)))})
+                """, params(row))
