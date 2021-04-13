@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
 from stackexchange import models
 
@@ -22,13 +23,28 @@ class UserBadgeInline(admin.TabularInline):
 
 
 @admin.register(models.User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(UserAdmin):
     """Admin for users
     """
     list_display = ('display_name', 'website', 'location', 'created', 'reputation')
+    list_filter = ()
+    filter_horizontal = ()
     search_fields = ('display_name',)
     inlines = (UserBadgeInline, )
     ordering = ('pk', )
+
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('display_name', 'website', 'location', 'about')}),
+        ('Important dates', {'fields': ('last_login', 'created')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'password1', 'password2'),
+        }),
+    )
+    readonly_fields = ('last_login', 'created')
 
 
 @admin.register(models.Tag)

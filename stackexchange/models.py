@@ -1,18 +1,32 @@
+"""The application models
+"""
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
+from stackexchange import managers
 
-class User(models.Model):
+
+class User(AbstractBaseUser, PermissionsMixin):
     """The user model
     """
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ('email', )
+
+    username = models.CharField(help_text="The user name", max_length=255, unique=True)
+    email = models.EmailField(help_text="The user email", max_length=255, unique=True)
     display_name = models.CharField(help_text="The user display name", max_length=255)
     website = models.URLField(help_text="The user web site", null=True, blank=True)
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
     about = models.TextField(help_text="The user about information", null=True, blank=True)
     created = models.DateField(help_text="The user creation date", auto_now_add=True)
-    reputation = models.PositiveIntegerField(help_text="The user reputation")
-    views = models.PositiveIntegerField(help_text="The user profile views")
-    up_votes = models.PositiveIntegerField(help_text="The user up votes")
-    down_votes = models.PositiveIntegerField(help_text="The user down votes")
+    reputation = models.PositiveIntegerField(help_text="The user reputation", default=0)
+    views = models.PositiveIntegerField(help_text="The user profile views", default=0)
+    up_votes = models.PositiveIntegerField(help_text="The user up votes", default=0)
+    down_votes = models.PositiveIntegerField(help_text="The user down votes", default=0)
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+
+    objects = managers.UserManager()
 
     class Meta:
         db_table = 'users'
@@ -23,6 +37,22 @@ class User(models.Model):
         :return: The user display name
         """
         return str(self.display_name)
+
+    @property
+    def is_staff(self):
+        """Returns true if the user is a member of the staff.
+
+        :return: True if the user is a member of the staff.
+        """
+        return self.is_admin
+
+    @property
+    def is_superuser(self):
+        """Returns true if the user is a superuser.
+
+        :return: True if the user is a superuser.
+        """
+        return self.is_admin
 
 
 class Badge(models.Model):

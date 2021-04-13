@@ -1,8 +1,11 @@
+import datetime
 import pathlib
 import re
+import time
 import typing
 import xml.etree.ElementTree as eT
 
+from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import connection, transaction
 
@@ -25,6 +28,8 @@ class Command(BaseCommand):
         :param args: The arguments.
         :param options: The options.
         """
+        self.stdout.write("Importing data")
+        start = time.time()
         import_dir = pathlib.Path(options['directory'])
         self.load_users(import_dir / "Users.xml")
         self.load_badges(import_dir / "Badges.xml")
@@ -34,6 +39,8 @@ class Command(BaseCommand):
         self.load_post_links(import_dir / "PostLinks.xml")
         self.load_post_votes(import_dir / "Votes.xml")
         self.load_tags(import_dir / "Tags.xml", import_dir / "Posts.xml")
+        end = time.time()
+        self.stdout.write(f"Data imported, took {datetime.timedelta(seconds=end-start)}")
 
     def load_users(self, users_file: pathlib.Path):
         """Load the users.
@@ -41,14 +48,17 @@ class Command(BaseCommand):
         :param users_file: The users file.
         """
         self.stdout.write(f"Loading users")
+        password = make_password("password")
         with connection.cursor() as cursor:
             with transaction.atomic():
                 self.insert_data(data=self.iterate_xml(users_file), cursor=cursor, table_name='users', table_columns=(
                     'id', 'display_name', 'website', 'location', 'about', 'created', 'reputation', 'views', 'up_votes',
-                    'down_votes'
+                    'down_votes', 'username', 'email', 'password', 'is_active', 'is_admin'
                 ), params=lambda row: (
                     row['Id'], row['DisplayName'], row.get('WebsiteUrl'), row.get('Location'), row.get('AboutMe'),
-                    row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
+                    row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes'],
+                    'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com", password,
+                    True, row['Id'] == '-1'
                 ))
         self.stdout.write(f"Users loaded")
 
@@ -111,6 +121,7 @@ class Command(BaseCommand):
                         row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row.get('UserId')
                     )
                 )
+        self.stdout.write(f"Comments loaded")
 
     def load_post_history(self, post_history_file: pathlib.Path):
         """Load the post history.
@@ -130,6 +141,7 @@ class Command(BaseCommand):
                         row.get('UserId'), row.get('UserDisplayName'), row.get('Comment'), row.get('Text')
                     )
                 )
+        self.stdout.write(f"Post history loaded")
 
     def load_post_links(self, post_links_file: pathlib.Path):
         """Load the post links.
@@ -149,6 +161,7 @@ class Command(BaseCommand):
                         row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
                     ) if int(row['PostId']) in post_ids and int(row['RelatedPostId']) in post_ids else None
                 )
+        self.stdout.write(f"Post links loaded")
 
     def load_post_votes(self, post_votes_file: pathlib.Path):
         """Load the post votes.
@@ -168,6 +181,7 @@ class Command(BaseCommand):
                         row['Id'], row['PostId'], row['VoteTypeId'], row.get('UserId'), row['CreationDate']
                     ) if int(row['PostId']) in post_ids else None
                 )
+        self.stdout.write(f"Comments votes loaded")
 
     def load_tags(self, tags_file: pathlib.Path, posts_file: pathlib.Path):
         """Load the tags.
