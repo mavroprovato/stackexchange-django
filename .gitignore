@@ -3,3 +3,6 @@ __pycache__/
 
 # Pycharm project files
 .idea/
+
+# Environment files
+.env
