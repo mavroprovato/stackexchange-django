@@ -18,13 +18,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     website = models.URLField(help_text="The user web site", null=True, blank=True)
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
     about = models.TextField(help_text="The user about information", null=True, blank=True)
-    created = models.DateField(help_text="The user creation date", auto_now_add=True)
+    creation_date = models.DateTimeField(help_text="The user creation date", auto_now_add=True)
     reputation = models.PositiveIntegerField(help_text="The user reputation", default=0)
     views = models.PositiveIntegerField(help_text="The user profile views", default=0)
     up_votes = models.PositiveIntegerField(help_text="The user up votes", default=0)
     down_votes = models.PositiveIntegerField(help_text="The user down votes", default=0)
     is_active = models.BooleanField(help_text="If the user is active", default=True)
-    is_admin = models.BooleanField(help_text="If the user is an admin", default=False)
+    is_employee = models.BooleanField(help_text="If the user is an employee", default=False)
 
     objects = managers.UserManager()
 
@@ -44,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         :return: True if the user is a member of the staff.
         """
-        return self.is_admin
+        return self.is_employee
 
     @property
     def is_superuser(self):
@@ -52,7 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         :return: True if the user is a superuser.
         """
-        return self.is_admin
+        return self.is_employee
 
 
 class Badge(models.Model):

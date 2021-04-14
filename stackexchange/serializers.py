@@ -38,7 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ('id', 'display_name', 'website', 'about', 'created', 'reputation', 'badges')
+        fields = ('id', 'display_name', 'website', 'about', 'creation_date', 'reputation', 'badges')
 
 
 class PostSerializer(serializers.ModelSerializer):
