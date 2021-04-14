@@ -2,12 +2,16 @@ import datetime
 import pathlib
 import re
 import time
+import shutil
 import typing
 import xml.etree.ElementTree as eT
 
 from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import connection, transaction
+from django.conf import settings
+import requests
+import py7zr
 
 
 class Command(BaseCommand):
@@ -20,7 +24,7 @@ class Command(BaseCommand):
 
         :param parser: The argument parser.
         """
-        parser.add_argument("directory", help="The directory that contains the data to import")
+        parser.add_argument("community", help="The name of the community to download")
 
     def handle(self, *args, **options):
         """Implements the logic of the command.
@@ -28,19 +32,47 @@ class Command(BaseCommand):
         :param args: The arguments.
         :param options: The options.
         """
-        self.stdout.write("Importing data")
+        community = options['community']
         start = time.time()
-        import_dir = pathlib.Path(options['directory'])
-        self.load_users(import_dir / "Users.xml")
-        self.load_badges(import_dir / "Badges.xml")
-        self.load_posts(import_dir / "Posts.xml")
-        self.load_comments(import_dir / "Comments.xml")
-        self.load_post_history(import_dir / "PostHistory.xml")
-        self.load_post_links(import_dir / "PostLinks.xml")
-        self.load_post_votes(import_dir / "Votes.xml")
-        self.load_tags(import_dir / "Tags.xml", import_dir / "Posts.xml")
+        self.stdout.write(f"Loading data for {community}")
+        dump_dir = self.download(community)
+        self.load_users(dump_dir / "Users.xml")
+        self.load_badges(dump_dir / "Badges.xml")
+        self.load_posts(dump_dir / "Posts.xml")
+        self.load_comments(dump_dir / "Comments.xml")
+        self.load_post_history(dump_dir / "PostHistory.xml")
+        self.load_post_links(dump_dir / "PostLinks.xml")
+        self.load_post_votes(dump_dir / "Votes.xml")
+        self.load_tags(dump_dir / "Tags.xml", dump_dir / "Posts.xml")
         end = time.time()
-        self.stdout.write(f"Data imported, took {datetime.timedelta(seconds=end-start)}")
+        self.stdout.write(f"Data loaded, took {datetime.timedelta(seconds=end-start)}")
+
+    def download(self, community: str) -> pathlib.Path:
+        """Download the dump for the community.
+
+        :param community: The community name.
+        :return: The dump directory with the extracted files.
+        """
+        url = f"https://archive.org/download/stackexchange/{community}.com.7z"
+        var_dir = pathlib.Path(settings.BASE_DIR) / "var"
+        var_dir.mkdir(parents=True, exist_ok=True)
+
+        # Download file if needed
+        dump_file = var_dir / f"{community}.com.7z"
+        if not dump_file.exists():
+            self.stdout.write("Downloading dump file")
+            with requests.get(url, stream=True) as r:
+                with open(var_dir / f"{community}.com.7z", 'wb') as f:
+                    shutil.copyfileobj(r.raw, f)
+
+        # Extract the file
+        extract_path = var_dir / community
+        if not extract_path.exists():
+            self.stdout.write("Extracting dump")
+            with py7zr.SevenZipFile(dump_file, mode='r') as dump_file:
+                dump_file.extractall(path=extract_path)
+
+        return extract_path
 
     def load_users(self, users_file: pathlib.Path):
         """Load the users.
@@ -233,3 +265,4 @@ class Command(BaseCommand):
                     INSERT INTO {table_name}({','.join(table_columns)})
                     VALUES ({','.join('%s' for _ in range(len(table_columns)))})
                 """, params(row))
+

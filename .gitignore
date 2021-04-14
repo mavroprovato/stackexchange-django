@@ -6,3 +6,6 @@ __pycache__/
 
 # Environment files
 .env
+
+# Various files
+var/
