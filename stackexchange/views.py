@@ -10,3 +10,10 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = models.User.objects.prefetch_related('badges__badge').order_by('pk')
     serializer_class = serializers.UserSerializer
+
+
+class PostViewSet(viewsets.ModelViewSet):
+    """The post view set
+    """
+    queryset = models.Post.objects.select_related('owner', 'last_editor').order_by('pk')
+    serializer_class = serializers.PostSerializer

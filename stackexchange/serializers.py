@@ -23,6 +23,14 @@ class UserBadgeSerializer(serializers.ModelSerializer):
         fields = ('badge', 'date_awarded')
 
 
+class BaseUserSerializer(serializers.ModelSerializer):
+    """The base user serializer.
+    """
+    class Meta:
+        model = models.User
+        fields = ('id', 'display_name')
+
+
 class UserSerializer(serializers.ModelSerializer):
     """The user serializer.
     """
@@ -31,3 +39,17 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ('id', 'display_name', 'website', 'about', 'created', 'reputation', 'badges')
+
+
+class PostSerializer(serializers.ModelSerializer):
+    """The post serializer
+    """
+    owner = BaseUserSerializer()
+    last_editor = BaseUserSerializer()
+
+    class Meta:
+        model = models.Post
+        fields = (
+            'id', 'title', 'type', 'created', 'last_edit', 'last_activity', 'score', 'view_count', 'answer_count',
+            'comment_count', 'favorite_count', 'owner', 'last_editor'
+        )
