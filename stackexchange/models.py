@@ -23,8 +23,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     views = models.PositiveIntegerField(help_text="The user profile views", default=0)
     up_votes = models.PositiveIntegerField(help_text="The user up votes", default=0)
     down_votes = models.PositiveIntegerField(help_text="The user down votes", default=0)
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(help_text="If the user is active", default=True)
+    is_admin = models.BooleanField(help_text="If the user is an admin", default=False)
 
     objects = managers.UserManager()
 
@@ -85,8 +85,8 @@ class Badge(models.Model):
 class UserBadge(models.Model):
     """The user badge model.
     """
-    user = models.ForeignKey(User, help_text="The user", on_delete=models.CASCADE, related_name='user_badges')
-    badge = models.ForeignKey(Badge, help_text="The badge", on_delete=models.CASCADE, related_name='user_badges')
+    user = models.ForeignKey(User, help_text="The user", on_delete=models.CASCADE, related_name='badges')
+    badge = models.ForeignKey(Badge, help_text="The badge", on_delete=models.CASCADE, related_name='users')
     date_awarded = models.DateTimeField(help_text="The date awarded", auto_now_add=True)
 
     class Meta:
