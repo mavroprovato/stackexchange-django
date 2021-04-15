@@ -1,5 +1,7 @@
 """The application serializers
 """
+import typing
+
 from django.db.models import QuerySet
 from rest_framework import fields, serializers
 
@@ -94,8 +96,20 @@ class PostSerializer(serializers.ModelSerializer):
     """The post serializer
     """
     owner = BaseUserSerializer()
+    post_type = fields.SerializerMethodField()
     post_id = fields.IntegerField(source="pk")
 
     class Meta:
         model = models.Post
-        fields = ('owner', 'score', 'last_activity_date', 'creation_date', 'post_id')
+        fields = ('owner', 'score', 'last_activity_date', 'creation_date', 'post_type', 'post_id')
+
+    @staticmethod
+    def get_post_type(post: models.Post) -> typing.Optional[str]:
+        """Get the post type
+
+        :param post: The post.
+        :return: The post type.
+        """
+        for choice in models.Post.TYPE_CHOICES:
+            if choice[0] == post.type:
+                return choice[1]

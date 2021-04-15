@@ -58,9 +58,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Badge(models.Model):
     """The badge model
     """
-    CLASS_GOLD = '1'
-    CLASS_SILVER = '2'
-    CLASS_BRONZE = '3'
+    CLASS_GOLD = 1
+    CLASS_SILVER = 2
+    CLASS_BRONZE = 3
 
     CLASS_CHOICES = (
         (CLASS_GOLD, 'Gold'),
@@ -68,7 +68,7 @@ class Badge(models.Model):
         (CLASS_BRONZE, 'Bronze'),
     )
     name = models.CharField(help_text="The badge name", max_length=255, unique=True)
-    badge_class = models.CharField(help_text="The badge class", max_length=1, choices=CLASS_CHOICES)
+    badge_class = models.SmallIntegerField(help_text="The badge class", choices=CLASS_CHOICES)
     tag_based = models.BooleanField(help_text="If the badge is tag based")
 
     class Meta:
@@ -96,14 +96,14 @@ class UserBadge(models.Model):
 class Post(models.Model):
     """The post model
     """
-    TYPE_QUESTION = '1'
-    TYPE_ANSWER = '2'
-    TYPE_WIKI = '3'
-    TYPE_TAG_WIKI_EXPERT = '4'
-    TYPE_TAG_WIKI = '5'
-    TYPE_MODERATOR_NOMINATION = '6'
-    TYPE_WIKI_PLACEHOLDER = '7'
-    TYPE_PRIVILEGE_WIKI = '8'
+    TYPE_QUESTION = 1
+    TYPE_ANSWER = 2
+    TYPE_WIKI = 3
+    TYPE_TAG_WIKI_EXPERT = 4
+    TYPE_TAG_WIKI = 5
+    TYPE_MODERATOR_NOMINATION = 6
+    TYPE_WIKI_PLACEHOLDER = 7
+    TYPE_PRIVILEGE_WIKI = 8
 
     TYPE_CHOICES = (
         (TYPE_QUESTION, 'Question'),
@@ -117,7 +117,7 @@ class Post(models.Model):
 
     title = models.CharField(help_text="The post title", max_length=1000, null=True, blank=True)
     body = models.TextField(help_text="The post body")
-    type = models.CharField(help_text="The post type", max_length=1, choices=TYPE_CHOICES)
+    type = models.PositiveSmallIntegerField(help_text="The post type", choices=TYPE_CHOICES)
     creation_date = models.DateTimeField(help_text="The post creation date", auto_now_add=True)
     last_edit_date = models.DateTimeField(help_text="The post last edit date", null=True, blank=True, auto_now=True)
     last_activity_date = models.DateTimeField(help_text="The post last activity date")
@@ -152,28 +152,28 @@ class Comment(models.Model):
 class PostHistory(models.Model):
     """The post history model
     """
-    TYPE_INITIAL_TITLE = '1'
-    TYPE_INITIAL_BODY = '2'
-    TYPE_INITIAL_TAGS = '3'
-    TYPE_EDIT_TITLE = '4'
-    TYPE_EDIT_BODY = '5'
-    TYPE_EDIT_TAGS = '6'
-    TYPE_ROLLBACK_TITLE = '7'
-    TYPE_ROLLBACK_BODY = '8'
-    TYPE_ROLLBACK_TAGS = '9'
-    TYPE_POST_CLOSED = '10'
-    TYPE_POST_REOPENED = '11'
-    TYPE_POST_DELETED = '12'
-    TYPE_POST_UNDELETED = '13'
-    TYPE_POST_LOCKED = '14'
-    TYPE_POST_UNLOCKED = '15'
-    TYPE_COMMUNITY_OWNED = '16'
-    TYPE_POST_MIGRATED = '17'
-    TYPE_QUESTION_MERGED = '18'
-    TYPE_QUESTION_PROTECTED = '19'
-    TYPE_QUESTION_UNPROTECTED = '20'
-    TYPE_POST_DISASSOCIATED = '21'
-    TYPE_QUESTION_UNMERGED = '22'
+    TYPE_INITIAL_TITLE = 1
+    TYPE_INITIAL_BODY = 2
+    TYPE_INITIAL_TAGS = 3
+    TYPE_EDIT_TITLE = 4
+    TYPE_EDIT_BODY = 5
+    TYPE_EDIT_TAGS = 6
+    TYPE_ROLLBACK_TITLE = 7
+    TYPE_ROLLBACK_BODY = 8
+    TYPE_ROLLBACK_TAGS = 9
+    TYPE_POST_CLOSED = 10
+    TYPE_POST_REOPENED = 11
+    TYPE_POST_DELETED = 12
+    TYPE_POST_UNDELETED = 13
+    TYPE_POST_LOCKED = 14
+    TYPE_POST_UNLOCKED = 15
+    TYPE_COMMUNITY_OWNED = 16
+    TYPE_POST_MIGRATED = 17
+    TYPE_QUESTION_MERGED = 18
+    TYPE_QUESTION_PROTECTED = 19
+    TYPE_QUESTION_UNPROTECTED = 20
+    TYPE_POST_DISASSOCIATED = 21
+    TYPE_QUESTION_UNMERGED = 22
 
     TYPE_CHOICES = (
         (TYPE_INITIAL_TITLE, 'Initial Title'),
@@ -201,7 +201,7 @@ class PostHistory(models.Model):
     )
 
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
-    type = models.CharField(help_text="The post history type", max_length=2, choices=TYPE_CHOICES)
+    type = models.PositiveSmallIntegerField(help_text="The post history type", choices=TYPE_CHOICES)
     revision_guid = models.CharField(help_text="The GUID of the action that created this history record", max_length=36)
     creation_date = models.DateTimeField(help_text="The date that this history record was created", auto_now_add=True)
     user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
@@ -220,8 +220,8 @@ class PostHistory(models.Model):
 class PostLink(models.Model):
     """The post link model
     """
-    TYPE_LINKED = '1'
-    TYPE_DUPLICATE = '3'
+    TYPE_LINKED = 1
+    TYPE_DUPLICATE = 3
 
     TYPE_CHOICES = (
         (TYPE_LINKED, 'Linked'),
@@ -231,7 +231,7 @@ class PostLink(models.Model):
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_links")
     related_post = models.ForeignKey(Post, help_text="The related post", on_delete=models.CASCADE,
                                      related_name="related_post_links")
-    type = models.CharField(help_text="The post link type", max_length=1, choices=TYPE_CHOICES)
+    type = models.PositiveSmallIntegerField(help_text="The post link type", choices=TYPE_CHOICES)
 
     class Meta:
         db_table = 'post_links'
@@ -240,19 +240,19 @@ class PostLink(models.Model):
 class PostVote(models.Model):
     """The post vote model
     """
-    TYPE_ACCEPTED_BY_ORIGINATOR = '1'
-    TYPE_UP_MOD = '2'
-    TYPE_DOWN_MOD = '3'
-    TYPE_OFFENSIVE = '4'
-    TYPE_FAVORITE = '5'
-    TYPE_CLOSE = '6'
-    TYPE_REOPEN = '7'
-    TYPE_BOUNTY_START = '8'
-    TYPE_BOUNTY_CLOSE = '9'
-    TYPE_DELETION = '10'
-    TYPE_UN_DELETION = '11'
-    TYPE_SPAM = '12'
-    TYPE_INFORM_MODERATOR = '13'
+    TYPE_ACCEPTED_BY_ORIGINATOR = 1
+    TYPE_UP_MOD = 2
+    TYPE_DOWN_MOD = 3
+    TYPE_OFFENSIVE = 4
+    TYPE_FAVORITE = 5
+    TYPE_CLOSE = 6
+    TYPE_REOPEN = 7
+    TYPE_BOUNTY_START = 8
+    TYPE_BOUNTY_CLOSE = 9
+    TYPE_DELETION = 10
+    TYPE_UN_DELETION = 11
+    TYPE_SPAM = 12
+    TYPE_INFORM_MODERATOR = 13
 
     TYPE_CHOICES = (
         (TYPE_ACCEPTED_BY_ORIGINATOR, 'AcceptedByOriginator'),
@@ -271,7 +271,7 @@ class PostVote(models.Model):
     )
 
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_votes")
-    type = models.CharField(help_text="The post vote type", max_length=2, choices=TYPE_CHOICES)
+    type = models.SmallIntegerField(help_text="The post vote type", choices=TYPE_CHOICES)
     user = models.ForeignKey(User, help_text="The user for the vote", on_delete=models.CASCADE,
                              related_name='user_votes', null=True, blank=True)
     creation_date = models.DateTimeField(help_text="The date that this vote was created", auto_now_add=True)
