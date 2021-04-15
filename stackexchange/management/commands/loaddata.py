@@ -112,11 +112,12 @@ class Command(BaseCommand):
             cursor.execute("SELECT id, name FROM badges")
             badges = {row[1]: row[0] for row in cursor.fetchall()}
             with transaction.atomic():
-                self.insert_data(data=self.iterate_xml(badges_file), cursor=cursor, table_name='user_badges',
-                                 table_columns=('badge_id', 'user_id', 'date_awarded'),
-                                 params=lambda row: (
-                                    badges[row['Name']], row['UserId'], row['Date']
-                                 ))
+                self.insert_data(
+                    data=self.iterate_xml(badges_file), cursor=cursor, table_name='user_badges',
+                    table_columns=('badge_id', 'user_id', 'date_awarded'), params=lambda row: (
+                        badges[row['Name']], row['UserId'], row['Date']
+                    )
+                )
         self.stdout.write(f"Badges loaded")
 
     def load_posts(self, posts_file: pathlib.Path):

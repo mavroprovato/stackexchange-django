@@ -18,6 +18,38 @@ class BaseSerializer(serializers.Serializer):
         pass
 
 
+class BadgeSerializer(serializers.ModelSerializer):
+    """The badge serializer
+    """
+    badge_type = fields.SerializerMethodField()
+    rank = fields.SerializerMethodField()
+    badge_id = fields.IntegerField(source='pk')
+
+    class Meta:
+        model = models.Badge
+        fields = ('badge_type', 'rank', 'badge_id', 'name')
+
+    @staticmethod
+    def get_badge_type(badge: models.Badge) -> str:
+        """Get the badge type.
+
+        :param badge: The badges.
+        :return: The badge type.
+        """
+        return "tag_based" if badge.tag_based else "named"
+
+    @staticmethod
+    def get_rank(badge: models.Badge) -> str:
+        """Get the badge rank.
+
+        :param badge: The badges.
+        :return: The badge type.
+        """
+        for class_id, class_description in models.Badge.CLASS_CHOICES:
+            if badge.badge_class == class_id:
+                return class_description
+
+
 class BadgeCountSerializer(BaseSerializer):
     """The badge count serializer.
     """

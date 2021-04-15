@@ -5,14 +5,21 @@ from rest_framework import viewsets
 from stackexchange import models, serializers
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
+    """The badge view set
+    """
+    queryset = models.Badge.objects.order_by('name')
+    serializer_class = serializers.BadgeSerializer
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """The user view set
     """
     queryset = models.User.objects.prefetch_related('badges__badge').order_by('pk')
     serializer_class = serializers.UserSerializer
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """The post view set
     """
     queryset = models.Post.objects.select_related('owner', 'last_editor').order_by('pk')
