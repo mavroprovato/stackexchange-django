@@ -15,7 +15,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(help_text="The user name", max_length=255, unique=True)
     email = models.EmailField(help_text="The user email", max_length=255, unique=True)
     display_name = models.CharField(help_text="The user display name", max_length=255)
-    website = models.URLField(help_text="The user web site", null=True, blank=True)
+    website_url = models.URLField(help_text="The user web site URL", null=True, blank=True)
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
     about = models.TextField(help_text="The user about information", null=True, blank=True)
     creation_date = models.DateTimeField(help_text="The user creation date", auto_now_add=True)

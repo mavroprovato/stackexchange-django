@@ -1,55 +1,103 @@
 """The application serializers
 """
-from rest_framework import serializers
+from django.db.models import QuerySet
+from rest_framework import fields, serializers
 
 from stackexchange import models
 
 
-class BadgeSerializer(serializers.ModelSerializer):
-    """The badge serializer.
+class BaseSerializer(serializers.Serializer):
+    """Base class for serializers
     """
-    class Meta:
-        model = models.Badge
-        fields = ('id', 'name', 'badge_class', 'tag_based')
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
 
 
-class UserBadgeSerializer(serializers.ModelSerializer):
-    """The user badge serializer.
+class BadgeCountSerializer(BaseSerializer):
+    """The badge count serializer.
     """
-    badge = BadgeSerializer()
+    bronze = fields.SerializerMethodField()
+    silver = fields.SerializerMethodField()
+    gold = fields.SerializerMethodField()
 
-    class Meta:
-        model = models.UserBadge
-        fields = ('badge', 'date_awarded')
+    @staticmethod
+    def get_bronze(user_badges: QuerySet) -> int:
+        """Get the number of bronze badges for a user.
+
+        :param user_badges: The user badges.
+        :return: The number of bronze badges.
+        """
+        return BadgeCountSerializer.count_badges(user_badges, models.Badge.CLASS_BRONZE)
+
+    @staticmethod
+    def get_silver(user_badges: QuerySet) -> int:
+        """Get the number of silver badges for a user.
+
+        :param user_badges: The user badges.
+        :return: The number of silver badges.
+        """
+        return BadgeCountSerializer.count_badges(user_badges, models.Badge.CLASS_SILVER)
+
+    @staticmethod
+    def get_gold(user_badges: QuerySet) -> int:
+        """Get the number of gold badges for a user.
+
+        :param user_badges: The gold badges.
+        :return: The number of gold badges.
+        """
+        return BadgeCountSerializer.count_badges(user_badges, models.Badge.CLASS_SILVER)
+
+    @staticmethod
+    def count_badges(user_badges: QuerySet, badge_class: str) -> int:
+        """Count the user badges for a class.
+
+        :param user_badges: The user badges.
+        :param badge_class: The badge class.
+        :return: The number of badges for the class.
+        """
+        count = 0
+        for user_badge in user_badges.all():
+            if user_badge.badge.badge_class == badge_class:
+                count += 1
+
+        return count
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
     """The base user serializer.
     """
+    user_id = fields.IntegerField(source="pk")
+
     class Meta:
         model = models.User
-        fields = ('id', 'display_name')
+        fields = ('reputation', 'user_id', 'display_name')
 
 
 class UserSerializer(serializers.ModelSerializer):
     """The user serializer.
     """
-    badges = UserBadgeSerializer(many=True)
+    badge_counts = BadgeCountSerializer(source="badges")
+    user_id = fields.IntegerField(source="pk")
 
     class Meta:
         model = models.User
-        fields = ('id', 'display_name', 'website', 'about', 'creation_date', 'reputation', 'badges')
+        fields = (
+            'badge_counts', 'is_employee', 'reputation', 'creation_date', 'user_id', 'location', 'website_url',
+            'display_name'
+        )
 
 
 class PostSerializer(serializers.ModelSerializer):
     """The post serializer
     """
     owner = BaseUserSerializer()
-    last_editor = BaseUserSerializer()
 
     class Meta:
         model = models.Post
         fields = (
             'id', 'title', 'type', 'created', 'last_edit', 'last_activity', 'score', 'view_count', 'answer_count',
-            'comment_count', 'favorite_count', 'owner', 'last_editor'
+            'comment_count', 'favorite_count', 'owner'
         )

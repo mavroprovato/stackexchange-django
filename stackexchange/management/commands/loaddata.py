@@ -84,7 +84,7 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             with transaction.atomic():
                 self.insert_data(data=self.iterate_xml(users_file), cursor=cursor, table_name='users', table_columns=(
-                    'id', 'display_name', 'website', 'location', 'about', 'creation_date', 'reputation', 'views',
+                    'id', 'display_name', 'website_url', 'location', 'about', 'creation_date', 'reputation', 'views',
                     'up_votes', 'down_votes', 'username', 'email', 'password', 'is_active', 'is_employee'
                 ), params=lambda row: (
                     row['Id'], row['DisplayName'], row.get('WebsiteUrl'), row.get('Location'), row.get('AboutMe'),

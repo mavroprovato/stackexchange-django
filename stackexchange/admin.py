@@ -26,7 +26,7 @@ class UserBadgeInline(admin.TabularInline):
 class UserAdmin(UserAdmin):
     """Admin for users
     """
-    list_display = ('display_name', 'website', 'location', 'creation_date', 'reputation')
+    list_display = ('display_name', 'website_url', 'location', 'creation_date', 'reputation')
     list_filter = ()
     filter_horizontal = ()
     search_fields = ('display_name',)
@@ -35,7 +35,7 @@ class UserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('display_name', 'website', 'location', 'about')}),
+        ('Personal info', {'fields': ('display_name', 'website_url', 'location', 'about')}),
         ('Important dates', {'fields': ('last_login', 'creation_date')}),
     )
     add_fieldsets = (
