@@ -10,6 +10,7 @@ from stackexchange import views
 router = routers.DefaultRouter()
 router.register(r'badges', views.BadgeViewSet)
 router.register(r'users', views.UserViewSet)
+router.register(r'tags', views.TagViewSet)
 router.register(r'posts', views.PostViewSet)
 
 urlpatterns = [

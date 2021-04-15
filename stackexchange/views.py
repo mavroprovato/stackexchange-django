@@ -19,6 +19,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.UserSerializer
 
 
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """The tag view set
+    """
+    queryset = models.Tag.objects.order_by('pk')
+    serializer_class = serializers.TagSerializer
+
+
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """The post view set
     """

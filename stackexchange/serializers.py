@@ -124,6 +124,14 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
+class TagSerializer(serializers.ModelSerializer):
+    """The tag serializer
+    """
+    class Meta:
+        model = models.Tag
+        fields = ('name', 'count')
+
+
 class PostSerializer(serializers.ModelSerializer):
     """The post serializer
     """
