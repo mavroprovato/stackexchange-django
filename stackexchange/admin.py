@@ -69,7 +69,7 @@ class PostTagInline(admin.TabularInline):
 class PostAdmin(admin.ModelAdmin):
     """Admin for posts
     """
-    list_display = ('title', 'type', 'score', 'created', 'last_edit')
+    list_display = ('title', 'type', 'score', 'creation_date', 'last_edit_date')
     list_filter = ('type',)
     search_fields = ('title',)
     autocomplete_fields = ('owner', 'last_editor')

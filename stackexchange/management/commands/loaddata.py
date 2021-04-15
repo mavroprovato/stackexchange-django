@@ -128,8 +128,8 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             with transaction.atomic():
                 self.insert_data(data=self.iterate_xml(posts_file), cursor=cursor, table_name='posts', table_columns=(
-                    'id', 'title', 'body', 'type', 'created', 'last_edit', 'last_activity', 'score', 'view_count',
-                    'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id'
+                    'id', 'title', 'body', 'type', 'creation_date', 'last_edit_date', 'last_activity_date', 'score',
+                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id'
                 ), params=lambda row: (
                     row['Id'], row.get('Title'), row['Body'], row['PostTypeId'], row['CreationDate'],
                     row.get('LastEditDate'), row['LastActivityDate'], row['Score'], row.get('ViewCount'),

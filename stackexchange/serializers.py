@@ -94,10 +94,8 @@ class PostSerializer(serializers.ModelSerializer):
     """The post serializer
     """
     owner = BaseUserSerializer()
+    post_id = fields.IntegerField(source="pk")
 
     class Meta:
         model = models.Post
-        fields = (
-            'id', 'title', 'type', 'created', 'last_edit', 'last_activity', 'score', 'view_count', 'answer_count',
-            'comment_count', 'favorite_count', 'owner'
-        )
+        fields = ('owner', 'score', 'last_activity_date', 'creation_date', 'post_id')
