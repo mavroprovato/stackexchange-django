@@ -3,6 +3,7 @@
 from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
+from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
 from rest_framework import routers
 
 from stackexchange import views
@@ -16,6 +17,8 @@ router.register(r'posts', views.PostViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api/doc/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
