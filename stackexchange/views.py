@@ -15,47 +15,65 @@ from stackexchange import models, serializers
     retrieve=extend_schema(summary='Gets the badge identified by id', description=' '),
     named=extend_schema(summary='Get all non-tagged-based badges', description=' '),
     tags=extend_schema(summary='Get all tagged-based badges', description=' '),
+    recipients=extend_schema(summary='Get the recent recipients of the given badges', description=' '),
 )
 class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     """The badge view set
     """
-    queryset = models.Badge.objects
-    serializer_class = serializers.BadgeSerializer
-
     @action(detail=False, url_path='name')
-    def named(self, request: Request, *args, **kwargs) -> Response:
-        """Get all the non-tagged-based badges
+    def named(self, request: Request) -> Response:
+        """Get all the non-tagged-based badges.
 
         :param request: The request.
-        :param args: The positional arguments.
-        :param kwargs: The keyword arguments.
         :return: The response.
         """
-        return super().list(request, *args, **kwargs)
+        return super().list(request)
 
     @action(detail=False, url_path='tags')
-    def tags(self, request: Request, *args, **kwargs) -> Response:
-        """Get all the tagged-based badges
+    def tags(self, request: Request) -> Response:
+        """Get all the tagged-based badges.
 
         :param request: The request.
-        :param args: The positional arguments.
-        :param kwargs: The keyword arguments.
         :return: The response.
         """
-        return super().list(request, *args, **kwargs)
+        return super().list(request)
+
+    @action(detail=True, url_path='recipients')
+    def recipients(self, request: Request, pk=None) -> Response:
+        """Get the recent recipients of the given badges.
+
+        :param request: The request.
+        :param pk: Not used.
+        :return: The response.
+        """
+        queryset = models.UserBadge.objects.filter(badge=pk).select_related('user', 'badge').order_by('pk')
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
 
         :return: The queryset.
         """
-        queryset = self.queryset.order_by('name')
+        queryset = models.Badge.objects.order_by('pk')
         if self.action == 'named':
             queryset = queryset.filter(tag_based=False)
         elif self.action == 'tags':
             queryset = queryset.filter(tag_based=True)
 
         return queryset
+
+    def get_serializer_class(self):
+        """Get the serializer class.
+
+        :return: The serializer class.
+        """
+        if self.action == 'recipients':
+            return serializers.UserBadgeSerializer
+
+        return serializers.BadgeSerializer
 
 
 @extend_schema_view(
