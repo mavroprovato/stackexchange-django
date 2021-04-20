@@ -136,3 +136,18 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (OrderingFilter, )
     ordering_fields = ('last_activity_date', 'creation_date', 'score')
     ordering = ('-last_activity_date',)
+
+
+@extend_schema_view(
+    list=extend_schema(summary='Get all answers on the site'),
+    retrieve=extend_schema(summary='Gets the answers identified by id'),
+)
+class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
+    """The answers view set
+    """
+    queryset = models.Post.objects.filter(type=models.Post.TYPE_ANSWER).select_related(
+        'owner').prefetch_related('tags')
+    serializer_class = serializers.PostSerializer
+    filter_backends = (OrderingFilter, )
+    ordering_fields = ('last_activity_date', 'creation_date', 'score')
+    ordering = ('-last_activity_date',)
