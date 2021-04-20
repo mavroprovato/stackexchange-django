@@ -4,6 +4,7 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -20,6 +21,10 @@ from stackexchange import models, serializers
 class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     """The badge view set
     """
+    filter_backends = (OrderingFilter, )
+    ordering_fields = ('name', 'badge_class', 'tag_based')
+    ordering = ('name',)
+
     @action(detail=False, url_path='name')
     def named(self, request: Request) -> Response:
         """Get all the non-tagged-based badges.
@@ -46,7 +51,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: Not used.
         :return: The response.
         """
-        queryset = models.UserBadge.objects.filter(badge=pk).select_related('user', 'badge').order_by('pk')
+        queryset = models.UserBadge.objects.filter(badge=pk).select_related('user', 'badge').order_by('-date_awarded')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
 
@@ -57,7 +62,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The queryset.
         """
-        queryset = models.Badge.objects.order_by('pk')
+        queryset = models.Badge.objects
         if self.action == 'named':
             queryset = queryset.filter(tag_based=False)
         elif self.action == 'tags':
@@ -83,8 +88,11 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """The user view set
     """
-    queryset = models.User.objects.prefetch_related('badges__badge').order_by('pk')
+    queryset = models.User.objects.prefetch_related('badges__badge')
     serializer_class = serializers.UserSerializer
+    filter_backends = (OrderingFilter, )
+    ordering_fields = ('reputation', 'creation_date', 'display_name')
+    ordering = ('-reputation',)
 
 
 @extend_schema_view(
@@ -94,8 +102,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """The tag view set
     """
-    queryset = models.Tag.objects.order_by('pk')
+    queryset = models.Tag.objects
     serializer_class = serializers.TagSerializer
+    filter_backends = (OrderingFilter, )
+    ordering_fields = ('count', 'name')
+    ordering = ('-count',)
 
 
 @extend_schema_view(
@@ -105,5 +116,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """The post view set
     """
-    queryset = models.Post.objects.select_related('owner', 'last_editor').order_by('pk')
+    queryset = models.Post.objects.select_related('owner', 'last_editor')
     serializer_class = serializers.PostSerializer
+    filter_backends = (OrderingFilter, )
+    ordering_fields = ('last_activity_date', 'creation_date', 'score')
+    ordering = ('-last_activity_date',)
