@@ -211,3 +211,13 @@ class QuestionSerializer(PostSerializer):
         :return: True if the question is answered.
         """
         return post.answer_count and post.answer_count > 1
+
+
+class AnswerSerializer(PostSerializer):
+    """The answer serializer
+    """
+    answer_id = fields.IntegerField(source="pk")
+
+    class Meta:
+        model = models.Post
+        fields = ('owner', 'score', 'last_activity_date', 'creation_date', 'answer_id')
