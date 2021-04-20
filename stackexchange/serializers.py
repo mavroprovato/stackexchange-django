@@ -193,7 +193,21 @@ class QuestionSerializer(PostSerializer):
     """The question serializer
     """
     tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    is_answered = fields.SerializerMethodField()
+    question_id = fields.IntegerField(source="pk")
 
     class Meta:
         model = models.Post
-        fields = list(PostSerializer.Meta.fields) + ['tags']
+        fields = (
+            'tags', 'owner', 'is_answered', 'view_count', 'answer_count', 'score', 'last_activity_date',
+            'creation_date', 'last_edit_date', 'question_id'
+        )
+
+    @staticmethod
+    def get_is_answered(post: models.Post) -> bool:
+        """Get weather this question is answered.
+
+        :param post: The post.
+        :return: True if the question is answered.
+        """
+        return post.answer_count and post.answer_count > 1
