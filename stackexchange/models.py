@@ -130,6 +130,10 @@ class Post(models.Model):
                               related_name='owner_posts', null=True, blank=True)
     last_editor = models.ForeignKey(User, help_text="The last editor of the post", on_delete=models.CASCADE,
                                     related_name='last_editor_posts', null=True, blank=True)
+    parent = models.ForeignKey('Post', help_text="The parent post", on_delete=models.CASCADE, null=True, blank=True,
+                               related_name='children')
+    accepted_answer = models.ForeignKey('Post', help_text="The accepted answer", on_delete=models.CASCADE, null=True,
+                                        blank=True, related_name='accepted_answers')
     tags = models.ManyToManyField('Tag', related_name='posts', through='PostTag')
 
     class Meta:

@@ -130,12 +130,13 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self.insert_data(data=self.iterate_xml(posts_file), cursor=cursor, table_name='posts', table_columns=(
                     'id', 'title', 'body', 'type', 'creation_date', 'last_edit_date', 'last_activity_date', 'score',
-                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id'
+                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id',
+                    'parent_id', 'accepted_answer_id'
                 ), params=lambda row: (
                     row['Id'], row.get('Title'), row['Body'], row['PostTypeId'], row['CreationDate'],
                     row.get('LastEditDate'), row['LastActivityDate'], row['Score'], row.get('ViewCount'),
                     row.get('AnswerCount'), row.get('CommentCount'), row.get('FavoriteCount'), row.get('OwnerUserId'),
-                    row.get('LastEditorUserId')
+                    row.get('LastEditorUserId'), row.get('ParentId'), row.get('AcceptedAnswerId')
                 ))
         self.stdout.write(f"Posts loaded")
 
