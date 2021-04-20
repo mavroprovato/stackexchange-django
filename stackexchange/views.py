@@ -146,7 +146,7 @@ class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
     """The answers view set
     """
     queryset = models.Post.objects.filter(type=models.Post.TYPE_ANSWER).select_related(
-        'owner').prefetch_related('tags')
+        'owner', 'parent').prefetch_related('tags')
     serializer_class = serializers.AnswerSerializer
     filter_backends = (OrderingFilter, )
     ordering_fields = ('last_activity_date', 'creation_date', 'score')
