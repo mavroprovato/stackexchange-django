@@ -116,8 +116,23 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """The post view set
     """
-    queryset = models.Post.objects.select_related('owner', 'last_editor')
+    queryset = models.Post.objects.select_related('owner')
     serializer_class = serializers.PostSerializer
+    filter_backends = (OrderingFilter, )
+    ordering_fields = ('last_activity_date', 'creation_date', 'score')
+    ordering = ('-last_activity_date',)
+
+
+@extend_schema_view(
+    list=extend_schema(summary='Get all questions on the site'),
+    retrieve=extend_schema(summary='Gets the questions identified by id'),
+)
+class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
+    """The question view set
+    """
+    queryset = models.Post.objects.filter(type=models.Post.TYPE_QUESTION).select_related(
+        'owner').prefetch_related('tags')
+    serializer_class = serializers.QuestionSerializer
     filter_backends = (OrderingFilter, )
     ordering_fields = ('last_activity_date', 'creation_date', 'score')
     ordering = ('-last_activity_date',)

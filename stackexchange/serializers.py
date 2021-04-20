@@ -187,3 +187,13 @@ class PostSerializer(serializers.ModelSerializer):
         for choice in models.Post.TYPE_CHOICES:
             if choice[0] == post.type:
                 return choice[1]
+
+
+class QuestionSerializer(PostSerializer):
+    """The question serializer
+    """
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+
+    class Meta:
+        model = models.Post
+        fields = list(PostSerializer.Meta.fields) + ['tags']
