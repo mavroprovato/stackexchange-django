@@ -22,12 +22,43 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     """The badge view set
     """
     filter_backends = (OrderingFilter, )
-    ordering_fields = ('name', 'badge_class', 'tag_based')
-    ordering = ('name',)
+
+    def get_queryset(self) -> QuerySet:
+        """Return the queryset for the action.
+
+        :return: The queryset for the action.
+        """
+        if self.action in ('list', 'retrieve'):
+            return models.Badge.objects
+        elif self.action == 'named':
+            return models.Badge.objects.filter(tag_based=False)
+        elif self.action == 'recipients':
+            return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related('user', 'badge')
+        elif self.action == 'tags':
+            return models.Badge.objects.filter(tag_based=True)
+
+    def get_serializer_class(self):
+        """Get the serializer class for the action.
+
+        :return: The serializer class for the action.
+        """
+        if self.action in ('list', 'retrieve', 'named', 'tags'):
+            return serializers.BadgeSerializer
+        elif self.action == 'recipients':
+            return serializers.UserBadgeSerializer
 
     @action(detail=False, url_path='name')
     def named(self, request: Request) -> Response:
         """Get all the non-tagged-based badges.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request)
+
+    @action(detail=True, url_path='recipients')
+    def recipients(self, request: Request, **kwargs) -> Response:
+        """Get the recent recipients of the given badges.
 
         :param request: The request.
         :return: The response.
@@ -42,43 +73,6 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         :return: The response.
         """
         return super().list(request)
-
-    @action(detail=True, url_path='recipients')
-    def recipients(self, request: Request, pk=None) -> Response:
-        """Get the recent recipients of the given badges.
-
-        :param request: The request.
-        :param pk: Not used.
-        :return: The response.
-        """
-        queryset = models.UserBadge.objects.filter(badge=pk).select_related('user', 'badge').order_by('-date_awarded')
-        page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(page, many=True)
-
-        return self.get_paginated_response(serializer.data)
-
-    def get_queryset(self) -> QuerySet:
-        """Return the queryset for the action.
-
-        :return: The queryset for the action.
-        """
-        queryset = models.Badge.objects
-        if self.action == 'named':
-            queryset = queryset.filter(tag_based=False)
-        elif self.action == 'tags':
-            queryset = queryset.filter(tag_based=True)
-
-        return queryset
-
-    def get_serializer_class(self):
-        """Get the serializer class for the action.
-
-        :return: The serializer class for the action.
-        """
-        if self.action == 'recipients':
-            return serializers.UserBadgeSerializer
-
-        return serializers.BadgeSerializer
 
 
 @extend_schema_view(
