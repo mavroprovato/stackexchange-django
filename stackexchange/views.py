@@ -112,6 +112,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             return serializers.UserSerializer
         elif self.action == 'answers':
             return serializers.AnswerSerializer
+        elif self.action == 'badges':
+            return serializers.UserBadgeSerializer
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, pk=None) -> Response:
@@ -121,7 +123,22 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         :param pk: The user id.
         :return: The response.
         """
-        queryset = models.Post.objects.filter(owner=pk, type=models.Post.TYPE_ANSWER).select_related('owner', 'parent')
+        queryset = models.Post.objects.filter(owner=pk, type=models.Post.TYPE_ANSWER).select_related(
+            'owner', 'parent').order_by('-last_activity_date')
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, url_path='badges')
+    def badges(self, request: Request, pk=None) -> Response:
+        """Get the answers for a user.
+
+        :param request: The request.
+        :param pk: The user id.
+        :return: The response.
+        """
+        queryset = models.UserBadge.objects.filter(user=pk).select_related('user', 'badge').order_by('-date_awarded')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
 
