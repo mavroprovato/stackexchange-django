@@ -87,6 +87,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     answers=extend_schema(summary='Get the answers posted by the user identified by id', description=' '),
     badges=extend_schema(summary='Get the badges earned by the user identified by id', description=' '),
     comments=extend_schema(summary='Get the comments posted by the user identified by id', description=' '),
+    post=extend_schema(summary='Get all posts (questions and answers) owned by a user', description=' '),
 )
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """The user view set
@@ -118,6 +119,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             return serializers.UserBadgeSerializer
         elif self.action == 'comments':
             return serializers.CommentSerializer
+        elif self.action == 'posts':
+            return serializers.PostSerializer
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, pk=None) -> Response:
@@ -162,6 +165,22 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
         return self.get_paginated_response(serializer.data)
 
+    @action(detail=True, url_path='posts')
+    def posts(self, request: Request, pk=None) -> Response:
+        """Get the posts for a user.
+
+        :param request: The request.
+        :param pk: The user id.
+        :return: The response.
+        """
+        queryset = models.Post.objects.filter(
+            type__in=(models.Post.TYPE_QUESTION, models.Post.TYPE_ANSWER), owner=pk
+        ).select_related('owner').order_by('-last_activity_date')
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
 
 @extend_schema_view(
     list=extend_schema(summary='Get all tags on the site'),
@@ -184,7 +203,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class PostViewSet(viewsets.ReadOnlyModelViewSet):
     """The post view set
     """
-    queryset = models.Post.objects.select_related('owner')
+    queryset = models.Post.objects.filter(
+        type__in=(models.Post.TYPE_QUESTION, models.Post.TYPE_ANSWER)).select_related('owner')
     serializer_class = serializers.PostSerializer
     filter_backends = (OrderingFilter, )
     ordering_fields = ('last_activity_date', 'creation_date', 'score')
