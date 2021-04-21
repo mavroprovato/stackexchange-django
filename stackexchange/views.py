@@ -60,7 +60,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
 
-        :return: The queryset.
+        :return: The queryset for the action.
         """
         queryset = models.Badge.objects
         if self.action == 'named':
@@ -71,9 +71,9 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        """Get the serializer class.
+        """Get the serializer class for the action.
 
-        :return: The serializer class.
+        :return: The serializer class for the action.
         """
         if self.action == 'recipients':
             return serializers.UserBadgeSerializer
@@ -82,17 +82,50 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all users on the site'),
-    retrieve=extend_schema(summary='Gets the badge identified by id'),
+    list=extend_schema(summary='Get all users on the site', description=' '),
+    retrieve=extend_schema(summary='Gets the user identified by id', description=' '),
+    answers=extend_schema(summary='Get the answers posted by the users identified by id', description=' '),
 )
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """The user view set
     """
-    queryset = models.User.objects.prefetch_related('badges__badge')
-    serializer_class = serializers.UserSerializer
     filter_backends = (OrderingFilter, )
     ordering_fields = ('reputation', 'creation_date', 'display_name')
     ordering = ('-reputation',)
+
+    def get_queryset(self) -> QuerySet:
+        """Return the queryset for the action.
+
+        :return: The queryset for the action
+        """
+        if self.action in ('list', 'retrieve'):
+            return models.User.objects.prefetch_related('badges__badge')
+
+        return models.User.objects
+
+    def get_serializer_class(self):
+        """Return the serializer class for the action.
+
+        :return: The serializer class for the action.
+        """
+        if self.action in ('list', 'retrieve'):
+            return serializers.UserSerializer
+        elif self.action == 'answers':
+            return serializers.AnswerSerializer
+
+    @action(detail=True, url_path='answers')
+    def answers(self, request: Request, pk=None) -> Response:
+        """Get the answers for a user.
+
+        :param request: The request.
+        :param pk: The user id.
+        :return: The response.
+        """
+        queryset = models.Post.objects.filter(owner=pk, type=models.Post.TYPE_ANSWER).select_related('owner', 'parent')
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
 
 
 @extend_schema_view(
