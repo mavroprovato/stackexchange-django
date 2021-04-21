@@ -201,3 +201,17 @@ class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (OrderingFilter, )
     ordering_fields = ('last_activity_date', 'creation_date', 'score')
     ordering = ('-last_activity_date',)
+
+
+@extend_schema_view(
+    list=extend_schema(summary='Get all comments on the site'),
+    retrieve=extend_schema(summary='Gets the comments identified by id'),
+)
+class CommentViewSet(viewsets.ReadOnlyModelViewSet):
+    """The answers view set
+    """
+    queryset = models.Comment.objects.select_related('post', 'user')
+    serializer_class = serializers.CommentSerializer
+    filter_backends = (OrderingFilter, )
+    ordering_fields = ('creation_date', 'score')
+    ordering = ('-creation_date',)

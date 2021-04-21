@@ -232,3 +232,14 @@ class AnswerSerializer(PostSerializer):
         :return: True if the answer is accepted.
         """
         return bool(post.accepted_answer_id)
+
+
+class CommentSerializer(PostSerializer):
+    """The comment serializer
+    """
+    owner = BaseUserSerializer(source="user")
+    comment_id = fields.IntegerField(source="pk")
+
+    class Meta:
+        model = models.Post
+        fields = ('owner', 'score', 'creation_date', 'post_id', 'comment_id')
