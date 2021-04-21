@@ -84,7 +84,8 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
 @extend_schema_view(
     list=extend_schema(summary='Get all users on the site', description=' '),
     retrieve=extend_schema(summary='Gets the user identified by id', description=' '),
-    answers=extend_schema(summary='Get the answers posted by the users identified by id', description=' '),
+    answers=extend_schema(summary='Get the answers posted by the user identified by id', description=' '),
+    badges=extend_schema(summary='Get the badges earned by the user identified by id', description=' '),
 )
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """The user view set
@@ -175,7 +176,7 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(summary='Get all questions on the site'),
-    retrieve=extend_schema(summary='Gets the questions identified by id'),
+    retrieve=extend_schema(summary='Gets the question identified by id'),
 )
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """The question view set
@@ -190,7 +191,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(summary='Get all answers on the site'),
-    retrieve=extend_schema(summary='Gets the answers identified by id'),
+    retrieve=extend_schema(summary='Gets the answer identified by id'),
 )
 class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
     """The answers view set
@@ -205,7 +206,7 @@ class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(summary='Get all comments on the site'),
-    retrieve=extend_schema(summary='Gets the comments identified by id'),
+    retrieve=extend_schema(summary='Gets the comment identified by id'),
 )
 class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     """The answers view set
