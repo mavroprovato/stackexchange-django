@@ -86,6 +86,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     retrieve=extend_schema(summary='Gets the user identified by id', description=' '),
     answers=extend_schema(summary='Get the answers posted by the user identified by id', description=' '),
     badges=extend_schema(summary='Get the badges earned by the user identified by id', description=' '),
+    comments=extend_schema(summary='Get the comments posted by the user identified by id', description=' '),
 )
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """The user view set
@@ -115,6 +116,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             return serializers.AnswerSerializer
         elif self.action == 'badges':
             return serializers.UserBadgeSerializer
+        elif self.action == 'comments':
+            return serializers.CommentSerializer
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, pk=None) -> Response:
@@ -133,13 +136,27 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, url_path='badges')
     def badges(self, request: Request, pk=None) -> Response:
-        """Get the answers for a user.
+        """Get the badges for a user.
 
         :param request: The request.
         :param pk: The user id.
         :return: The response.
         """
         queryset = models.UserBadge.objects.filter(user=pk).select_related('user', 'badge').order_by('-date_awarded')
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(page, many=True)
+
+        return self.get_paginated_response(serializer.data)
+
+    @action(detail=True, url_path='comments')
+    def comments(self, request: Request, pk=None) -> Response:
+        """Get the comments for a user.
+
+        :param request: The request.
+        :param pk: The user id.
+        :return: The response.
+        """
+        queryset = models.Comment.objects.filter(user=pk).select_related('post', 'user').order_by('-creation_date')
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True)
 
