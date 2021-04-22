@@ -1,7 +1,5 @@
 """The users view set.
 """
-import typing
-
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
@@ -18,7 +16,7 @@ from stackexchange import filters, models, serializers
     answers=extend_schema(summary='Get the answers posted by the user identified by id', description=' '),
     badges=extend_schema(summary='Get the badges earned by the user identified by id', description=' '),
     comments=extend_schema(summary='Get the comments posted by the user identified by id', description=' '),
-    post=extend_schema(summary='Get all posts (questions and answers) owned by a user', description=' '),
+    posts=extend_schema(summary='Get all posts (questions and answers) owned by a user', description=' '),
     questions=extend_schema(summary='Get the questions posted by the user identified by id', description=' '),
 )
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -64,19 +62,22 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action == 'posts':
             return serializers.PostSerializer
 
-    def get_ordering_fields(self) -> typing.Dict[str, str]:
+    def get_ordering_fields(self):
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve'):
-            return {'reputation': 'desc', 'creation_date': 'desc', 'display_name': 'desc'}
+            return ('reputation', 'desc'), ('creation', 'desc', 'creation_date')
         elif self.action in ('answers', 'posts', 'questions'):
-            return {'last_activity_date': 'desc', 'creation_date': 'desc', 'votes': 'desc'}
+            return (
+                ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
+                ('votes', 'desc', 'score')
+            )
         elif self.action == 'badges':
-            return {'badge__name': 'asc', 'badge__badge_class': 'asc'}
+            return ('name', 'asc', 'badge__name'), ('type', 'acs', 'badge__class'), ('awarded', 'desc', 'date_awarded')
         elif self.action == 'comments':
-            return {'creation_date': 'desc', 'score': 'desc'}
+            return ('creation', 'desc', 'creation_date'),
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:

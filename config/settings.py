@@ -152,3 +152,7 @@ REST_FRAMEWORK = {
 # Debug toolbar configuration
 
 INTERNAL_IPS = ['127.0.0.1']
+
+# Display full SQL for runserver plus
+
+RUNSERVER_PLUS_PRINT_SQL_TRUNCATE = None
