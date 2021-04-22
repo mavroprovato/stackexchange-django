@@ -1,3 +1,5 @@
+"""The badges view set.
+"""
 import typing
 
 from django.db.models import QuerySet
@@ -60,37 +62,37 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
             return {'date_awarded': 'desc'}
 
     @action(detail=False, url_path='name')
-    def named(self, request: Request) -> Response:
+    def named(self, request: Request, *args, **kwargs) -> Response:
         """Get all the non-tagged-based badges.
 
         :param request: The request.
         :return: The response.
         """
-        return super().list(request)
+        return super().list(request, *args, **kwargs)
 
     @action(detail=False, url_path='recipients')
-    def recipients(self, request: Request) -> Response:
+    def recipients(self, request: Request, *args, **kwargs) -> Response:
         """Get badges recently awarded on the site.
 
         :param request: The request.
         :return: The response.
         """
-        return super().list(request)
+        return super().list(request, *args, **kwargs)
 
     @action(detail=True, url_path='recipients')
-    def recipients_detail(self, request: Request, **kwargs) -> Response:
+    def recipients_detail(self, request: Request, *args, **kwargs) -> Response:
         """Get the recent recipients of the given badges.
 
         :param request: The request.
         :return: The response.
         """
-        return super().list(request)
+        return super().list(request, *args, **kwargs)
 
     @action(detail=False, url_path='tags')
-    def tags(self, request: Request) -> Response:
+    def tags(self, request: Request, *args, **kwargs) -> Response:
         """Get all the tagged-based badges.
 
         :param request: The request.
         :return: The response.
         """
-        return super().list(request)
+        return super().list(request, *args, **kwargs)
