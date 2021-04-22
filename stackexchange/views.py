@@ -8,7 +8,7 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from stackexchange import models, serializers
+from stackexchange import filters, models, serializers
 
 
 @extend_schema_view(
@@ -21,21 +21,21 @@ from stackexchange import models, serializers
 class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     """The badge view set
     """
-    filter_backends = (OrderingFilter, )
+    filter_backends = (filters.OrderingFilter, )
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
 
         :return: The queryset for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return models.Badge.objects
-        elif self.action == 'named':
+        if self.action == 'named':
             return models.Badge.objects.filter(tag_based=False)
         elif self.action == 'recipients':
             return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related('user', 'badge')
         elif self.action == 'tags':
             return models.Badge.objects.filter(tag_based=True)
+        else:
+            return models.Badge.objects.all()
 
     def get_serializer_class(self):
         """Get the serializer class for the action.
@@ -46,6 +46,16 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
             return serializers.BadgeSerializer
         elif self.action == 'recipients':
             return serializers.UserBadgeSerializer
+
+    def get_ordering_fields(self):
+        """Return the ordering fields for the action.
+
+        :return: The ordering fields for the action.
+        """
+        if self.action in ('list', 'retrieve', 'named', 'tags'):
+            return 'name', 'type'
+        elif self.action == 'recipients':
+            return 'date_awarded',
 
     @action(detail=False, url_path='name')
     def named(self, request: Request) -> Response:
