@@ -1,5 +1,7 @@
 """The application views
 """
+import typing
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets
@@ -47,15 +49,15 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action == 'recipients':
             return serializers.UserBadgeSerializer
 
-    def get_ordering_fields(self):
+    def get_ordering_fields(self) -> typing.Dict[str, str]:
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
-            return 'name', 'type'
+            return {'name': 'asc', 'type': 'asc'}
         elif self.action == 'recipients':
-            return 'date_awarded',
+            return {'date_awarded': 'desc'}
 
     @action(detail=False, url_path='name')
     def named(self, request: Request) -> Response:

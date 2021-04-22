@@ -33,11 +33,13 @@ class OrderingFilter(BaseFilterBackend):
         """
         name = request.query_params.get(self.ordering_name_param)
         sort = request.query_params.get(self.ordering_sort_param)
-        ordering_fields = getattr(view, 'get_ordering_fields', lambda x: [])()
+        ordering_fields = getattr(view, 'get_ordering_fields', lambda x: {})()
 
         if name in ordering_fields:
             return [f"{'-' if self.ORDERING_DESCENDING == sort else ''}{name}", '-pk']
         elif ordering_fields:
-            return [f"{'-' if self.ORDERING_DESCENDING == sort else ''}{ordering_fields[0]}", '-pk']
+            default_ordering = list(ordering_fields.items())[0]
+
+            return [f"{'-' if self.ORDERING_DESCENDING == default_ordering[1] else ''}{default_ordering[0]}", '-pk']
         else:
             return ['-pk']
