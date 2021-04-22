@@ -17,8 +17,9 @@ from stackexchange import filters, models, serializers
     list=extend_schema(summary='Get all badges on the site', description=' '),
     retrieve=extend_schema(summary='Gets the badge identified by id', description=' '),
     named=extend_schema(summary='Get all non-tagged-based badges', description=' '),
+    recipients=extend_schema(summary='Get badges recently awarded on the site', description=' '),
+    recipients_detail=extend_schema(summary='Get the recent recipients of the given badges', description=' '),
     tags=extend_schema(summary='Get all tagged-based badges', description=' '),
-    recipients=extend_schema(summary='Get the recent recipients of the given badges', description=' '),
 )
 class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
     """The badge view set
@@ -33,6 +34,8 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'named':
             return models.Badge.objects.filter(tag_based=False)
         elif self.action == 'recipients':
+            return models.UserBadge.objects.select_related('user', 'badge')
+        elif self.action == 'recipients_detail':
             return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related('user', 'badge')
         elif self.action == 'tags':
             return models.Badge.objects.filter(tag_based=True)
@@ -46,7 +49,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
             return serializers.BadgeSerializer
-        elif self.action == 'recipients':
+        elif self.action in ('recipients', 'recipients_detail'):
             return serializers.UserBadgeSerializer
 
     def get_ordering_fields(self) -> typing.Dict[str, str]:
@@ -56,7 +59,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
             return {'name': 'asc', 'type': 'asc'}
-        elif self.action == 'recipients':
+        elif self.action in ('recipients', 'recipients_detail'):
             return {'date_awarded': 'desc'}
 
     @action(detail=False, url_path='name')
@@ -68,8 +71,17 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         """
         return super().list(request)
 
+    @action(detail=False, url_path='recipients')
+    def recipients(self, request: Request) -> Response:
+        """Get badges recently awarded on the site.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request)
+
     @action(detail=True, url_path='recipients')
-    def recipients(self, request: Request, **kwargs) -> Response:
+    def recipients_detail(self, request: Request, **kwargs) -> Response:
         """Get the recent recipients of the given badges.
 
         :param request: The request.
