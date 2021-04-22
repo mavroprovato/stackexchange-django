@@ -10,6 +10,7 @@ import stackexchange.views.answers
 import stackexchange.views.badges
 import stackexchange.views.comments
 import stackexchange.views.questions
+import stackexchange.views.posts
 import stackexchange.views.tags
 import stackexchange.views.users
 
@@ -17,7 +18,7 @@ router = routers.DefaultRouter()
 router.register(r'badges', stackexchange.views.badges.BadgeViewSet, basename='Badge')
 router.register(r'users', stackexchange.views.users.UserViewSet, basename='User')
 router.register(r'tags', stackexchange.views.tags.TagViewSet, basename='Tag')
-router.register(r'posts', stackexchange.views.tags.PostViewSet, basename='Post')
+router.register(r'posts', stackexchange.views.posts.PostViewSet, basename='Post')
 router.register(r'questions', stackexchange.views.questions.QuestionViewSet, basename='Post')
 router.register(r'answers', stackexchange.views.answers.AnswerViewSet, basename='Post')
 router.register(r'comments', stackexchange.views.comments.CommentViewSet, basename='Post')
