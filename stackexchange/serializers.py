@@ -163,7 +163,7 @@ class TagSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = models.Tag
-        fields = ('name', 'count')
+        fields = ('count', 'name')
 
 
 class PostSerializer(serializers.ModelSerializer):
