@@ -1,8 +1,7 @@
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
-from rest_framework.filters import OrderingFilter
 
-from stackexchange import models, serializers
+from stackexchange import filters, models, serializers
 
 
 @extend_schema_view(
@@ -14,6 +13,12 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = models.Tag.objects
     serializer_class = serializers.TagSerializer
-    filter_backends = (OrderingFilter, )
-    ordering_fields = ('count', 'name')
-    ordering = ('-count',)
+    filter_backends = (filters.OrderingFilter, )
+
+    def get_ordering_fields(self):
+        """Return the ordering fields for the action.
+
+        :return: The ordering fields for the action.
+        """
+        if self.action in ('list', 'retrieve'):
+            return ('popular', 'desc', 'count'), ('name', 'asc')
