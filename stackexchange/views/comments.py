@@ -1,8 +1,7 @@
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
-from rest_framework.filters import OrderingFilter
 
-from stackexchange import models, serializers
+from stackexchange import filters, models, serializers
 
 
 @extend_schema_view(
@@ -14,6 +13,12 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = models.Comment.objects.select_related('post', 'user')
     serializer_class = serializers.CommentSerializer
-    filter_backends = (OrderingFilter, )
-    ordering_fields = ('creation_date', 'score')
-    ordering = ('-creation_date',)
+    filter_backends = (filters.OrderingFilter, )
+
+    def get_ordering_fields(self):
+        """Return the ordering fields for the action.
+
+        :return: The ordering fields for the action.
+        """
+        if self.action in ('list', 'retrieve'):
+            return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
