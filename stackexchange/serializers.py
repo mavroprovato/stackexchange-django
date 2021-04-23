@@ -161,9 +161,24 @@ class UserSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     """The tag serializer
     """
+    tag_id = fields.IntegerField(source='pk')
+
     class Meta:
         model = models.Tag
-        fields = ('count', 'name')
+        fields = ('count', 'name', 'tag_id')
+
+
+class TagWikiSerializer(serializers.ModelSerializer):
+    """The tag wiki serializer
+    """
+    excerpt_last_edit_date = fields.DateTimeField(source='excerpt.last_edit_date', default=None)
+    body_last_edit_date = fields.DateTimeField(source='wiki.last_edit_date', default=None)
+    excerpt = fields.CharField(source='excerpt.body', default=None)
+    tag_name = fields.CharField(source='name')
+
+    class Meta:
+        model = models.Tag
+        fields = ('excerpt_last_edit_date', 'body_last_edit_date', 'excerpt', 'tag_name')
 
 
 class PostSerializer(serializers.ModelSerializer):

@@ -50,7 +50,7 @@ class OrderingFilter(BaseFilterBackend):
         """
         ordering_fields = self.get_ordering_fields(view)
 
-        if ordering_fields is not None:
+        if ordering_fields:
             # Get the ordering field from the request, or the first available if it cannot be found
             name = request.query_params.get(self.ordering_name_param)
             ordering_field = next(
@@ -81,8 +81,11 @@ class OrderingFilter(BaseFilterBackend):
         :param view: The view.
         :return: The ordering fields for the view.
         """
-        ordering_fields_function = getattr(view, 'get_ordering_fields', lambda: [])
+        ordering_fields_function = getattr(view, 'get_ordering_fields')
         ordering_fields = []
+
+        if not ordering_fields_function or not ordering_fields_function():
+            return ordering_fields
 
         for ordering_field in ordering_fields_function():
             if isinstance(ordering_field, str):
