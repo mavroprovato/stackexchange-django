@@ -63,9 +63,9 @@ class Badge(models.Model):
     CLASS_BRONZE = 3
 
     CLASS_CHOICES = (
-        (CLASS_GOLD, 'Gold'),
-        (CLASS_SILVER, 'Silver'),
-        (CLASS_BRONZE, 'Bronze'),
+        (CLASS_GOLD, 'gold'),
+        (CLASS_SILVER, 'silver'),
+        (CLASS_BRONZE, 'bronze'),
     )
     name = models.CharField(help_text="The badge name", max_length=255, unique=True)
     badge_class = models.SmallIntegerField(help_text="The badge class", choices=CLASS_CHOICES)
