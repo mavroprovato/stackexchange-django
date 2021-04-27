@@ -1,9 +1,19 @@
 """The application models
 """
+import enum
+
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 
 from stackexchange import managers
+
+
+class ContentLicense(enum.Enum):
+    """The content license enumeration
+    """
+    CC_BY_SA_2_5 = 'Attribution-ShareAlike 2.5 Generic'
+    CC_BY_SA_3_0 = 'Attribution-ShareAlike 3.0 Unported'
+    CC_BY_SA_4_0 = 'Attribution-ShareAlike 4.0 International'
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -126,6 +136,9 @@ class Post(models.Model):
     answer_count = models.PositiveIntegerField(help_text="The post answer count", null=True, blank=True)
     comment_count = models.PositiveIntegerField(help_text="The post comment count", null=True, blank=True)
     favorite_count = models.PositiveIntegerField(help_text="The post favorite count", null=True, blank=True)
+    content_license = models.CharField(
+        help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in ContentLicense],
+        default=ContentLicense.CC_BY_SA_4_0.name)
     owner = models.ForeignKey(User, help_text="The owner of the post", on_delete=models.CASCADE,
                               related_name='owner_posts', null=True, blank=True)
     last_editor = models.ForeignKey(User, help_text="The last editor of the post", on_delete=models.CASCADE,
@@ -147,6 +160,9 @@ class Comment(models.Model):
     score = models.IntegerField(help_text="The comment score")
     text = models.TextField(help_text="The comment text")
     creation_date = models.DateTimeField(help_text="The date that the comment was created", auto_now_add=True)
+    content_license = models.CharField(
+        help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in ContentLicense],
+        default=ContentLicense.CC_BY_SA_4_0.name)
     user = models.ForeignKey(User, help_text="The user for the comment", on_delete=models.CASCADE,
                              related_name='user_comments', null=True, blank=True)
 

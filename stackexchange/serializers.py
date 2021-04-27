@@ -110,6 +110,20 @@ class BaseUserSerializer(serializers.ModelSerializer):
         fields = ('reputation', 'user_id', 'display_name')
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """The user serializer.
+    """
+    badge_counts = BadgeCountSerializer(source="badges")
+    user_id = fields.IntegerField(source="pk")
+
+    class Meta:
+        model = models.User
+        fields = (
+            'badge_counts', 'is_employee', 'reputation', 'creation_date', 'user_id', 'location', 'website_url',
+            'display_name'
+        )
+
+
 class UserBadgeSerializer(serializers.ModelSerializer):
     """The user badge serializer
     """
@@ -144,20 +158,6 @@ class UserBadgeSerializer(serializers.ModelSerializer):
                 return class_description
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """The user serializer.
-    """
-    badge_counts = BadgeCountSerializer(source="badges")
-    user_id = fields.IntegerField(source="pk")
-
-    class Meta:
-        model = models.User
-        fields = (
-            'badge_counts', 'is_employee', 'reputation', 'creation_date', 'user_id', 'location', 'website_url',
-            'display_name'
-        )
-
-
 class TagSerializer(serializers.ModelSerializer):
     """The tag serializer
     """
@@ -190,7 +190,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Post
-        fields = ('owner', 'score', 'last_activity_date', 'creation_date', 'post_type', 'post_id')
+        fields = ('owner', 'score', 'last_activity_date', 'creation_date', 'post_type', 'post_id', 'content_license')
 
     @staticmethod
     def get_post_type(post: models.Post) -> typing.Optional[str]:
@@ -215,7 +215,7 @@ class QuestionSerializer(PostSerializer):
         model = models.Post
         fields = (
             'tags', 'owner', 'is_answered', 'view_count', 'answer_count', 'score', 'last_activity_date',
-            'creation_date', 'last_edit_date', 'question_id', 'title'
+            'creation_date', 'last_edit_date', 'question_id', 'content_license', 'title'
         )
 
     @staticmethod
@@ -237,7 +237,10 @@ class AnswerSerializer(PostSerializer):
 
     class Meta:
         model = models.Post
-        fields = ('owner', 'is_accepted', 'score', 'last_activity_date', 'creation_date', 'answer_id', 'question_id')
+        fields = (
+            'owner', 'is_accepted', 'score', 'last_activity_date', 'creation_date', 'answer_id', 'question_id',
+            'content_license'
+        )
 
     @staticmethod
     def get_is_accepted(post: models.Post) -> bool:
@@ -257,4 +260,4 @@ class CommentSerializer(PostSerializer):
 
     class Meta:
         model = models.Post
-        fields = ('owner', 'score', 'creation_date', 'post_id', 'comment_id')
+        fields = ('owner', 'score', 'creation_date', 'post_id', 'comment_id', 'content_license')

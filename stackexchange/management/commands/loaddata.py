@@ -130,13 +130,14 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self.insert_data(data=self.iterate_xml(posts_file), cursor=cursor, table_name='posts', table_columns=(
                     'id', 'title', 'body', 'type', 'creation_date', 'last_edit_date', 'last_activity_date', 'score',
-                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id',
-                    'parent_id', 'accepted_answer_id'
+                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'content_license', 'owner_id',
+                    'last_editor_id', 'parent_id', 'accepted_answer_id'
                 ), params=lambda row: (
                     row['Id'], row.get('Title'), row['Body'], row['PostTypeId'], row['CreationDate'],
                     row.get('LastEditDate'), row['LastActivityDate'], row['Score'], row.get('ViewCount'),
-                    row.get('AnswerCount'), row.get('CommentCount'), row.get('FavoriteCount'), row.get('OwnerUserId'),
-                    row.get('LastEditorUserId'), row.get('ParentId'), row.get('AcceptedAnswerId')
+                    row.get('AnswerCount'), row.get('CommentCount'), row.get('FavoriteCount'), row['ContentLicense'],
+                    row.get('OwnerUserId'), row.get('LastEditorUserId'), row.get('ParentId'),
+                    row.get('AcceptedAnswerId')
                 ))
         self.stdout.write(f"Posts loaded")
 
@@ -150,9 +151,10 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self.insert_data(
                     data=self.iterate_xml(comments_file), cursor=cursor, table_name='comments',
-                    table_columns=('id', 'post_id', 'score', 'text', 'creation_date', 'user_id'),
+                    table_columns=('id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id'),
                     params=lambda row: (
-                        row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row.get('UserId')
+                        row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row['ContentLicense'],
+                        row.get('UserId')
                     )
                 )
         self.stdout.write(f"Comments loaded")
