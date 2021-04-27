@@ -55,7 +55,8 @@ class OrderingFilter(BaseFilterBackend):
             name = request.query_params.get(self.ordering_name_param)
             ordering_field = next(
                 iter(ordering_field for ordering_field in ordering_fields if ordering_field.name == name),
-                ordering_fields[0])
+                ordering_fields[0]
+            )
             # Customize the sort order if it exists and the request and is valid.
             sort = request.query_params.get(self.ordering_sort_param)
             if sort:

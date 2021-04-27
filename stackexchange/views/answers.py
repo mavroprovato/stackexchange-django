@@ -1,8 +1,9 @@
+"""Answers view set
+"""
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
-from rest_framework.filters import OrderingFilter
 
-from stackexchange import models, serializers
+from stackexchange import filters, models, serializers
 
 
 @extend_schema_view(
@@ -15,6 +16,15 @@ class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = models.Post.objects.filter(type=models.Post.TYPE_ANSWER).select_related(
         'owner', 'parent').prefetch_related('tags')
     serializer_class = serializers.AnswerSerializer
-    filter_backends = (OrderingFilter, )
-    ordering_fields = ('last_activity_date', 'creation_date', 'score')
-    ordering = ('-last_activity_date',)
+    filter_backends = (filters.OrderingFilter, )
+
+    def get_ordering_fields(self):
+        """Return the ordering fields for the action.
+
+        :return: The ordering fields for the action.
+        """
+        if self.action in ('list', 'retrieve'):
+            return (
+                ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
+                ('votes', 'desc', 'score')
+            )
