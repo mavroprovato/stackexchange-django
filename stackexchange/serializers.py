@@ -205,6 +205,28 @@ class PostSerializer(serializers.ModelSerializer):
                 return choice[1]
 
 
+class PostHistorySerializer(serializers.ModelSerializer):
+    """The post history serializer
+    """
+    user = BaseUserSerializer()
+    post_type = fields.SerializerMethodField()
+
+    class Meta:
+        model = models.PostHistory
+        fields = ('user', 'creation_date', 'post_id', 'post_type', 'comment', 'revision_guid')
+
+    @staticmethod
+    def get_post_type(post_history: models.PostHistory) -> typing.Optional[str]:
+        """Get the post type
+
+        :param post_history: The post history.
+        :return: The post type.
+        """
+        for choice in models.Post.TYPE_CHOICES:
+            if choice[0] == post_history.post.type:
+                return choice[1]
+
+
 class QuestionSerializer(PostSerializer):
     """The question serializer
     """
