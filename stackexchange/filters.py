@@ -66,10 +66,10 @@ class OrderingFilter(BaseFilterBackend):
                     pass
 
             return (
-                f"{'-' if ordering_field.ordering == OrderingDirection.DESC else ''}{ordering_field.field}", '-pk'
+                f"{'-' if ordering_field.ordering == OrderingDirection.DESC else ''}{ordering_field.field}", 'pk'
             )
         else:
-            return '-pk',
+            return 'pk',
 
     @staticmethod
     def get_ordering_fields(view) -> typing.List[OrderingField]:
