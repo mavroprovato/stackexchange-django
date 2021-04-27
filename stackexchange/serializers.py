@@ -214,8 +214,8 @@ class QuestionSerializer(PostSerializer):
     class Meta:
         model = models.Post
         fields = (
-            'tags', 'owner', 'is_answered', 'view_count', 'answer_count', 'score', 'last_activity_date',
-            'creation_date', 'last_edit_date', 'question_id', 'content_license', 'title'
+            'tags', 'owner', 'is_answered', 'view_count', 'accepted_answer_id', 'answer_count', 'score',
+            'last_activity_date', 'creation_date', 'last_edit_date', 'question_id', 'content_license', 'title'
         )
 
     @staticmethod
