@@ -213,7 +213,7 @@ class PostHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.PostHistory
-        fields = ('user', 'creation_date', 'post_id', 'post_type', 'comment', 'revision_guid')
+        fields = ('user', 'creation_date', 'post_id', 'post_type', 'content_license', 'comment', 'revision_guid')
 
     @staticmethod
     def get_post_type(post_history: models.PostHistory) -> typing.Optional[str]:

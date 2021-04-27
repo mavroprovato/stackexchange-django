@@ -171,10 +171,11 @@ class Command(BaseCommand):
                     data=self.iterate_xml(post_history_file), cursor=cursor, table_name='post_history',
                     table_columns=(
                         'id', 'post_id', 'type', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
-                        'comment', 'text'
+                        'comment', 'text', 'content_license'
                     ), params=lambda row: (
                         row['Id'], row['PostId'], row['PostHistoryTypeId'], row['RevisionGUID'], row['CreationDate'],
-                        row.get('UserId'), row.get('UserDisplayName'), row.get('Comment'), row.get('Text')
+                        row.get('UserId'), row.get('UserDisplayName'), row.get('Comment'), row.get('Text'),
+                        row.get('ContentLicense')
                     )
                 )
         self.stdout.write(f"Post history loaded")

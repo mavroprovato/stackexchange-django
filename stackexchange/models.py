@@ -225,13 +225,16 @@ class PostHistory(models.Model):
     type = models.PositiveSmallIntegerField(help_text="The post history type", choices=TYPE_CHOICES)
     revision_guid = models.CharField(help_text="The GUID of the action that created this history record", max_length=36)
     creation_date = models.DateTimeField(help_text="The date that this history record was created", auto_now_add=True)
-    user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
-                             related_name='user_post_history', null=True, blank=True)
     user_display_name = models.CharField(
         help_text="The display name of the user that created this record, if the user has been removed and no longer "
                   "referenced by id", max_length=255, null=True, blank=True)
     comment = models.TextField(help_text="The comment of the user that has edited this post", null=True, blank=True)
     text = models.TextField(help_text="The new value for a given revision", null=True, blank=True)
+    content_license = models.CharField(
+        help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in ContentLicense],
+        default=ContentLicense.CC_BY_SA_4_0.name, null=True, blank=True)
+    user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
+                             related_name='user_post_history', null=True, blank=True)
 
     class Meta:
         db_table = 'post_history'
