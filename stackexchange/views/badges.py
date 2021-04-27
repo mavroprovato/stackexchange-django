@@ -55,7 +55,7 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
-            return ('name', 'asc'), ('type', 'asc', 'badge_class')
+            return ('rank', 'desk', 'badge_class'), ('name', 'asc'), ('type', 'asc', 'tag_based')
         elif self.action in ('recipients', 'recipients_detail'):
             return 'date_awarded',
 
