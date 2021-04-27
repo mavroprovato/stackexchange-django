@@ -1,6 +1,6 @@
 """The badges view set.
 """
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Count
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -28,16 +28,18 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The queryset for the action.
         """
-        if self.action == 'named':
-            return models.Badge.objects.filter(tag_based=False)
-        elif self.action == 'recipients':
+        if self.action == 'recipients':
             return models.UserBadge.objects.select_related('user', 'badge')
         elif self.action == 'recipients_detail':
             return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related('user', 'badge')
-        elif self.action == 'tags':
-            return models.Badge.objects.filter(tag_based=True)
         else:
-            return models.Badge.objects.all()
+            queryset = models.Badge.objects.annotate(Count('users'))
+            if self.action == 'named':
+                return models.Badge.objects.filter(tag_based=False)
+            elif self.action == 'tags':
+                return models.Badge.objects.filter(tag_based=True)
+
+            return queryset
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

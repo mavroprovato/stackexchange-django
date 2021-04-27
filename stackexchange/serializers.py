@@ -22,12 +22,13 @@ class BadgeSerializer(serializers.ModelSerializer):
     """The badge serializer
     """
     badge_type = fields.SerializerMethodField()
+    award_count = fields.IntegerField(source='users__count')
     rank = fields.SerializerMethodField()
     badge_id = fields.IntegerField(source='pk')
 
     class Meta:
         model = models.Badge
-        fields = ('badge_type', 'rank', 'badge_id', 'name')
+        fields = ('badge_type', 'award_count', 'rank', 'badge_id', 'name')
 
     @staticmethod
     def get_badge_type(badge: models.Badge) -> str:
