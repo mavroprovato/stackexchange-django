@@ -12,6 +12,7 @@ from stackexchange import filters, models, serializers
     list=extend_schema(summary='Get all questions on the site', description=' '),
     retrieve=extend_schema(summary='Gets the question identified by id', description=' '),
     answers=extend_schema(summary='Gets the answers for a question identified by id', description=' '),
+    linked=extend_schema(summary='Get the questions that link to the question identified by an id', description=' '),
 )
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """The question view set
@@ -28,6 +29,10 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
                 'owner')
         elif self.action == 'comments':
             return models.Comment.objects.filter(post=self.kwargs['pk']).select_related('user')
+        elif self.action == 'linked':
+            return models.Post.objects.filter(
+                post_links__related_post=self.kwargs['pk'], post_links__type=models.Post.TYPE_QUESTION
+            ).select_related('owner').prefetch_related('tags')
         else:
             return models.Post.objects.filter(type=models.Post.TYPE_QUESTION).select_related('owner').prefetch_related(
                 'tags')
@@ -49,7 +54,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action in ('list', 'retrieve', 'answers'):
+        if self.action in ('list', 'retrieve', 'answers', 'linked'):
             return (
                 ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
                 ('votes', 'desc', 'score')
@@ -69,6 +74,15 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:
         """Gets the comments for question identified by id.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='linked')
+    def linked(self, request: Request, *args, **kwargs) -> Response:
+        """Get the questions that link to the question identified by an id.
 
         :param request: The request.
         :return: The response.
