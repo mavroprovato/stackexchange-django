@@ -162,11 +162,9 @@ class UserBadgeSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     """The tag serializer
     """
-    tag_id = fields.IntegerField(source='pk')
-
     class Meta:
         model = models.Tag
-        fields = ('count', 'name', 'tag_id')
+        fields = ('count', 'name')
 
 
 class TagWikiSerializer(serializers.ModelSerializer):
