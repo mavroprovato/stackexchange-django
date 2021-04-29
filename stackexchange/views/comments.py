@@ -15,10 +15,10 @@ class CommentViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.CommentSerializer
     filter_backends = (filters.OrderingFilter, )
 
-    def get_ordering_fields(self):
+    @staticmethod
+    def get_ordering_fields():
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
+        return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
