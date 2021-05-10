@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': 'localhost',
+        'HOST': env('DB_HOST', default='localhost'),
         'NAME': env('DB_NAME', default='stackexchange'),
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
