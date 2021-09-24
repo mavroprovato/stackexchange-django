@@ -4,7 +4,8 @@ This project implements an API for a StackExchange-like site. The data used for 
 data dump that are published regularly at [archive.org](https://archive.org/details/stackexchange). The application is 
 built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) 3.8+ and
 [Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used for
-storing the application data.
+storing the application data. Make sure you have Python, Poetry and PostreSQL installed before running the installation
+instructions.
 
 ## Installation
 
@@ -22,7 +23,7 @@ Then, you can activate the Python virtual environment by running:
 $ poetry shell
 ```
 
-All commands from this point forward require that the virtual environment is enabled.
+All commands from this point forward require that the virtual environment is activated.
 
 ### Database
 
@@ -66,7 +67,7 @@ $ python manage.py loaddata dba.stackexchange
 
 ### Running the application
 
-Now everything should be ready to start up the application by running:
+Now everything should be ready to launch the application by running:
 
 ```
 $ python manage.py runserver
