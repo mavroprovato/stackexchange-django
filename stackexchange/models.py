@@ -169,6 +169,13 @@ class Comment(models.Model):
     class Meta:
         db_table = 'comments'
 
+    def __str__(self) -> str:
+        """Return the string representation of the comment
+
+        :return: The comment text
+        """
+        return str(self.text)
+
 
 class PostHistory(models.Model):
     """The post history model

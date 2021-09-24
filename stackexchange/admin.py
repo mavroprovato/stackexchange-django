@@ -9,28 +9,19 @@ class BadgeAdmin(admin.ModelAdmin):
     """Admin for badges
     """
     list_display = ('name', 'badge_class', 'tag_based')
-    list_filter = ('badge_class',)
+    list_filter = ('badge_class', 'tag_based')
     search_fields = ('name',)
     ordering = ('name',)
-
-
-class UserBadgeInline(admin.TabularInline):
-    """The user badge inline
-    """
-    model = models.UserBadge
-    readonly_fields = ('date_awarded',)
-    extra = 1
 
 
 @admin.register(models.User)
 class UserAdmin(UserAdmin):
     """Admin for users
     """
-    list_display = ('display_name', 'website_url', 'location', 'creation_date', 'reputation')
+    list_display = ('display_name', 'website_url', 'location', 'reputation', 'creation_date')
     list_filter = ()
     filter_horizontal = ()
     search_fields = ('display_name',)
-    inlines = (UserBadgeInline, )
     ordering = ('pk', )
 
     fieldsets = (
@@ -49,9 +40,9 @@ class UserAdmin(UserAdmin):
 
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
-    """Admin for badges
+    """Admin for tags
     """
-    list_display = ('name', )
+    list_display = ('name', 'count')
     search_fields = ('name',)
     ordering = ('name',)
     autocomplete_fields = ('excerpt', 'wiki')
@@ -72,7 +63,17 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ('title', 'type', 'score', 'creation_date', 'last_edit_date')
     list_filter = ('type',)
     search_fields = ('title',)
-    autocomplete_fields = ('owner', 'last_editor')
-    ordering = ('pk', )
+    autocomplete_fields = ('owner', 'last_editor', 'parent', 'accepted_answer')
+    ordering = ('-creation_date', )
     inlines = (PostTagInline, )
 
+
+@admin.register(models.Comment)
+class CommentAdmin(admin.ModelAdmin):
+    """Admin for comments
+    """
+    list_display = ('text', 'user', 'score', 'creation_date')
+    list_select_related = ('user', )
+    search_fields = ('text',)
+    autocomplete_fields = ('post', 'user')
+    ordering = ('-creation_date',)
