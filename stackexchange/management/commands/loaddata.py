@@ -109,14 +109,18 @@ class Command(BaseCommand):
                 self.insert_data(data=badges.values(), cursor=cursor, table_name='badges', table_columns=(
                     'name', 'badge_class', 'tag_based'
                 ), params=lambda x: (x['Name'], x['Class'], x['TagBased']))
+            # Map badge ids to names
             cursor.execute("SELECT id, name FROM badges")
             badges = {row[1]: row[0] for row in cursor.fetchall()}
+            # Get all user ids
+            cursor.execute("SELECT id FROM users")
+            users = {row[0] for row in cursor.fetchall()}
             with transaction.atomic():
                 self.insert_data(
                     data=self.iterate_xml(badges_file), cursor=cursor, table_name='user_badges',
                     table_columns=('badge_id', 'user_id', 'date_awarded'), params=lambda row: (
                         badges[row['Name']], row['UserId'], row['Date']
-                    )
+                    ) if row['UserId'] in users else None
                 )
         self.stdout.write(f"Badges loaded")
 
@@ -128,6 +132,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Loading posts")
         with connection.cursor() as cursor:
             with transaction.atomic():
+                row_ids = {row['Id'] for row in self.iterate_xml(posts_file)}
                 self.insert_data(data=self.iterate_xml(posts_file), cursor=cursor, table_name='posts', table_columns=(
                     'id', 'title', 'body', 'type', 'creation_date', 'last_edit_date', 'last_activity_date', 'score',
                     'view_count', 'answer_count', 'comment_count', 'favorite_count', 'content_license', 'owner_id',
@@ -137,7 +142,7 @@ class Command(BaseCommand):
                     row.get('LastEditDate'), row['LastActivityDate'], row['Score'], row.get('ViewCount'),
                     row.get('AnswerCount'), row.get('CommentCount'), row.get('FavoriteCount'), row['ContentLicense'],
                     row.get('OwnerUserId'), row.get('LastEditorUserId'), row.get('ParentId'),
-                    row.get('AcceptedAnswerId')
+                    row.get('AcceptedAnswerId') if row.get('AcceptedAnswerId') in row_ids else None
                 ))
         self.stdout.write(f"Posts loaded")
 
@@ -218,7 +223,7 @@ class Command(BaseCommand):
                         row['Id'], row['PostId'], row['VoteTypeId'], row.get('UserId'), row['CreationDate']
                     ) if int(row['PostId']) in post_ids else None
                 )
-        self.stdout.write(f"Comments votes loaded")
+        self.stdout.write(f"Post votes loaded")
 
     def load_tags(self, tags_file: pathlib.Path, posts_file: pathlib.Path):
         """Load the tags.
@@ -262,7 +267,16 @@ class Command(BaseCommand):
                 yield dict(elem.items())
 
     @staticmethod
-    def insert_data(data, cursor, table_name, table_columns, params):
+    def insert_data(data, cursor, table_name: str, table_columns: typing.Collection[str], params):
+        """Insert data to the database
+
+        :param data: The data to insert.
+        :param cursor:
+        :param table_name: The name of the table to insert the data to.
+        :param table_columns: The name of the table columns.
+        :param params:
+        """
+        # Clear data before inserting
         cursor.execute(f"TRUNCATE TABLE {table_name} CASCADE")
         for row in data:
             if params(row):
@@ -270,4 +284,3 @@ class Command(BaseCommand):
                     INSERT INTO {table_name}({','.join(table_columns)})
                     VALUES ({','.join('%s' for _ in range(len(table_columns)))})
                 """, params(row))
-
