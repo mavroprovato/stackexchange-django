@@ -56,6 +56,22 @@ class PostTagInline(admin.TabularInline):
     extra = 1
 
 
+class PostHistoryInline(admin.TabularInline):
+    """The post history inline
+    """
+    model = models.PostHistory
+    readonly_fields = tuple(field.name for field in models.PostHistory._meta.fields)
+
+    def has_add_permission(self, request, obj=None):
+        """Overridden in order to disable user from adding new objects.
+
+        :param request: The request.
+        :param obj: The objects.
+        :return: Always false.
+        """
+        return False
+
+
 @admin.register(models.Post)
 class PostAdmin(admin.ModelAdmin):
     """Admin for posts
@@ -65,7 +81,7 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = ('title',)
     autocomplete_fields = ('owner', 'last_editor', 'parent', 'accepted_answer')
     ordering = ('-creation_date', )
-    inlines = (PostTagInline, )
+    inlines = (PostTagInline, PostHistoryInline)
 
 
 @admin.register(models.Comment)
