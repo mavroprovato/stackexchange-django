@@ -62,6 +62,8 @@ class Command(BaseCommand):
         if not dump_file.exists():
             self.stdout.write("Downloading dump file")
             with requests.get(url, stream=True) as r:
+                # Check for error
+                r.raise_for_status()
                 with open(var_dir / f"{community}.com.7z", 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
 
