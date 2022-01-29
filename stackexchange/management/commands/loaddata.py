@@ -1,8 +1,10 @@
 import datetime
+import io
 import pathlib
 import re
 import time
 import shutil
+import tempfile
 import typing
 import xml.etree.ElementTree as eT
 
@@ -14,74 +16,126 @@ import requests
 import py7zr
 
 
-class Command(BaseCommand):
-    """Command to load the data from a dump directory.
+class Downloader:
+    """Helper class to download stack exchange site data.
     """
-    help = 'Load the data from a dump directory'
+    def __init__(self, site: str, output: io.IOBase):
+        """Create the site downloader.
 
-    def add_arguments(self, parser: CommandParser) -> typing.NoReturn:
-        """Add the command arguments.
-
-        :param parser: The argument parser.
+        :param site: The site to download.
         """
-        parser.add_argument("community", help="The name of the community to download")
+        self.site = site
+        self.output = output
+        self._download_dir = pathlib.Path(settings.BASE_DIR) / "var"
+        self._download_dir.mkdir(parents=True, exist_ok=True)
 
-    def handle(self, *args, **options):
-        """Implements the logic of the command.
+    @property
+    def download_url(self) -> str:
+        """Get the dump file download URL.
 
-        :param args: The arguments.
-        :param options: The options.
+        :return: The dump file download URL.
         """
-        community = options['community']
-        start = time.time()
-        self.stdout.write(f"Loading data for {community}")
-        dump_dir = self.download(community)
-        self.load_users(dump_dir / "Users.xml")
-        self.load_badges(dump_dir / "Badges.xml")
-        self.load_posts(dump_dir / "Posts.xml")
-        self.load_comments(dump_dir / "Comments.xml")
-        self.load_post_history(dump_dir / "PostHistory.xml")
-        self.load_post_links(dump_dir / "PostLinks.xml")
-        self.load_post_votes(dump_dir / "Votes.xml")
-        self.load_tags(dump_dir / "Tags.xml", dump_dir / "Posts.xml")
-        end = time.time()
-        self.stdout.write(f"Data loaded, took {datetime.timedelta(seconds=end-start)}")
+        return f"https://archive.org/download/stackexchange/{self.site}.7z"
 
-    def download(self, community: str) -> pathlib.Path:
-        """Download the dump for the community.
+    @property
+    def dump_file(self) -> pathlib.Path:
+        """Get the local dump file.
 
-        :param community: The community name.
-        :return: The dump directory with the extracted files.
+        :return: The local dump file.
         """
-        url = f"https://archive.org/download/stackexchange/{community}.com.7z"
-        var_dir = pathlib.Path(settings.BASE_DIR) / "var"
-        var_dir.mkdir(parents=True, exist_ok=True)
+        return self._download_dir / f"{self.site}.7z"
 
-        # Download file if needed
-        dump_file = var_dir / f"{community}.com.7z"
-        if not dump_file.exists():
-            self.stdout.write("Downloading dump file")
-            with requests.get(url, stream=True) as r:
-                # Check for error
+    @property
+    def cache_file(self) -> pathlib.Path:
+        """Get the local cache file.
+
+        :return: The local cache file.
+        """
+        return self._download_dir / f"{self.site}.7z.cache"
+
+    def download(self) -> bool:
+        """Download the dump file if needed.
+
+        :return: True if the file was downloaded, False otherwise.
+        """
+        if self.should_download():
+            self.output.write("Downloading")
+            # Download file
+            with requests.get(self.download_url, stream=True) as r:
                 r.raise_for_status()
-                with open(var_dir / f"{community}.com.7z", 'wb') as f:
+                with open(self.dump_file, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
+            # Save cache version
+            with open(self.cache_file, 'wt') as f:
+                f.write(r.headers['ETag'])
 
-        # Extract the file
-        extract_path = var_dir / community
-        if not extract_path.exists():
-            self.stdout.write("Extracting dump")
-            with py7zr.SevenZipFile(dump_file, mode='r') as dump_file:
-                dump_file.extractall(path=extract_path)
+            return True
 
-        return extract_path
+        return False
+
+    def should_download(self) -> bool:
+        """Check if the dump file should be downloaded.
+
+        :return: True if the dump file should be downloaded, false otherwise.
+        """
+        if not self.dump_file.exists():
+            self.output.write("Local dump file does not exist")
+            return True
+        if not self.cache_file.exists():
+            self.output.write("Cache file does not exist")
+            return True
+        if self.dump_changed():
+            self.output.write("Dump File has changed")
+            return True
+
+        return False
+
+    def dump_changed(self) -> bool:
+        """Check if the dump file has changed.
+
+        :return: True if the dump file has changed, False otherwise.
+        """
+        local_etag = self.cache_file.read_text()
+        remote_etag = requests.head(self.download_url, allow_redirects=True).headers['Etag']
+
+        return local_etag != remote_etag
+
+
+class Importer:
+    """Helper class to import data to the database
+    """
+    def __init__(self, dump_file: pathlib.Path, output: io.IOBase):
+        """Create the imported
+
+        :param dump_file: The dump file to import.
+        :param output: Output stream to write the messages.
+        """
+        self.dump_file = dump_file
+        self.output = output
+
+    def import_file(self):
+        """Import files to the database.
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            self.output.write("Extracting dump")
+            with py7zr.SevenZipFile(self.dump_file, mode='r') as dump_file:
+                dump_file.extractall(path=temp_dir)
+            temp_dir = pathlib.Path(temp_dir)
+            self.load_users(temp_dir / "Users.xml")
+            self.load_badges(temp_dir / "Badges.xml")
+            self.load_posts(temp_dir / "Posts.xml")
+            self.load_comments(temp_dir / "Comments.xml")
+            self.load_post_history(temp_dir / "PostHistory.xml")
+            self.load_post_links(temp_dir / "PostLinks.xml")
+            self.load_post_votes(temp_dir / "Votes.xml")
+            self.load_tags(temp_dir / "Tags.xml", temp_dir / "Posts.xml")
 
     def load_users(self, users_file: pathlib.Path):
         """Load the users.
 
         :param users_file: The users file.
         """
-        self.stdout.write(f"Loading users")
+        self.output.write(f"Loading users")
         password = make_password("password")
         with connection.cursor() as cursor:
             with transaction.atomic():
@@ -94,14 +148,14 @@ class Command(BaseCommand):
                     'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com", password,
                     True, row['Id'] == '-1'
                 ))
-        self.stdout.write(f"Users loaded")
+        self.output.write(f"Users loaded")
 
     def load_badges(self, badges_file: pathlib.Path):
         """Load the badges.
 
         :param badges_file: The badges file.
         """
-        self.stdout.write(f"Loading badges")
+        self.output.write(f"Loading badges")
         badges = {
             row['Name']: {'Name': row['Name'], 'Class': row['Class'], 'TagBased': row['TagBased']}
             for row in self.iterate_xml(badges_file)
@@ -124,14 +178,14 @@ class Command(BaseCommand):
                         badges[row['Name']], row['UserId'], row['Date']
                     ) if row['UserId'] in users else None
                 )
-        self.stdout.write(f"Badges loaded")
+        self.output.write(f"Badges loaded")
 
     def load_posts(self, posts_file: pathlib.Path):
         """Load the posts.
 
         :param posts_file: The posts file.
         """
-        self.stdout.write(f"Loading posts")
+        self.output.write(f"Loading posts")
         with connection.cursor() as cursor:
             with transaction.atomic():
                 row_ids = {row['Id'] for row in self.iterate_xml(posts_file)}
@@ -146,14 +200,14 @@ class Command(BaseCommand):
                     row.get('OwnerUserId'), row.get('LastEditorUserId'), row.get('ParentId'),
                     row.get('AcceptedAnswerId') if row.get('AcceptedAnswerId') in row_ids else None
                 ))
-        self.stdout.write(f"Posts loaded")
+        self.output.write(f"Posts loaded")
 
     def load_comments(self, comments_file: pathlib.Path):
         """Load the comments.
 
         :param comments_file: The comments file.
         """
-        self.stdout.write(f"Loading comments")
+        self.output.write(f"Loading comments")
         with connection.cursor() as cursor:
             with transaction.atomic():
                 self.insert_data(
@@ -164,14 +218,14 @@ class Command(BaseCommand):
                         row.get('UserId')
                     )
                 )
-        self.stdout.write(f"Comments loaded")
+        self.output.write(f"Comments loaded")
 
     def load_post_history(self, post_history_file: pathlib.Path):
         """Load the post history.
 
         :param post_history_file: The post history file.
         """
-        self.stdout.write(f"Loading post history")
+        self.output.write(f"Loading post history")
         with connection.cursor() as cursor:
             with transaction.atomic():
                 self.insert_data(
@@ -185,14 +239,14 @@ class Command(BaseCommand):
                         row.get('ContentLicense')
                     )
                 )
-        self.stdout.write(f"Post history loaded")
+        self.output.write(f"Post history loaded")
 
     def load_post_links(self, post_links_file: pathlib.Path):
         """Load the post links.
 
         :param post_links_file: The post links file.
         """
-        self.stdout.write(f"Loading post links")
+        self.output.write(f"Loading post links")
         with connection.cursor() as cursor:
             with transaction.atomic():
                 cursor.execute("SELECT id FROM posts")
@@ -205,14 +259,14 @@ class Command(BaseCommand):
                         row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
                     ) if int(row['PostId']) in post_ids and int(row['RelatedPostId']) in post_ids else None
                 )
-        self.stdout.write(f"Post links loaded")
+        self.output.write(f"Post links loaded")
 
     def load_post_votes(self, post_votes_file: pathlib.Path):
         """Load the post votes.
 
         :param post_votes_file: The post votes file.
         """
-        self.stdout.write(f"Loading post votes")
+        self.output.write(f"Loading post votes")
         with connection.cursor() as cursor:
             with transaction.atomic():
                 cursor.execute("SELECT id FROM posts")
@@ -225,7 +279,7 @@ class Command(BaseCommand):
                         row['Id'], row['PostId'], row['VoteTypeId'], row.get('UserId'), row['CreationDate']
                     ) if int(row['PostId']) in post_ids else None
                 )
-        self.stdout.write(f"Post votes loaded")
+        self.output.write(f"Post votes loaded")
 
     def load_tags(self, tags_file: pathlib.Path, posts_file: pathlib.Path):
         """Load the tags.
@@ -233,7 +287,7 @@ class Command(BaseCommand):
         :param tags_file: The tags file.
         :param posts_file: The posts file.
         """
-        self.stdout.write(f"Loading tags")
+        self.output.write(f"Loading tags")
         with connection.cursor() as cursor:
             with transaction.atomic():
                 self.insert_data(
@@ -246,7 +300,7 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self.insert_data(data=self.yield_post_tags(cursor, posts_file), cursor=cursor, table_name='post_tags',
                                  table_columns=('post_id', 'tag_id'), params=lambda row: (row['PostId'], row['TagId']))
-        self.stdout.write(f"Tags loaded")
+        self.output.write(f"Tags loaded")
 
     def yield_post_tags(self, cursor, posts_file: pathlib.Path):
         cursor.execute("SELECT id, name FROM tags")
@@ -286,3 +340,32 @@ class Command(BaseCommand):
                     INSERT INTO {table_name}({','.join(table_columns)})
                     VALUES ({','.join('%s' for _ in range(len(table_columns)))})
                 """, params(row))
+
+
+class Command(BaseCommand):
+    """Command to load the data from a dump directory.
+    """
+    help = 'Load the data for a stackexchange site'
+
+    def add_arguments(self, parser: CommandParser) -> typing.NoReturn:
+        """Add the command arguments.
+
+        :param parser: The argument parser.
+        """
+        parser.add_argument("site", help="The name of the site to download")
+
+    def handle(self, *args, **options):
+        """Implements the logic of the command.
+
+        :param args: The arguments.
+        :param options: The options.
+        """
+        site = options['site']
+        start = time.time()
+        self.stdout.write(f"Loading data for {site}")
+        downloader = Downloader(site, self.stdout)
+        downloader.download()
+        importer = Importer(downloader.dump_file, self.stdout)
+        importer.import_file()
+        end = time.time()
+        self.stdout.write(f"Data loaded, took {datetime.timedelta(seconds=end-start)}")
