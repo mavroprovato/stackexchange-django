@@ -14,6 +14,7 @@ from django.db import connection, transaction
 from django.conf import settings
 import requests
 import py7zr
+import tqdm
 
 
 class Downloader:
@@ -61,13 +62,18 @@ class Downloader:
         if self.should_download():
             self.output.write("Downloading")
             # Download file
-            with requests.get(self.download_url, stream=True) as r:
-                r.raise_for_status()
-                with open(self.dump_file, 'wb') as f:
-                    shutil.copyfileobj(r.raw, f)
+            with requests.get(self.download_url, stream=True) as response:
+                response.raise_for_status()
+                total = int(response.headers.get('content-length', 0))
+                with open(self.dump_file, 'wb') as f, tqdm.tqdm(
+                        desc=self.site, total=total, unit='iB', unit_scale=True
+                ) as bar:
+                    for data in response.iter_content(chunk_size=1024):
+                        size = f.write(data)
+                        bar.update(size)
             # Save cache version
             with open(self.cache_file, 'wt') as f:
-                f.write(r.headers['ETag'])
+                f.write(response.headers['ETag'])
 
             return True
 
