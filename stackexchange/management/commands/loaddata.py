@@ -3,7 +3,6 @@ import io
 import pathlib
 import re
 import time
-import shutil
 import tempfile
 import typing
 import xml.etree.ElementTree as eT
@@ -60,7 +59,7 @@ class Downloader:
         :return: True if the file was downloaded, False otherwise.
         """
         if self.should_download():
-            self.output.write("Downloading")
+            self.output.write("Downloading dump file")
             # Download file
             with requests.get(self.download_url, stream=True) as response:
                 response.raise_for_status()
@@ -110,6 +109,15 @@ class Downloader:
 class Importer:
     """Helper class to import data to the database
     """
+    USERS_FILE = "Users.xml"
+    BADGES_FILE = "Badges.xml"
+    POSTS_FILE = "Posts.xml"
+    COMMENTS_FILE = "Comments.xml"
+    POST_HISTORY_FILE = "PostHistory.xml"
+    POST_LINKS_FILE = "PostLinks.xml"
+    VOTES_FILE = "Votes.xml"
+    TAGS_FILE = "Tags.xml"
+
     def __init__(self, dump_file: pathlib.Path, output: io.IOBase):
         """Create the imported
 
@@ -127,14 +135,14 @@ class Importer:
             with py7zr.SevenZipFile(self.dump_file, mode='r') as dump_file:
                 dump_file.extractall(path=temp_dir)
             temp_dir = pathlib.Path(temp_dir)
-            self.load_users(temp_dir / "Users.xml")
-            self.load_badges(temp_dir / "Badges.xml")
-            self.load_posts(temp_dir / "Posts.xml")
-            self.load_comments(temp_dir / "Comments.xml")
-            self.load_post_history(temp_dir / "PostHistory.xml")
-            self.load_post_links(temp_dir / "PostLinks.xml")
-            self.load_post_votes(temp_dir / "Votes.xml")
-            self.load_tags(temp_dir / "Tags.xml", temp_dir / "Posts.xml")
+            self.load_users(temp_dir / self.USERS_FILE)
+            self.load_badges(temp_dir / self.BADGES_FILE)
+            self.load_posts(temp_dir / self.POSTS_FILE)
+            self.load_comments(temp_dir / self.COMMENTS_FILE)
+            self.load_post_history(temp_dir / self.POST_HISTORY_FILE)
+            self.load_post_links(temp_dir / self.POST_LINKS_FILE)
+            self.load_post_votes(temp_dir / self.VOTES_FILE)
+            self.load_tags(temp_dir / self.TAGS_FILE, temp_dir / self.POSTS_FILE)
 
     def load_users(self, users_file: pathlib.Path):
         """Load the users.
