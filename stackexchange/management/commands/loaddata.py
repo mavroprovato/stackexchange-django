@@ -336,8 +336,7 @@ class Importer:
             if elem.tag == 'row':
                 yield dict(elem.items())
 
-    @staticmethod
-    def insert_data(data, cursor, table_name: str, table_columns: typing.Collection[str], params):
+    def insert_data(self, data, cursor, table_name: str, table_columns: typing.Collection[str], params):
         """Insert data to the database
 
         :param data: The data to insert.
@@ -347,13 +346,18 @@ class Importer:
         :param params:
         """
         # Clear data before inserting
+        self.output.write(f"Truncating table {table_name}")
         cursor.execute(f"TRUNCATE TABLE {table_name} CASCADE")
+        self.output.write(f"Inserting data for table {table_name}")
+        rows_inserted = 0
         for row in data:
             if params(row):
                 cursor.execute(f"""
                     INSERT INTO {table_name}({','.join(table_columns)})
                     VALUES ({','.join('%s' for _ in range(len(table_columns)))})
                 """, params(row))
+                rows_inserted += 1
+        self.output.write(f"{rows_inserted} rows inserted")
 
 
 class Command(BaseCommand):
