@@ -190,7 +190,7 @@ class Importer:
                     data=self.iterate_xml(badges_file), cursor=cursor, table_name='user_badges',
                     table_columns=('badge_id', 'user_id', 'date_awarded'), params=lambda row: (
                         badges[row['Name']], row['UserId'], row['Date']
-                    ) if row['UserId'] in users else None
+                    ) if int(row['UserId']) in users else None
                 )
         self.output.write(f"Badges loaded")
 
