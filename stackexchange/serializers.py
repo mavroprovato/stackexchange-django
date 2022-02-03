@@ -22,7 +22,7 @@ class BadgeSerializer(serializers.ModelSerializer):
     """The badge serializer
     """
     badge_type = fields.SerializerMethodField()
-    award_count = fields.IntegerField(source='users__count')
+    award_count = fields.IntegerField()
     rank = fields.SerializerMethodField()
     badge_id = fields.IntegerField(source='pk')
 
