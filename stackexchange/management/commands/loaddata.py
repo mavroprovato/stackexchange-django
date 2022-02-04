@@ -242,6 +242,9 @@ class Importer:
         self.output.write(f"Loading post history")
         with connection.cursor() as cursor:
             with transaction.atomic():
+                cursor.execute("SELECT id FROM posts")
+                post_ids = {row[0] for row in cursor.fetchall()}
+
                 self.insert_data(
                     data=self.iterate_xml(post_history_file), cursor=cursor, table_name='post_history',
                     table_columns=(
@@ -251,7 +254,7 @@ class Importer:
                         row['Id'], row['PostId'], row['PostHistoryTypeId'], row['RevisionGUID'], row['CreationDate'],
                         row.get('UserId'), row.get('UserDisplayName'), row.get('Comment'), row.get('Text'),
                         row.get('ContentLicense')
-                    )
+                    ) if int(row['PostId']) in post_ids else None
                 )
         self.output.write(f"Post history loaded")
 
