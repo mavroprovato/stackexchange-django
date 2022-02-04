@@ -1,6 +1,6 @@
 """The users view set.
 """
-from django.db.models import QuerySet
+from django.db.models import QuerySet, OuterRef, Subquery, Count
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -29,6 +29,17 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The queryset for the action
         """
+        if self.action in ('list', 'retrieve'):
+            return models.User.objects.annotate(**{
+                f"{badge_class}_count": Subquery(
+                    models.UserBadge.objects.filter(
+                        user=OuterRef('pk'), badge__badge_class=badge_id
+                    ).values('badge__badge_class').annotate(
+                        count=Count('pk')
+                    ).values('count')
+                )
+                for badge_id, badge_class in models.Badge.CLASS_CHOICES
+            })
         if self.action == 'answers':
             return models.Post.objects.filter(owner=self.kwargs['pk'], type=models.Post.TYPE_ANSWER).select_related(
                 'owner', 'parent')
@@ -43,8 +54,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action == 'questions':
             return models.Post.objects.filter(owner=self.kwargs['pk'], type=models.Post.TYPE_QUESTION).select_related(
                 'owner')
-
-        return models.User.objects.prefetch_related('badges__badge')
 
     def get_serializer_class(self):
         """Return the serializer class for the action.

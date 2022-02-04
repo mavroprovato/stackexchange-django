@@ -54,51 +54,16 @@ class BadgeSerializer(serializers.ModelSerializer):
 class BadgeCountSerializer(BaseSerializer):
     """The badge count serializer.
     """
-    bronze = fields.SerializerMethodField()
-    silver = fields.SerializerMethodField()
-    gold = fields.SerializerMethodField()
+    def get_fields(self) -> dict:
+        """Return the fields for the serializer. Returns one field for each field class.
 
-    @staticmethod
-    def get_bronze(user_badges: QuerySet) -> int:
-        """Get the number of bronze badges for a user.
-
-        :param user_badges: The user badges.
-        :return: The number of bronze badges.
+        :return: The fields for the serializer.
         """
-        return BadgeCountSerializer.count_badges(user_badges, models.Badge.CLASS_BRONZE)
+        serializer_fields = super().get_fields()
+        for _, field_name in models.Badge.CLASS_CHOICES:
+            serializer_fields[field_name] = fields.IntegerField(source=f"{field_name}_count")
 
-    @staticmethod
-    def get_silver(user_badges: QuerySet) -> int:
-        """Get the number of silver badges for a user.
-
-        :param user_badges: The user badges.
-        :return: The number of silver badges.
-        """
-        return BadgeCountSerializer.count_badges(user_badges, models.Badge.CLASS_SILVER)
-
-    @staticmethod
-    def get_gold(user_badges: QuerySet) -> int:
-        """Get the number of gold badges for a user.
-
-        :param user_badges: The gold badges.
-        :return: The number of gold badges.
-        """
-        return BadgeCountSerializer.count_badges(user_badges, models.Badge.CLASS_SILVER)
-
-    @staticmethod
-    def count_badges(user_badges: QuerySet, badge_class: str) -> int:
-        """Count the user badges for a class.
-
-        :param user_badges: The user badges.
-        :param badge_class: The badge class.
-        :return: The number of badges for the class.
-        """
-        count = 0
-        for user_badge in user_badges.all():
-            if user_badge.badge.badge_class == badge_class:
-                count += 1
-
-        return count
+        return serializer_fields
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -114,7 +79,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """The user serializer.
     """
-    badge_counts = BadgeCountSerializer(source="badges")
+    badge_counts = BadgeCountSerializer(source="*")
     user_id = fields.IntegerField(source="pk")
 
     class Meta:

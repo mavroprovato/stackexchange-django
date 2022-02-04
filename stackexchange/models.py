@@ -41,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = 'users'
-        indexes = (BrinIndex(fields=['creation_date']),)
+        indexes = (models.Index(fields=('reputation',)), BrinIndex(fields=('creation_date', )))
 
     def __str__(self) -> str:
         """Return the string representation of the user
@@ -103,7 +103,7 @@ class UserBadge(models.Model):
 
     class Meta:
         db_table = 'user_badges'
-        indexes = (BrinIndex(fields=['date_awarded']),)
+        indexes = (BrinIndex(fields=('date_awarded',)),)
 
 
 class Post(models.Model):
@@ -154,7 +154,7 @@ class Post(models.Model):
 
     class Meta:
         db_table = 'posts'
-        indexes = (BrinIndex(fields=['creation_date']),)
+        indexes = (BrinIndex(fields=('creation_date', )),)
 
 
 class Comment(models.Model):
@@ -172,7 +172,7 @@ class Comment(models.Model):
 
     class Meta:
         db_table = 'comments'
-        indexes = (BrinIndex(fields=['creation_date']),)
+        indexes = (BrinIndex(fields=('creation_date',)),)
 
     def __str__(self) -> str:
         """Return the string representation of the comment
@@ -251,7 +251,7 @@ class PostHistory(models.Model):
     class Meta:
         db_table = 'post_history'
         verbose_name_plural = 'post history'
-        indexes = (BrinIndex(fields=['creation_date']),)
+        indexes = (BrinIndex(fields=('creation_date', )),)
 
 
 class PostLink(models.Model):
@@ -315,7 +315,7 @@ class PostVote(models.Model):
 
     class Meta:
         db_table = 'post_votes'
-        indexes = (BrinIndex(fields=['creation_date']),)
+        indexes = (BrinIndex(fields=('creation_date',)),)
 
 
 class Tag(models.Model):
