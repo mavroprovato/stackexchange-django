@@ -23,6 +23,14 @@ class BadgeClass(BaseEnum):
     BRONZE = 3
 
 
+class ContentLicense(enum.Enum):
+    """The content license enumeration
+    """
+    CC_BY_SA_2_5 = 'Attribution-ShareAlike 2.5 Generic'
+    CC_BY_SA_3_0 = 'Attribution-ShareAlike 3.0 Unported'
+    CC_BY_SA_4_0 = 'Attribution-ShareAlike 4.0 International'
+
+
 class PostType(BaseEnum):
     """Enumeration for the post type.
     """
