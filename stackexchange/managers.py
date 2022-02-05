@@ -5,6 +5,8 @@ from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db.models import OuterRef, Count, Subquery, QuerySet
 
+from stackexchange import enums
+
 
 class UserManager(BaseUserManager):
     """The user manager
@@ -37,15 +39,13 @@ class UserManager(BaseUserManager):
 
         :return: The annotated queryset.
         """
-        from stackexchange import models
-
         return self.annotate(**{
-            f"{badge_class}_count": Subquery(
+            f"{badge_class.name.lower()}_count": Subquery(
                 apps.get_model('stackexchange', 'UserBadge').objects.filter(
-                    user=OuterRef('pk'), badge__badge_class=badge_id
+                    user=OuterRef('pk'), badge__badge_class=badge_class.value
                 ).values('badge__badge_class').annotate(
                     count=Count('pk')
                 ).values('count')
             )
-            for badge_id, badge_class in models.Badge.CLASS_CHOICES
+            for badge_class in enums.BadgeClass
         })

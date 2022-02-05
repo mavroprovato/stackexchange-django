@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.indexes import BrinIndex
 from django.db import models
 
-from stackexchange import managers
+from stackexchange import enums, managers
 
 
 class ContentLicense(enum.Enum):
@@ -70,17 +70,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Badge(models.Model):
     """The badge model
     """
-    CLASS_GOLD = 1
-    CLASS_SILVER = 2
-    CLASS_BRONZE = 3
-
-    CLASS_CHOICES = (
-        (CLASS_GOLD, 'gold'),
-        (CLASS_SILVER, 'silver'),
-        (CLASS_BRONZE, 'bronze'),
-    )
     name = models.CharField(help_text="The badge name", max_length=255, unique=True)
-    badge_class = models.SmallIntegerField(help_text="The badge class", choices=CLASS_CHOICES)
+    badge_class = models.SmallIntegerField(
+        help_text="The badge class", choices=((bc.value, bc.description) for bc in enums.BadgeClass))
     tag_based = models.BooleanField(help_text="If the badge is tag based")
 
     class Meta:
@@ -109,28 +101,10 @@ class UserBadge(models.Model):
 class Post(models.Model):
     """The post model
     """
-    TYPE_QUESTION = 1
-    TYPE_ANSWER = 2
-    TYPE_WIKI = 3
-    TYPE_TAG_WIKI_EXPERT = 4
-    TYPE_TAG_WIKI = 5
-    TYPE_MODERATOR_NOMINATION = 6
-    TYPE_WIKI_PLACEHOLDER = 7
-    TYPE_PRIVILEGE_WIKI = 8
-
-    TYPE_CHOICES = (
-        (TYPE_QUESTION, 'Question'),
-        (TYPE_ANSWER, 'Answer'),
-        (TYPE_WIKI, 'Wiki'),
-        (TYPE_TAG_WIKI_EXPERT, 'Tag Wiki Expert'),
-        (TYPE_MODERATOR_NOMINATION, 'Moderator Nomination'),
-        (TYPE_WIKI_PLACEHOLDER, 'Wiki Placeholder'),
-        (TYPE_PRIVILEGE_WIKI, 'Privilege Wiki'),
-    )
-
     title = models.CharField(help_text="The post title", max_length=1000, null=True, blank=True)
     body = models.TextField(help_text="The post body")
-    type = models.PositiveSmallIntegerField(help_text="The post type", choices=TYPE_CHOICES)
+    type = models.PositiveSmallIntegerField(
+        help_text="The post type", choices=((pt.value, pt.description) for pt in enums.PostType))
     creation_date = models.DateTimeField(help_text="The post creation date", auto_now_add=True)
     last_edit_date = models.DateTimeField(help_text="The post last edit date", null=True, blank=True, auto_now=True)
     last_activity_date = models.DateTimeField(help_text="The post last activity date")
@@ -185,56 +159,9 @@ class Comment(models.Model):
 class PostHistory(models.Model):
     """The post history model
     """
-    TYPE_INITIAL_TITLE = 1
-    TYPE_INITIAL_BODY = 2
-    TYPE_INITIAL_TAGS = 3
-    TYPE_EDIT_TITLE = 4
-    TYPE_EDIT_BODY = 5
-    TYPE_EDIT_TAGS = 6
-    TYPE_ROLLBACK_TITLE = 7
-    TYPE_ROLLBACK_BODY = 8
-    TYPE_ROLLBACK_TAGS = 9
-    TYPE_POST_CLOSED = 10
-    TYPE_POST_REOPENED = 11
-    TYPE_POST_DELETED = 12
-    TYPE_POST_UNDELETED = 13
-    TYPE_POST_LOCKED = 14
-    TYPE_POST_UNLOCKED = 15
-    TYPE_COMMUNITY_OWNED = 16
-    TYPE_POST_MIGRATED = 17
-    TYPE_QUESTION_MERGED = 18
-    TYPE_QUESTION_PROTECTED = 19
-    TYPE_QUESTION_UNPROTECTED = 20
-    TYPE_POST_DISASSOCIATED = 21
-    TYPE_QUESTION_UNMERGED = 22
-
-    TYPE_CHOICES = (
-        (TYPE_INITIAL_TITLE, 'Initial Title'),
-        (TYPE_INITIAL_BODY, 'Initial Body'),
-        (TYPE_INITIAL_TAGS, 'Initial Tags'),
-        (TYPE_EDIT_TITLE, 'Edit Title'),
-        (TYPE_EDIT_BODY, 'Edit Body'),
-        (TYPE_EDIT_TAGS, 'Edit Tags'),
-        (TYPE_ROLLBACK_TITLE, 'Rollback Title'),
-        (TYPE_ROLLBACK_BODY, 'Rollback Body'),
-        (TYPE_ROLLBACK_TAGS, 'Rollback Tags'),
-        (TYPE_POST_CLOSED, 'Post Closed'),
-        (TYPE_POST_REOPENED, 'Post Reopened'),
-        (TYPE_POST_DELETED, 'Post Deleted'),
-        (TYPE_POST_UNDELETED, 'Post Undeleted'),
-        (TYPE_POST_LOCKED, 'Post Locked'),
-        (TYPE_POST_UNLOCKED, 'Post Unlocked'),
-        (TYPE_COMMUNITY_OWNED, 'Community Owned'),
-        (TYPE_POST_MIGRATED, 'Post Migrated'),
-        (TYPE_QUESTION_MERGED, 'Question Merged'),
-        (TYPE_QUESTION_PROTECTED, 'Question Protected'),
-        (TYPE_QUESTION_UNPROTECTED, 'Question Unprotected'),
-        (TYPE_POST_DISASSOCIATED, 'Post Disassociated'),
-        (TYPE_QUESTION_UNMERGED, 'Question Unmerged'),
-    )
-
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
-    type = models.PositiveSmallIntegerField(help_text="The post history type", choices=TYPE_CHOICES)
+    type = models.PositiveSmallIntegerField(
+        help_text="The post history type", choices=((pht.value, pht.description) for pht in enums.PostHistoryType))
     revision_guid = models.CharField(help_text="The GUID of the action that created this history record", max_length=36)
     creation_date = models.DateTimeField(help_text="The date that this history record was created", auto_now_add=True)
     user_display_name = models.CharField(
@@ -277,38 +204,9 @@ class PostLink(models.Model):
 class PostVote(models.Model):
     """The post vote model
     """
-    TYPE_ACCEPTED_BY_ORIGINATOR = 1
-    TYPE_UP_MOD = 2
-    TYPE_DOWN_MOD = 3
-    TYPE_OFFENSIVE = 4
-    TYPE_FAVORITE = 5
-    TYPE_CLOSE = 6
-    TYPE_REOPEN = 7
-    TYPE_BOUNTY_START = 8
-    TYPE_BOUNTY_CLOSE = 9
-    TYPE_DELETION = 10
-    TYPE_UN_DELETION = 11
-    TYPE_SPAM = 12
-    TYPE_INFORM_MODERATOR = 13
-
-    TYPE_CHOICES = (
-        (TYPE_ACCEPTED_BY_ORIGINATOR, 'AcceptedByOriginator'),
-        (TYPE_UP_MOD, 'UpMod'),
-        (TYPE_DOWN_MOD, 'DownMod'),
-        (TYPE_OFFENSIVE, 'Offensive'),
-        (TYPE_FAVORITE, 'Favorite'),
-        (TYPE_CLOSE, 'Close'),
-        (TYPE_REOPEN, 'Reopen'),
-        (TYPE_BOUNTY_START, 'Bounty Start'),
-        (TYPE_BOUNTY_CLOSE, 'Bounty Close'),
-        (TYPE_DELETION, 'Deletion'),
-        (TYPE_UN_DELETION, 'Un-deletion'),
-        (TYPE_SPAM, 'Spam'),
-        (TYPE_INFORM_MODERATOR, 'Inform Moderator'),
-    )
-
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_votes")
-    type = models.SmallIntegerField(help_text="The post vote type", choices=TYPE_CHOICES)
+    type = models.SmallIntegerField(
+        help_text="The post vote type", choices=((pvt.value, pvt.description) for pvt in enums.PostVoteType))
     user = models.ForeignKey(User, help_text="The user for the vote", on_delete=models.CASCADE,
                              related_name='user_votes', null=True, blank=True)
     creation_date = models.DateTimeField(help_text="The date that this vote was created", auto_now_add=True)

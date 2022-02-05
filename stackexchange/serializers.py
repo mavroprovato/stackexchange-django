@@ -1,11 +1,8 @@
 """The application serializers
 """
-import typing
-
-from django.db.models import QuerySet
 from rest_framework import fields, serializers
 
-from stackexchange import models
+from stackexchange import enums, models
 
 
 class BaseSerializer(serializers.Serializer):
@@ -46,9 +43,7 @@ class BadgeSerializer(serializers.ModelSerializer):
         :param badge: The badges.
         :return: The badge type.
         """
-        for class_id, class_description in models.Badge.CLASS_CHOICES:
-            if badge.badge_class == class_id:
-                return class_description
+        return enums.BadgeClass(badge.badge_class).description
 
 
 class BadgeCountSerializer(BaseSerializer):
@@ -60,8 +55,8 @@ class BadgeCountSerializer(BaseSerializer):
         :return: The fields for the serializer.
         """
         serializer_fields = super().get_fields()
-        for _, field_name in models.Badge.CLASS_CHOICES:
-            serializer_fields[field_name] = fields.IntegerField(source=f"{field_name}_count")
+        for bc in enums.BadgeClass:
+            serializer_fields[bc.name.lower()] = fields.IntegerField(source=f"{bc.name.lower()}_count")
 
         return serializer_fields
 
@@ -119,9 +114,7 @@ class UserBadgeSerializer(serializers.ModelSerializer):
         :param user_badge: The badges.
         :return: The badge type.
         """
-        for class_id, class_description in models.Badge.CLASS_CHOICES:
-            if user_badge.badge.badge_class == class_id:
-                return class_description
+        return enums.BadgeClass(user_badge.badge.badge_class).description
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -157,15 +150,13 @@ class PostSerializer(serializers.ModelSerializer):
         fields = ('owner', 'score', 'last_activity_date', 'creation_date', 'post_type', 'post_id', 'content_license')
 
     @staticmethod
-    def get_post_type(post: models.Post) -> typing.Optional[str]:
+    def get_post_type(post: models.Post) -> str:
         """Get the post type
 
         :param post: The post.
         :return: The post type.
         """
-        for choice in models.Post.TYPE_CHOICES:
-            if choice[0] == post.type:
-                return choice[1]
+        return enums.PostType(post.type).description
 
 
 class PostHistorySerializer(serializers.ModelSerializer):
@@ -179,15 +170,13 @@ class PostHistorySerializer(serializers.ModelSerializer):
         fields = ('user', 'creation_date', 'post_id', 'post_type', 'content_license', 'comment', 'revision_guid')
 
     @staticmethod
-    def get_post_type(post_history: models.PostHistory) -> typing.Optional[str]:
+    def get_post_type(post_history: models.PostHistory) -> str:
         """Get the post type
 
         :param post_history: The post history.
         :return: The post type.
         """
-        for choice in models.Post.TYPE_CHOICES:
-            if choice[0] == post_history.post.type:
-                return choice[1]
+        return enums.PostHistoryType(post_history.type).description
 
 
 class QuestionSerializer(PostSerializer):
