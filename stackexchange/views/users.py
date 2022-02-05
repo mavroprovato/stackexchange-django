@@ -30,16 +30,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         :return: The queryset for the action
         """
         if self.action in ('list', 'retrieve'):
-            return models.User.objects.annotate(**{
-                f"{badge_class}_count": Subquery(
-                    models.UserBadge.objects.filter(
-                        user=OuterRef('pk'), badge__badge_class=badge_id
-                    ).values('badge__badge_class').annotate(
-                        count=Count('pk')
-                    ).values('count')
-                )
-                for badge_id, badge_class in models.Badge.CLASS_CHOICES
-            })
+            return models.User.objects.with_badge_counts()
         elif self.action == 'answers':
             return models.Post.objects.filter(owner=self.kwargs['pk'], type=models.Post.TYPE_ANSWER).select_related(
                 'owner', 'parent')

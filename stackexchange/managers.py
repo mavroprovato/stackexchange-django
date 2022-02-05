@@ -1,7 +1,9 @@
 """The managers for the models
 """
 
+from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
+from django.db.models import OuterRef, Count, Subquery, QuerySet
 
 
 class UserManager(BaseUserManager):
@@ -28,3 +30,22 @@ class UserManager(BaseUserManager):
         :return: The created superuser.
         """
         return self._create_user(username, email, password, is_admin=True, **extra_fields)
+
+    def with_badge_counts(self) -> QuerySet:
+        """Annotate the queryset with the badge counts per badge type. Tree fields are added, named
+        `<badge_class>_count`.
+
+        :return: The annotated queryset.
+        """
+        from stackexchange import models
+
+        return self.annotate(**{
+            f"{badge_class}_count": Subquery(
+                apps.get_model('stackexchange', 'UserBadge').objects.filter(
+                    user=OuterRef('pk'), badge__badge_class=badge_id
+                ).values('badge__badge_class').annotate(
+                    count=Count('pk')
+                ).values('count')
+            )
+            for badge_id, badge_class in models.Badge.CLASS_CHOICES
+        })
