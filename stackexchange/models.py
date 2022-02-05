@@ -41,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = 'users'
-        indexes = (models.Index(fields=('reputation',)), BrinIndex(fields=('creation_date', )))
+        indexes = (models.Index(fields=('-reputation',)), BrinIndex(fields=('creation_date', )))
 
     def __str__(self) -> str:
         """Return the string representation of the user
