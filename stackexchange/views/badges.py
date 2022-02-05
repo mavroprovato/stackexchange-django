@@ -28,19 +28,16 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The queryset for the action.
         """
-        award_count_subquery = Subquery(models.UserBadge.objects.filter(badge=OuterRef('pk')).values('badge').annotate(
-            count=Count('pk')
-        ).values('count'))
         if self.action in ('list', 'retrieve'):
-            return models.Badge.objects.annotate(award_count=award_count_subquery)
+            return models.Badge.objects.with_award_count()
         elif self.action == 'named':
-            return models.Badge.objects.filter(tag_based=False).annotate(award_count=award_count_subquery)
+            return models.Badge.objects.filter(tag_based=False).with_award_count()
         elif self.action == 'recipients':
             return models.UserBadge.objects.select_related('user', 'badge')
         elif self.action == 'recipients_detail':
             return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related('user', 'badge')
         elif self.action == 'tags':
-            return models.Badge.objects.filter(tag_based=True)
+            return models.Badge.objects.filter(tag_based=True).with_award_count()
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

@@ -75,6 +75,8 @@ class Badge(models.Model):
         help_text="The badge class", choices=((bc.value, bc.description) for bc in enums.BadgeClass))
     tag_based = models.BooleanField(help_text="If the badge is tag based")
 
+    objects = managers.BadgeQuerySet().as_manager()
+
     class Meta:
         db_table = 'badges'
 

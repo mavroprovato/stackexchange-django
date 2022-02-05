@@ -3,7 +3,7 @@
 
 from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.db.models import OuterRef, Count, Subquery, QuerySet
+from django.db.models import Manager, OuterRef, Count, Subquery, QuerySet
 
 from stackexchange import enums
 
@@ -49,3 +49,20 @@ class UserManager(BaseUserManager):
             )
             for badge_class in enums.BadgeClass
         })
+
+
+class BadgeQuerySet(QuerySet):
+    """The badge queryset
+    """
+    def with_award_count(self) -> QuerySet:
+        """Annotate the queryset with the badge award count. A field named `award_count` is added to the queryset.
+
+        :return: The annotated queryset.
+        """
+        return self.annotate(
+            award_count=Subquery(
+                apps.get_model('stackexchange', 'UserBadge').objects.filter(
+                    badge=OuterRef('pk')
+                ).values('badge').annotate(count=Count('pk')).values('count')
+            )
+        )
