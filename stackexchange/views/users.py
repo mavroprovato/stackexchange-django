@@ -40,7 +40,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 )
                 for badge_id, badge_class in models.Badge.CLASS_CHOICES
             })
-        if self.action == 'answers':
+        elif self.action == 'answers':
             return models.Post.objects.filter(owner=self.kwargs['pk'], type=models.Post.TYPE_ANSWER).select_related(
                 'owner', 'parent')
         elif self.action == 'badges':
