@@ -1,6 +1,6 @@
 """The badges view set.
 """
-from django.db.models import QuerySet, Count, OuterRef, Subquery
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -55,9 +55,9 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
-            return ('rank', 'desk', 'badge_class'), ('name', 'asc'), ('type', 'asc', 'tag_based')
+            return ('rank', 'desc', 'badge_class'), ('name', 'asc'), ('type', 'asc', 'tag_based')
         elif self.action in ('recipients', 'recipients_detail'):
-            return 'date_awarded',
+            return 'date_awarded', 'desc', 'date_awarded'
 
     @action(detail=False, url_path='name')
     def named(self, request: Request, *args, **kwargs) -> Response:

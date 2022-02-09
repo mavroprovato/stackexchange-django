@@ -1,13 +1,13 @@
 """The users view set.
 """
-from django.db.models import QuerySet, OuterRef, Subquery, Count
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from stackexchange import filters, models, serializers
+from stackexchange import enums, filters, models, serializers
 
 
 @extend_schema_view(
@@ -32,7 +32,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action in ('list', 'retrieve'):
             return models.User.objects.with_badge_counts()
         elif self.action == 'answers':
-            return models.Post.objects.filter(owner=self.kwargs['pk'], type=models.Post.TYPE_ANSWER).select_related(
+            return models.Post.objects.filter(owner=self.kwargs['pk'], type=enums.PostType.ANSWER).select_related(
                 'owner', 'parent')
         elif self.action == 'badges':
             return models.UserBadge.objects.filter(user=self.kwargs['pk']).select_related('user', 'badge')
@@ -40,10 +40,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             return models.Comment.objects.filter(user=self.kwargs['pk']).select_related('post', 'user')
         elif self.action == 'posts':
             return models.Post.objects.filter(
-                type__in=(models.Post.TYPE_QUESTION, models.Post.TYPE_ANSWER), owner=self.kwargs['pk']
+                type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER), owner=self.kwargs['pk']
             ).select_related('owner')
         elif self.action == 'questions':
-            return models.Post.objects.filter(owner=self.kwargs['pk'], type=models.Post.TYPE_QUESTION).select_related(
+            return models.Post.objects.filter(owner=self.kwargs['pk'], type=enums.PostType.QUESTION).select_related(
                 'owner')
 
     def get_serializer_class(self):
@@ -68,14 +68,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve'):
-            return ('reputation', 'desc'), ('creation', 'desc', 'creation_date')
+            return ('reputation', 'desc'), ('creation', 'desc', 'creation_date'), ('name', 'asc', 'display_name')
         elif self.action in ('answers', 'posts', 'questions'):
             return (
                 ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
                 ('votes', 'desc', 'score')
             )
         elif self.action == 'badges':
-            return ('name', 'asc', 'badge__name'), ('type', 'acs', 'badge__class'), ('awarded', 'desc', 'date_awarded')
+            return ('name', 'asc', 'badge__name'), ('type', 'asc', 'badge__class'), ('awarded', 'desc', 'date_awarded')
         elif self.action == 'comments':
             return ('creation', 'desc', 'creation_date'),
 

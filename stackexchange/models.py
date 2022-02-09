@@ -1,6 +1,7 @@
 """The application models
 """
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.postgres.fields import CITextField, CIEmailField
 from django.contrib.postgres.indexes import BrinIndex
 from django.db import models
 
@@ -13,8 +14,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ('email', )
 
-    username = models.CharField(help_text="The user name", max_length=255, unique=True)
-    email = models.EmailField(help_text="The user email", max_length=255, unique=True)
+    username = CITextField(help_text="The user name", max_length=255, unique=True)
+    email = CIEmailField(help_text="The user email", max_length=255, unique=True)
     display_name = models.CharField(help_text="The user display name", max_length=255)
     website_url = models.URLField(help_text="The user web site URL", null=True, blank=True)
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
@@ -31,7 +32,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         db_table = 'users'
-        indexes = (models.Index(fields=('-reputation',)), BrinIndex(fields=('creation_date', )))
+        indexes = (
+            models.Index(fields=('-reputation', 'id')), models.Index(fields=('-creation_date', 'id')),
+            models.Index(fields=('display_name', 'id'))
+        )
 
     def __str__(self) -> str:
         """Return the string representation of the user
@@ -87,7 +91,7 @@ class UserBadge(models.Model):
 
     class Meta:
         db_table = 'user_badges'
-        indexes = (BrinIndex(fields=('date_awarded',)),)
+        indexes = (models.Index(fields=('-date_awarded', 'id')),)
 
 
 class Post(models.Model):
