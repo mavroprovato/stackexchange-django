@@ -1,7 +1,5 @@
 """The application models
 """
-import enum
-
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.indexes import BrinIndex
 from django.db import models
