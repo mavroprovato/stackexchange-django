@@ -9,7 +9,7 @@ import xml.etree.ElementTree as eT
 
 from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandParser
-from django.db import connection, transaction
+from django.db import connection, transaction, utils
 from django.conf import settings
 import requests
 import py7zr
@@ -126,10 +126,47 @@ class Importer:
         """
         self.dump_file = dump_file
         self.output = output
+        self.indexes = self._get_indexes()
+
+    @staticmethod
+    def _get_indexes() -> dict:
+        """Get all database indexes.
+
+        :return: A dictionary with the index name as a key and the index definition as a value.
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = 'public'")
+
+            return {row[0]: row[1] for row in cursor.fetchall()}
+
+    def drop_indexes(self):
+        """Drop indexes from the database.
+        """
+        self.output.write("Dropping indexes")
+        with connection.cursor() as cursor:
+            for index_name in self.indexes.keys():
+                try:
+                    cursor.execute(f"DROP INDEX IF EXISTS {index_name}")
+                except utils.InternalError:
+                    pass
+        self.output.write("Indexes dropped")
+
+    def recreate_indexes(self):
+        """Recreate the indexes from the database.
+        """
+        self.output.write("Creating indexes")
+        with connection.cursor() as cursor:
+            for index_name, index_definition in self.indexes.items():
+                try:
+                    cursor.execute(index_definition)
+                except utils.ProgrammingError:
+                    pass
+        self.output.write("Indexes created")
 
     def import_file(self):
         """Import files to the database.
         """
+        self.drop_indexes()
         with tempfile.TemporaryDirectory() as temp_dir:
             self.output.write("Extracting dump")
             with py7zr.SevenZipFile(self.dump_file, mode='r') as dump_file:
@@ -143,6 +180,7 @@ class Importer:
             self.load_post_links(temp_dir / self.POST_LINKS_FILE)
             self.load_post_votes(temp_dir / self.VOTES_FILE)
             self.load_tags(temp_dir / self.TAGS_FILE, temp_dir / self.POSTS_FILE)
+        self.recreate_indexes()
 
     def load_users(self, users_file: pathlib.Path):
         """Load the users.
@@ -350,7 +388,7 @@ class Importer:
         """
         # Clear data before inserting
         self.output.write(f"Truncating table {table_name}")
-        cursor.execute(f"TRUNCATE TABLE {table_name} CASCADE")
+        cursor.execute(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE")
         self.output.write(f"Inserting data for table {table_name}")
         rows_inserted = 0
         for row in data:
