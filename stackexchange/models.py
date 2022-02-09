@@ -2,7 +2,6 @@
 """
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.fields import CITextField, CIEmailField
-from django.contrib.postgres.indexes import BrinIndex
 from django.db import models
 
 from stackexchange import enums, managers
@@ -124,7 +123,10 @@ class Post(models.Model):
 
     class Meta:
         db_table = 'posts'
-        indexes = (BrinIndex(fields=('creation_date', )),)
+        indexes = (
+            models.Index(fields=('-last_activity_date', 'id')), models.Index(fields=('-creation_date', 'id')),
+            models.Index(fields=('-score', 'id'))
+        )
 
 
 class Comment(models.Model):
@@ -142,7 +144,7 @@ class Comment(models.Model):
 
     class Meta:
         db_table = 'comments'
-        indexes = (BrinIndex(fields=('creation_date',)),)
+        indexes = (models.Index(fields=('-creation_date', 'id')), models.Index(fields=('-score', 'id')))
 
     def __str__(self) -> str:
         """Return the string representation of the comment
@@ -174,7 +176,6 @@ class PostHistory(models.Model):
     class Meta:
         db_table = 'post_history'
         verbose_name_plural = 'post history'
-        indexes = (BrinIndex(fields=('creation_date', )),)
 
 
 class PostLink(models.Model):
@@ -209,7 +210,6 @@ class PostVote(models.Model):
 
     class Meta:
         db_table = 'post_votes'
-        indexes = (BrinIndex(fields=('creation_date',)),)
 
 
 class Tag(models.Model):
