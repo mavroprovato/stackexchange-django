@@ -1,3 +1,4 @@
+import csv
 import datetime
 import io
 import pathlib
@@ -127,6 +128,7 @@ class Importer:
         self.dump_file = dump_file
         self.output = output
         self.indexes = self._get_indexes()
+        self.temp_dir = None
 
     @staticmethod
     def _get_indexes() -> dict:
@@ -171,36 +173,40 @@ class Importer:
             self.output.write("Extracting dump")
             with py7zr.SevenZipFile(self.dump_file, mode='r') as dump_file:
                 dump_file.extractall(path=temp_dir)
-            temp_dir = pathlib.Path(temp_dir)
-            self.load_users(temp_dir / self.USERS_FILE)
-            self.load_badges(temp_dir / self.BADGES_FILE)
-            self.load_posts(temp_dir / self.POSTS_FILE)
-            self.load_comments(temp_dir / self.COMMENTS_FILE)
-            self.load_post_history(temp_dir / self.POST_HISTORY_FILE)
-            self.load_post_links(temp_dir / self.POST_LINKS_FILE)
-            self.load_post_votes(temp_dir / self.VOTES_FILE)
-            self.load_tags(temp_dir / self.TAGS_FILE, temp_dir / self.POSTS_FILE)
+            self.output.write("Dump extracted")
+            self.temp_dir = pathlib.Path(temp_dir)
+            self.load_users()
+            # self.load_badges(temp_dir / self.BADGES_FILE)
+            # self.load_posts(temp_dir / self.POSTS_FILE)
+            # self.load_comments(temp_dir / self.COMMENTS_FILE)
+            # self.load_post_history(temp_dir / self.POST_HISTORY_FILE)
+            # self.load_post_links(temp_dir / self.POST_LINKS_FILE)
+            # self.load_post_votes(temp_dir / self.VOTES_FILE)
+            # self.load_tags(temp_dir / self.TAGS_FILE, temp_dir / self.POSTS_FILE)
         self.recreate_indexes()
 
-    def load_users(self, users_file: pathlib.Path):
+    def load_users(self):
         """Load the users.
-
-        :param users_file: The users file.
         """
         self.output.write(f"Loading users")
         password = make_password("password")
-        with connection.cursor() as cursor:
-            with transaction.atomic():
-                self.insert_data(data=self.iterate_xml(users_file), cursor=cursor, table_name='users', table_columns=(
-                    'id', 'display_name', 'website_url', 'location', 'about', 'creation_date', 'reputation', 'views',
-                    'up_votes', 'down_votes', 'username', 'email', 'password', 'is_active', 'is_employee'
-                ), params=lambda row: (
-                    row['Id'], row['DisplayName'], row.get('WebsiteUrl'), row.get('Location'), row.get('AboutMe'),
-                    row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes'],
-                    'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com", password,
-                    True, row['Id'] == '-1'
-                ))
-        self.output.write(f"Users loaded")
+        with (self.temp_dir / 'users.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
+                csv_writer.writerow([
+                    row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
+                    row['DisplayName'], row.get('WebsiteUrl'), row.get('Location'), row.get('About'),
+                    row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'],
+                    row['DownVotes'], True, row['Id'] == '-1', password
+                ])
+        with (self.temp_dir / 'users.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE users CASCADE")
+                cursor.copy_from(f, table='users', columns=(
+                    'id', 'username', 'email', 'display_name', 'website_url', 'location', 'about', 'creation_date',
+                    'reputation', 'views', 'up_votes', 'down_votes', 'is_active', 'is_employee', 'password'
+                ), sep=',')
+        self.output.write("Users loaded")
 
     def load_badges(self, badges_file: pathlib.Path):
         """Load the badges.
