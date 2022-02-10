@@ -177,6 +177,7 @@ class Importer:
             self.temp_dir = pathlib.Path(temp_dir)
             self.load_users()
             self.load_badges()
+            self.load_user_badges()
             # self.load_posts(temp_dir / self.POSTS_FILE)
             # self.load_comments(temp_dir / self.COMMENTS_FILE)
             # self.load_post_history(temp_dir / self.POST_HISTORY_FILE)
@@ -227,6 +228,26 @@ class Importer:
                 cursor.execute(f"TRUNCATE TABLE badges CASCADE")
                 cursor.copy_from(f, table='badges', columns=('name', 'badge_class', 'tag_based'), sep=',')
         self.output.write("Badges loaded")
+
+    def load_user_badges(self):
+        """Load the user badges.
+        """
+        self.output.write(f"Loading user badges")
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, name FROM badges")
+            badges = {row[1]: row[0] for row in cursor.fetchall()}
+        with (self.temp_dir / 'user_badges.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE):
+                csv_writer.writerow([
+                    badges[row['Name']], row['UserId'], row['Date']
+                ])
+        with (self.temp_dir / 'user_badges.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE user_badges CASCADE")
+                cursor.copy_from(f, table='user_badges', columns=('badge_id', 'user_id', 'date_awarded'), sep=',')
+        self.output.write("User badges loaded")
 
     def load_posts(self, posts_file: pathlib.Path):
         """Load the posts.
