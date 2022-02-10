@@ -178,7 +178,7 @@ class Importer:
             self.load_users()
             self.load_badges()
             self.load_user_badges()
-            # self.load_posts(temp_dir / self.POSTS_FILE)
+            self.load_posts()
             # self.load_comments(temp_dir / self.COMMENTS_FILE)
             # self.load_post_history(temp_dir / self.POST_HISTORY_FILE)
             # self.load_post_links(temp_dir / self.POST_LINKS_FILE)
@@ -240,35 +240,30 @@ class Importer:
         with (self.temp_dir / 'user_badges.csv').open('wt') as f:
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE):
-                csv_writer.writerow([
-                    badges[row['Name']], row['UserId'], row['Date']
-                ])
+                csv_writer.writerow([badges[row['Name']], row['UserId'], row['Date']])
         with (self.temp_dir / 'user_badges.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE user_badges CASCADE")
                 cursor.copy_from(f, table='user_badges', columns=('badge_id', 'user_id', 'date_awarded'), sep=',')
         self.output.write("User badges loaded")
 
-    def load_posts(self, posts_file: pathlib.Path):
+    def load_posts(self):
         """Load the posts.
-
-        :param posts_file: The posts file.
         """
         self.output.write(f"Loading posts")
-        with connection.cursor() as cursor:
-            with transaction.atomic():
-                row_ids = {row['Id'] for row in self.iterate_xml(posts_file)}
-                self.insert_data(data=self.iterate_xml(posts_file), cursor=cursor, table_name='posts', table_columns=(
-                    'id', 'title', 'body', 'type', 'creation_date', 'last_edit_date', 'last_activity_date', 'score',
-                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'content_license', 'owner_id',
-                    'last_editor_id', 'parent_id', 'accepted_answer_id'
-                ), params=lambda row: (
+        with (self.temp_dir / 'posts.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE):
+                csv_writer.writerow([
                     row['Id'], row.get('Title'), row['Body'], row['PostTypeId'], row['CreationDate'],
-                    row.get('LastEditDate'), row['LastActivityDate'], row['Score'], row.get('ViewCount'),
-                    row.get('AnswerCount'), row.get('CommentCount'), row.get('FavoriteCount'), row['ContentLicense'],
-                    row.get('OwnerUserId'), row.get('LastEditorUserId'), row.get('ParentId'),
-                    row.get('AcceptedAnswerId') if row.get('AcceptedAnswerId') in row_ids else None
-                ))
+                    row['LastActivityDate'], row['Score'], row['ContentLicense']
+                ])
+        with (self.temp_dir / 'posts.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE posts CASCADE")
+                cursor.copy_from(f, table='posts', columns=(
+                    'id', 'title', 'body', 'type', 'creation_date', 'last_activity_date', 'score', 'content_license'
+                ), sep=',', null='"\\N"')
         self.output.write(f"Posts loaded")
 
     def load_comments(self, comments_file: pathlib.Path):
