@@ -176,7 +176,7 @@ class Importer:
             self.output.write("Dump extracted")
             self.temp_dir = pathlib.Path(temp_dir)
             self.load_users()
-            # self.load_badges(temp_dir / self.BADGES_FILE)
+            self.load_badges()
             # self.load_posts(temp_dir / self.POSTS_FILE)
             # self.load_comments(temp_dir / self.COMMENTS_FILE)
             # self.load_post_history(temp_dir / self.POST_HISTORY_FILE)
@@ -208,35 +208,25 @@ class Importer:
                 ), sep=',')
         self.output.write("Users loaded")
 
-    def load_badges(self, badges_file: pathlib.Path):
+    def load_badges(self):
         """Load the badges.
-
-        :param badges_file: The badges file.
         """
         self.output.write(f"Loading badges")
         badges = {
             row['Name']: {'Name': row['Name'], 'Class': row['Class'], 'TagBased': row['TagBased']}
-            for row in self.iterate_xml(badges_file)
+            for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE)
         }
-        with connection.cursor() as cursor:
-            with transaction.atomic():
-                self.insert_data(data=badges.values(), cursor=cursor, table_name='badges', table_columns=(
-                    'name', 'badge_class', 'tag_based'
-                ), params=lambda x: (x['Name'], x['Class'], x['TagBased']))
-            # Map badge ids to names
-            cursor.execute("SELECT id, name FROM badges")
-            badges = {row[1]: row[0] for row in cursor.fetchall()}
-            # Get all user ids
-            cursor.execute("SELECT id FROM users")
-            users = {row[0] for row in cursor.fetchall()}
-            with transaction.atomic():
-                self.insert_data(
-                    data=self.iterate_xml(badges_file), cursor=cursor, table_name='user_badges',
-                    table_columns=('badge_id', 'user_id', 'date_awarded'), params=lambda row: (
-                        badges[row['Name']], row['UserId'], row['Date']
-                    ) if int(row['UserId']) in users else None
-                )
-        self.output.write(f"Badges loaded")
+        with (self.temp_dir / 'badges.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in badges.values():
+                csv_writer.writerow([
+                    row['Name'], row['Class'], row['TagBased']
+                ])
+        with (self.temp_dir / 'badges.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE badges CASCADE")
+                cursor.copy_from(f, table='badges', columns=('name', 'badge_class', 'tag_based'), sep=',')
+        self.output.write("Badges loaded")
 
     def load_posts(self, posts_file: pathlib.Path):
         """Load the posts.
