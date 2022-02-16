@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 
-class BadgesTests(APITestCase):
+class BadgeTests(APITestCase):
     """Badges view set tests
     """
     def test_list(self):
