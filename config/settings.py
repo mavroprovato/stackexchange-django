@@ -156,3 +156,7 @@ INTERNAL_IPS = ['127.0.0.1']
 # Display full SQL for runserver plus
 
 RUNSERVER_PLUS_PRINT_SQL_TRUNCATE = None
+
+# Temporary directory in which the dump files will be extracted
+
+TEMP_DIR = env('TEMP_DIR', default=None)
