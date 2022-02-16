@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from stackexchange import filters, models, serializers
+from stackexchange import enums, filters, models, serializers
 
 
 @extend_schema_view(
@@ -26,15 +26,14 @@ class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The queryset for the action.
         """
-        if self.action == 'comments':
+        if self.action in ('list', 'retrieve'):
+            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related(
+                'owner', 'parent').prefetch_related('tags')
+        elif self.action == 'comments':
             return models.Comment.objects.filter(post=self.kwargs['pk']).select_related('user')
         elif self.action == 'questions':
             return models.Post.objects.filter(children=self.kwargs['pk']).select_related('owner').prefetch_related(
                 'tags')
-        else:
-            return models.Post.objects.filter(type=models.Post.TYPE_ANSWER).select_related(
-                'owner', 'parent'
-            ).prefetch_related('tags')
 
     def get_serializer_class(self):
         """Get the serializer class for the action.
