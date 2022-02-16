@@ -15,13 +15,13 @@ import stackexchange.views.tags
 import stackexchange.views.users
 
 router = routers.DefaultRouter()
-router.register(r'badges', stackexchange.views.badges.BadgeViewSet, basename='Badge')
-router.register(r'users', stackexchange.views.users.UserViewSet, basename='User')
-router.register(r'tags', stackexchange.views.tags.TagViewSet, basename='Tag')
-router.register(r'posts', stackexchange.views.posts.PostViewSet, basename='Post')
-router.register(r'questions', stackexchange.views.questions.QuestionViewSet, basename='Question')
-router.register(r'answers', stackexchange.views.answers.AnswerViewSet, basename='Answer')
-router.register(r'comments', stackexchange.views.comments.CommentViewSet, basename='Comment')
+router.register(r'badges', stackexchange.views.badges.BadgeViewSet, basename='badge')
+router.register(r'users', stackexchange.views.users.UserViewSet, basename='user')
+router.register(r'tags', stackexchange.views.tags.TagViewSet, basename='tag')
+router.register(r'posts', stackexchange.views.posts.PostViewSet, basename='post')
+router.register(r'questions', stackexchange.views.questions.QuestionViewSet, basename='question')
+router.register(r'answers', stackexchange.views.answers.AnswerViewSet, basename='answer')
+router.register(r'comments', stackexchange.views.comments.CommentViewSet, basename='comment')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -34,7 +34,7 @@ that will be used to access the data. You can do this by running:
 $ sudo -u postgres psql
 
 postgres=# create database stackexchange;
-postgres=# create user stackexchange with encrypted password 'stackexchange';
+postgres=# create user stackexchange with encrypted password 'stackexchange' createdb;
 ```
 
 You can change the database name, user and password to whatever values you wish.
