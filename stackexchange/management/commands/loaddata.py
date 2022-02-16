@@ -8,10 +8,11 @@ import tempfile
 import typing
 import xml.etree.ElementTree as eT
 
+from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import connection, utils
-from django.conf import settings
+from django.core.management import call_command
 import requests
 import py7zr
 import tqdm
@@ -150,7 +151,7 @@ class Importer:
             self.load_post_votes()
             self.load_tags()
         self.recreate_indexes()
-        self.vacuum()
+        self.analyze()
 
     @staticmethod
     def _get_indexes() -> dict:
@@ -158,10 +159,13 @@ class Importer:
 
         :return: A dictionary with the index name as a key and the index definition as a value.
         """
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE schemaname = 'public'")
+        output = io.StringIO()
+        call_command('sqlmigrate', 'stackexchange',  '0001_initial', stdout=output)
 
-            return {row[0]: row[1] for row in cursor.fetchall()}
+        return {
+            re.search(r'"(.*?)"', line).group(1): line
+            for line in output.getvalue().splitlines() if line.startswith("CREATE INDEX")
+        }
 
     def drop_indexes(self):
         """Drop indexes from the database.
@@ -187,13 +191,13 @@ class Importer:
                     pass
         self.output.write("Indexes created")
 
-    def vacuum(self):
+    def analyze(self):
         """Vacuum full and analyze the tables.
         """
-        self.output.write("Vacuuming")
+        self.output.write("Analyzing")
         with connection.cursor() as cursor:
-            cursor.execute("VACUUM FULL ANALYZE")
-        self.output.write("Vacuum completed")
+            cursor.execute("ANALYZE")
+        self.output.write("Analyze completed")
 
     def load_users(self):
         """Load the users.
