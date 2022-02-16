@@ -10,7 +10,7 @@ import xml.etree.ElementTree as eT
 
 from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandParser
-from django.db import connection, transaction, utils
+from django.db import connection, utils
 from django.conf import settings
 import requests
 import py7zr
@@ -130,6 +130,28 @@ class Importer:
         self.indexes = self._get_indexes()
         self.temp_dir = None
 
+    def do_import(self):
+        """Perform the import.
+        """
+        self.drop_indexes()
+        with tempfile.TemporaryDirectory(dir='/home/kostas/Tmp') as temp_dir:
+            self.output.write("Extracting dump")
+            with py7zr.SevenZipFile(self.dump_file, mode='r') as dump_file:
+                dump_file.extractall(path=temp_dir)
+            self.output.write("Dump extracted")
+            self.temp_dir = pathlib.Path(temp_dir)
+            self.load_users()
+            self.load_badges()
+            self.load_user_badges()
+            self.load_posts()
+            self.load_comments()
+            self.load_post_history()
+            self.load_post_links()
+            self.load_post_votes()
+            self.load_tags()
+        self.recreate_indexes()
+        self.vacuum()
+
     @staticmethod
     def _get_indexes() -> dict:
         """Get all database indexes.
@@ -165,26 +187,13 @@ class Importer:
                     pass
         self.output.write("Indexes created")
 
-    def import_file(self):
-        """Import files to the database.
+    def vacuum(self):
+        """Vacuum full and analyze the tables.
         """
-        self.drop_indexes()
-        with tempfile.TemporaryDirectory() as temp_dir:
-            self.output.write("Extracting dump")
-            with py7zr.SevenZipFile(self.dump_file, mode='r') as dump_file:
-                dump_file.extractall(path=temp_dir)
-            self.output.write("Dump extracted")
-            self.temp_dir = pathlib.Path(temp_dir)
-            self.load_users()
-            self.load_badges()
-            self.load_user_badges()
-            self.load_posts()
-            # self.load_comments(temp_dir / self.COMMENTS_FILE)
-            # self.load_post_history(temp_dir / self.POST_HISTORY_FILE)
-            # self.load_post_links(temp_dir / self.POST_LINKS_FILE)
-            # self.load_post_votes(temp_dir / self.VOTES_FILE)
-            # self.load_tags(temp_dir / self.TAGS_FILE, temp_dir / self.POSTS_FILE)
-        self.recreate_indexes()
+        self.output.write("Vacuuming")
+        with connection.cursor() as cursor:
+            cursor.execute("VACUUM FULL ANALYZE")
+        self.output.write("Vacuum completed")
 
     def load_users(self):
         """Load the users.
@@ -196,8 +205,8 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
                     row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
-                    row['DisplayName'], row.get('WebsiteUrl'), row.get('Location'), row.get('About'),
-                    row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'],
+                    row['DisplayName'], row.get('WebsiteUrl', 'NULL'), row.get('Location', '<NULL>'),
+                    row.get('AboutMe', '<NULL>'), row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'],
                     row['DownVotes'], True, row['Id'] == '-1', password
                 ])
         with (self.temp_dir / 'users.csv').open('rt') as f:
@@ -206,7 +215,7 @@ class Importer:
                 cursor.copy_from(f, table='users', columns=(
                     'id', 'username', 'email', 'display_name', 'website_url', 'location', 'about', 'creation_date',
                     'reputation', 'views', 'up_votes', 'down_votes', 'is_active', 'is_employee', 'password'
-                ), sep=',')
+                ), sep=',', null='<NULL>')
         self.output.write("Users loaded")
 
     def load_badges(self):
@@ -237,10 +246,13 @@ class Importer:
         with connection.cursor() as cursor:
             cursor.execute("SELECT id, name FROM badges")
             badges = {row[1]: row[0] for row in cursor.fetchall()}
+            cursor.execute("SELECT id FROM users")
+            users = {row[0] for row in cursor.fetchall()}
         with (self.temp_dir / 'user_badges.csv').open('wt') as f:
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE):
-                csv_writer.writerow([badges[row['Name']], row['UserId'], row['Date']])
+                if row['UserId'] in users:
+                    csv_writer.writerow([badges[row['Name']], row['UserId'], row['Date']])
         with (self.temp_dir / 'user_badges.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE user_badges CASCADE")
@@ -251,131 +263,141 @@ class Importer:
         """Load the posts.
         """
         self.output.write(f"Loading posts")
+        post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
         with (self.temp_dir / 'posts.csv').open('wt') as f:
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE):
                 csv_writer.writerow([
-                    row['Id'], row.get('Title'), row['Body'], row['PostTypeId'], row['CreationDate'],
-                    row['LastActivityDate'], row['Score'], row['ContentLicense']
+                    row['Id'], row.get('Title', '<NULL>'), row['Body'], row['PostTypeId'], row['CreationDate'],
+                    row.get('LastEditDate', '<NULL>'), row['LastActivityDate'], row['Score'],
+                    row.get('ViewCount', '<NULL>'), row.get('AnswerCount', '<NULL>'), row.get('CommentCount', '<NULL>'),
+                    row.get('FavoriteCount', '<NULL>'), row.get('OwnerUserId', '<NULL>'),
+                    row.get('LastEditorUserId', '<NULL>'), row.get('ParentId', '<NULL>'),
+                    row['AcceptedAnswerId'] if row.get('') in post_ids else '<NULL>', row['ContentLicense']
                 ])
         with (self.temp_dir / 'posts.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE posts CASCADE")
                 cursor.copy_from(f, table='posts', columns=(
-                    'id', 'title', 'body', 'type', 'creation_date', 'last_activity_date', 'score', 'content_license'
-                ), sep=',', null='"\\N"')
+                    'id', 'title', 'body', 'type', 'creation_date', 'last_edit_date', 'last_activity_date', 'score',
+                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id',
+                    'parent_id', 'accepted_answer_id', 'content_license'
+                ), sep=',', null='<NULL>')
         self.output.write(f"Posts loaded")
 
-    def load_comments(self, comments_file: pathlib.Path):
+    def load_comments(self):
         """Load the comments.
-
-        :param comments_file: The comments file.
         """
         self.output.write(f"Loading comments")
-        with connection.cursor() as cursor:
-            with transaction.atomic():
-                self.insert_data(
-                    data=self.iterate_xml(comments_file), cursor=cursor, table_name='comments',
-                    table_columns=('id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id'),
-                    params=lambda row: (
-                        row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row['ContentLicense'],
-                        row.get('UserId')
-                    )
-                )
+        with (self.temp_dir / 'comments.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.COMMENTS_FILE):
+                csv_writer.writerow([
+                    row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row['ContentLicense'],
+                    row.get('UserId', '<NULL>')
+                ])
+        with (self.temp_dir / 'comments.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE comments CASCADE")
+                cursor.copy_from(f, table='comments', columns=(
+                    'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id'
+                ), sep=',', null='<NULL>')
         self.output.write(f"Comments loaded")
 
-    def load_post_history(self, post_history_file: pathlib.Path):
+    def load_post_history(self):
         """Load the post history.
-
-        :param post_history_file: The post history file.
         """
         self.output.write(f"Loading post history")
-        with connection.cursor() as cursor:
-            with transaction.atomic():
-                cursor.execute("SELECT id FROM posts")
-                post_ids = {row[0] for row in cursor.fetchall()}
-
-                self.insert_data(
-                    data=self.iterate_xml(post_history_file), cursor=cursor, table_name='post_history',
-                    table_columns=(
-                        'id', 'post_id', 'type', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
-                        'comment', 'text', 'content_license'
-                    ), params=lambda row: (
+        post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
+        with (self.temp_dir / 'post_history.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.POST_HISTORY_FILE):
+                if row['PostId'] in post_ids:
+                    csv_writer.writerow([
                         row['Id'], row['PostId'], row['PostHistoryTypeId'], row['RevisionGUID'], row['CreationDate'],
-                        row.get('UserId'), row.get('UserDisplayName'), row.get('Comment'), row.get('Text'),
-                        row.get('ContentLicense')
-                    ) if int(row['PostId']) in post_ids else None
-                )
+                        row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
+                        row.get('Text', '<NULL>'), row.get('ContentLicense', '<NULL>')
+                    ])
+        with (self.temp_dir / 'post_history.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE post_history CASCADE")
+                cursor.copy_from(f, table='post_history', columns=(
+                    'id', 'post_id', 'type', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
+                    'comment', 'text', 'content_license'
+                ), sep=',', null='<NULL>')
         self.output.write(f"Post history loaded")
 
-    def load_post_links(self, post_links_file: pathlib.Path):
+    def load_post_links(self):
         """Load the post links.
-
-        :param post_links_file: The post links file.
         """
         self.output.write(f"Loading post links")
-        with connection.cursor() as cursor:
-            with transaction.atomic():
-                cursor.execute("SELECT id FROM posts")
-                post_ids = {row[0] for row in cursor.fetchall()}
-
-                self.insert_data(
-                    data=self.iterate_xml(post_links_file), cursor=cursor, table_name='post_links',
-                    table_columns=('id', 'post_id', 'related_post_id', 'type'),
-                    params=lambda row: (
+        post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
+        with (self.temp_dir / 'post_links.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.POST_LINKS_FILE):
+                if row['PostId'] in post_ids and row['RelatedPostId'] in post_ids:
+                    csv_writer.writerow([
                         row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
-                    ) if int(row['PostId']) in post_ids and int(row['RelatedPostId']) in post_ids else None
-                )
+                    ])
+        with (self.temp_dir / 'post_links.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE post_links CASCADE")
+                cursor.copy_from(f, table='post_links', columns=(
+                    'id', 'post_id', 'related_post_id', 'type'
+                ), sep=',', null='<NULL>')
         self.output.write(f"Post links loaded")
 
-    def load_post_votes(self, post_votes_file: pathlib.Path):
+    def load_post_votes(self):
         """Load the post votes.
-
-        :param post_votes_file: The post votes file.
         """
         self.output.write(f"Loading post votes")
-        with connection.cursor() as cursor:
-            with transaction.atomic():
-                cursor.execute("SELECT id FROM posts")
-                post_ids = {row[0] for row in cursor.fetchall()}
-
-                self.insert_data(
-                    data=self.iterate_xml(post_votes_file), cursor=cursor, table_name='post_votes',
-                    table_columns=('id', 'post_id', 'type', 'user_id', 'creation_date'),
-                    params=lambda row: (
-                        row['Id'], row['PostId'], row['VoteTypeId'], row.get('UserId'), row['CreationDate']
-                    ) if int(row['PostId']) in post_ids else None
-                )
+        post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
+        with (self.temp_dir / 'post_votes.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.VOTES_FILE):
+                if row['PostId'] in post_ids:
+                    csv_writer.writerow([
+                        row['Id'], row['PostId'], row['VoteTypeId'], row.get('UserId', '<NULL>'), row['CreationDate']
+                    ])
+        with (self.temp_dir / 'post_votes.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE post_votes CASCADE")
+                cursor.copy_from(f, table='post_votes', columns=(
+                    'id', 'post_id', 'type', 'user_id', 'creation_date'
+                ), sep=',', null='<NULL>')
         self.output.write(f"Post votes loaded")
 
-    def load_tags(self, tags_file: pathlib.Path, posts_file: pathlib.Path):
+    def load_tags(self):
         """Load the tags.
-
-        :param tags_file: The tags file.
-        :param posts_file: The posts file.
         """
         self.output.write(f"Loading tags")
+        with (self.temp_dir / 'tags.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.TAGS_FILE):
+                csv_writer.writerow([
+                    row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId', '<NULL>'),
+                    row.get('WikiPostId', '<NULL>')
+                ])
+        with (self.temp_dir / 'tags.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE tags CASCADE")
+                cursor.copy_from(f, table='tags', columns=(
+                    'id', 'name', 'count', 'excerpt_id', 'wiki_id'
+                ), sep=',', null='<NULL>')
+
         with connection.cursor() as cursor:
-            with transaction.atomic():
-                self.insert_data(
-                    data=self.iterate_xml(tags_file), cursor=cursor, table_name='tags',
-                    table_columns=('id', 'name', 'count', 'excerpt_id', 'wiki_id'),
-                    params=lambda row: (
-                        row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId'), row.get('WikiPostId')
-                    )
-                )
-            with transaction.atomic():
-                self.insert_data(data=self.yield_post_tags(cursor, posts_file), cursor=cursor, table_name='post_tags',
-                                 table_columns=('post_id', 'tag_id'), params=lambda row: (row['PostId'], row['TagId']))
+            cursor.execute("SELECT id, name FROM tags")
+            tags = {row[1]: row[0] for row in cursor.fetchall()}
+        with (self.temp_dir / 'post_tags.csv').open('wt') as f:
+            csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE):
+                for match in re.finditer(r'<(.*?)>', row.get('Tags', '')):
+                    csv_writer.writerow([row['Id'], tags[match.group(1)]])
+        with (self.temp_dir / 'post_tags.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE post_tags CASCADE")
+                cursor.copy_from(f, table='post_tags', columns=('post_id', 'tag_id'), sep=',', null='<NULL>')
         self.output.write(f"Tags loaded")
-
-    def yield_post_tags(self, cursor, posts_file: pathlib.Path):
-        cursor.execute("SELECT id, name FROM tags")
-        tags = {row[1]: row[0] for row in cursor.fetchall()}
-
-        for row in self.iterate_xml(posts_file):
-            for match in re.finditer(r'<(.*?)>', row.get('Tags', '')):
-                yield {'PostId': row['Id'], 'TagId': tags[match.group(1)]}
 
     @staticmethod
     def iterate_xml(xml_file: pathlib.Path):
@@ -388,29 +410,6 @@ class Importer:
         for event, elem in tree:
             if elem.tag == 'row':
                 yield dict(elem.items())
-
-    def insert_data(self, data, cursor, table_name: str, table_columns: typing.Collection[str], params):
-        """Insert data to the database
-
-        :param data: The data to insert.
-        :param cursor:
-        :param table_name: The name of the table to insert the data to.
-        :param table_columns: The name of the table columns.
-        :param params:
-        """
-        # Clear data before inserting
-        self.output.write(f"Truncating table {table_name}")
-        cursor.execute(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE")
-        self.output.write(f"Inserting data for table {table_name}")
-        rows_inserted = 0
-        for row in data:
-            if params(row):
-                cursor.execute(f"""
-                    INSERT INTO {table_name}({','.join(table_columns)})
-                    VALUES ({','.join('%s' for _ in range(len(table_columns)))})
-                """, params(row))
-                rows_inserted += 1
-        self.output.write(f"{rows_inserted} rows inserted")
 
 
 class Command(BaseCommand):
@@ -437,6 +436,6 @@ class Command(BaseCommand):
         downloader = Downloader(site, self.stdout)
         downloader.download()
         importer = Importer(downloader.dump_file, self.stdout)
-        importer.import_file()
+        importer.do_import()
         end = time.time()
         self.stdout.write(f"Data loaded, took {datetime.timedelta(seconds=end-start)}")
