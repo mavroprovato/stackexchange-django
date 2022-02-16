@@ -134,7 +134,7 @@ class Importer:
         """Perform the import.
         """
         self.drop_indexes()
-        with tempfile.TemporaryDirectory(dir='/home/kostas/Tmp') as temp_dir:
+        with tempfile.TemporaryDirectory(dir=settings.TEMP_DIR) as temp_dir:
             self.output.write("Extracting dump")
             with py7zr.SevenZipFile(self.dump_file, mode='r') as dump_file:
                 dump_file.extractall(path=temp_dir)
