@@ -205,7 +205,7 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
                     row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
-                    row['DisplayName'], row.get('WebsiteUrl', 'NULL'), row.get('Location', '<NULL>'),
+                    row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
                     row.get('AboutMe', '<NULL>'), row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'],
                     row['DownVotes'], True, row['Id'] == '-1', password
                 ])
