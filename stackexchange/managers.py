@@ -4,6 +4,7 @@
 from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
 from django.db.models import Manager, OuterRef, Count, Subquery, QuerySet
+from django.db.models.functions import Coalesce
 
 from stackexchange import enums
 
@@ -25,7 +26,7 @@ class UserManager(BaseUserManager):
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         """Create a superuser.
 
-        :param username: The user name.
+        :param username: The username.
         :param email: The user email.
         :param password: The user password.
         :param extra_fields: The user extra field.
@@ -40,13 +41,13 @@ class UserManager(BaseUserManager):
         :return: The annotated queryset.
         """
         return self.annotate(**{
-            f"{badge_class.name.lower()}_count": Subquery(
+            f"{badge_class.name.lower()}_count": Coalesce(Subquery(
                 apps.get_model('stackexchange', 'UserBadge').objects.filter(
                     user=OuterRef('pk'), badge__badge_class=badge_class.value
                 ).values('badge__badge_class').annotate(
                     count=Count('pk')
                 ).values('count')
-            )
+            ), 0)
             for badge_class in enums.BadgeClass
         })
 
