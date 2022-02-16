@@ -17,6 +17,7 @@ tqdm = "*"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
+coverage = "^6.3.1"
 django-debug-toolbar = "*"
 django-extensions = "*"
 safety = "*"
