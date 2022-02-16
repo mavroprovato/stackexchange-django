@@ -246,12 +246,12 @@ class Importer:
         with connection.cursor() as cursor:
             cursor.execute("SELECT id, name FROM badges")
             badges = {row[1]: row[0] for row in cursor.fetchall()}
-            cursor.execute("SELECT id FROM users")
-            users = {row[0] for row in cursor.fetchall()}
+
+        user_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.USERS_FILE)}
         with (self.temp_dir / 'user_badges.csv').open('wt') as f:
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE):
-                if row['UserId'] in users:
+                if row['UserId'] in user_ids:
                     csv_writer.writerow([badges[row['Name']], row['UserId'], row['Date']])
         with (self.temp_dir / 'user_badges.csv').open('rt') as f:
             with connection.cursor() as cursor:
