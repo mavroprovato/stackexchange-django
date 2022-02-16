@@ -37,7 +37,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
             return models.Post.objects.filter(
                 post_links__related_post=self.kwargs['pk'], post_links__type=enums.PostType.QUESTION
             ).select_related('owner').prefetch_related('tags')
-        elif self.action == 'no_answer':
+        elif self.action == 'no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')
 
@@ -58,7 +58,7 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answer'):
+        if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answers'):
             return (
                 ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
                 ('votes', 'desc', 'score')
@@ -93,8 +93,8 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         """
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True, url_path='no-answer')
-    def no_answer(self, request: Request, *args, **kwargs) -> Response:
+    @action(detail=False, url_path='no-answers')
+    def no_answers(self, request: Request, *args, **kwargs) -> Response:
         """Get all questions on the site with no answers.
 
         :param request: The request.
