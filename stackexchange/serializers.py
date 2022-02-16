@@ -208,7 +208,7 @@ class AnswerSerializer(PostSerializer):
     """
     is_accepted = fields.SerializerMethodField()
     answer_id = fields.IntegerField(source="pk")
-    question_id = fields.IntegerField(source="parent.pk")
+    question_id = fields.IntegerField(source="parent_id")
 
     class Meta:
         model = models.Post
