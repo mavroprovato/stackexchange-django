@@ -13,7 +13,7 @@ from stackexchange import enums, filters, models, serializers
     retrieve=extend_schema(summary='Gets the question identified by id', description=' '),
     answers=extend_schema(summary='Gets the answers for a question identified by id', description=' '),
     linked=extend_schema(summary='Get the questions that link to the question identified by an id', description=' '),
-    no_answer=extend_schema(summary='Get all questions on the site with no answers', description=' '),
+    no_answers=extend_schema(summary='Get all questions on the site with no answers', description=' '),
 )
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     """The question view set
