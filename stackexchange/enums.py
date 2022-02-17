@@ -3,6 +3,13 @@
 import enum
 
 
+class OrderingDirection(enum.Enum):
+    """The ordering direction enum
+    """
+    DESC = 'desc'
+    ASC = 'asc'
+
+
 class BaseEnum(enum.IntEnum):
     """The base enumeration. Enumerations have and int value and
     """

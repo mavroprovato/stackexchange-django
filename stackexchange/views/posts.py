@@ -31,7 +31,7 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
             return models.Comment.objects.filter(post=self.kwargs['pk']).select_related('post', 'user')
         elif self.action == 'revisions':
             return models.PostHistory.objects.filter(post=self.kwargs['pk'], user__isnull=False).select_related(
-                'post', 'user')
+                'post', 'user').order_by('-creation_date')
 
     def get_serializer_class(self):
         """Get the serializer class for the action.
@@ -45,7 +45,8 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action == 'revisions':
             return serializers.PostHistorySerializer
 
-    def get_ordering_fields(self):
+    @property
+    def ordering_fields(self):
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
@@ -57,8 +58,6 @@ class PostViewSet(viewsets.ReadOnlyModelViewSet):
             )
         elif self.action == 'comments':
             return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
-        elif self.action == 'revisions':
-            return ('creation', 'desc', 'creation_date'),
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:

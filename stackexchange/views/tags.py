@@ -1,9 +1,6 @@
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.request import Request
-from rest_framework.response import Response
 
 from stackexchange import filters, models, serializers
 
@@ -22,9 +19,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The queryset for the action.
         """
-        if self.action == 'wikis':
-            return models.Tag.objects.filter(pk=self.kwargs['pk']).select_related('excerpt', 'wiki')
-        else:
+        if self.action in ('list', 'retrieve'):
             return models.Tag.objects.all()
 
     def get_serializer_class(self):
@@ -34,22 +29,12 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
         """
         if self.action in ('list', 'retrieve'):
             return serializers.TagSerializer
-        elif self.action == 'wikis':
-            return serializers.TagWikiSerializer
 
-    def get_ordering_fields(self):
+    @property
+    def ordering_fields(self):
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve'):
             return ('popular', 'desc', 'count'), ('name', 'asc')
-
-    @action(detail=True, url_path='wikis')
-    def wikis(self, request: Request, *args, **kwargs) -> Response:
-        """Get the recent recipients of the given badges.
-
-        :param request: The request.
-        :return: The response.
-        """
-        return super().list(request, *args, **kwargs)

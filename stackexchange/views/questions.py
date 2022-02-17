@@ -53,7 +53,8 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             return serializers.QuestionSerializer
 
-    def get_ordering_fields(self):
+    @property
+    def ordering_fields(self):
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.

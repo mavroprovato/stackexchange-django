@@ -33,9 +33,10 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action == 'named':
             return models.Badge.objects.filter(tag_based=False).with_award_count()
         elif self.action == 'recipients':
-            return models.UserBadge.objects.select_related('user', 'badge')
+            return models.UserBadge.objects.select_related('user', 'badge').order_by('-date_awarded')
         elif self.action == 'recipients_detail':
-            return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related('user', 'badge')
+            return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related(
+                'user', 'badge').order_by('-date_awarded')
         elif self.action == 'tags':
             return models.Badge.objects.filter(tag_based=True).with_award_count()
 
@@ -49,15 +50,14 @@ class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action in ('recipients', 'recipients_detail'):
             return serializers.UserBadgeSerializer
 
-    def get_ordering_fields(self):
+    @property
+    def ordering_fields(self):
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
             return ('rank', 'desc', 'badge_class'), ('name', 'asc'), ('type', 'asc', 'tag_based')
-        elif self.action in ('recipients', 'recipients_detail'):
-            return 'date_awarded', 'desc', 'date_awarded'
 
     @action(detail=False, url_path='name')
     def named(self, request: Request, *args, **kwargs) -> Response:
