@@ -2,11 +2,11 @@
 """
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from .base import BaseViewSet
 from stackexchange import enums, filters, models, serializers
 
 
@@ -19,7 +19,7 @@ from stackexchange import enums, filters, models, serializers
     posts=extend_schema(summary='Get all posts (questions and answers) owned by a user', description=' '),
     questions=extend_schema(summary='Get the questions posted by the user identified by id', description=' '),
 )
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(BaseViewSet):
     """The user view set
     """
     filter_backends = (filters.OrderingFilter, )

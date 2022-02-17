@@ -1,11 +1,11 @@
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -13,7 +13,7 @@ from stackexchange import enums, filters, models, serializers
     retrieve=extend_schema(summary='Gets the post identified by id', description=' '),
     comments=extend_schema(summary='Gets the comments for a post identified by id', description=' '),
 )
-class PostViewSet(viewsets.ReadOnlyModelViewSet):
+class PostViewSet(BaseViewSet):
     """The post view set
     """
     filter_backends = (filters.OrderingFilter, )

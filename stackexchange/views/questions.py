@@ -1,11 +1,11 @@
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -15,7 +15,7 @@ from stackexchange import enums, filters, models, serializers
     linked=extend_schema(summary='Get the questions that link to the question identified by an id', description=' '),
     no_answers=extend_schema(summary='Get all questions on the site with no answers', description=' '),
 )
-class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
+class QuestionViewSet(BaseViewSet):
     """The question view set
     """
     filter_backends = (filters.OrderingFilter, )
@@ -46,12 +46,12 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The serializer class for the action.
         """
+        if self.action in ('list', 'retrieve'):
+            return serializers.QuestionSerializer
         if self.action == 'answers':
             return serializers.AnswerSerializer
         elif self.action == 'comments':
             return serializers.CommentSerializer
-        else:
-            return serializers.QuestionSerializer
 
     @property
     def ordering_fields(self):

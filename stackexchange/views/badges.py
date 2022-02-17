@@ -2,12 +2,12 @@
 """
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import filters, models, serializers
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -18,7 +18,7 @@ from stackexchange import filters, models, serializers
     recipients_detail=extend_schema(summary='Get the recent recipients of the given badges', description=' '),
     tags=extend_schema(summary='Get all tagged-based badges', description=' '),
 )
-class BadgeViewSet(viewsets.ReadOnlyModelViewSet):
+class BadgeViewSet(BaseViewSet):
     """The badge view set
     """
     filter_backends = (filters.OrderingFilter, )

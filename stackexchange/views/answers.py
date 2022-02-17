@@ -8,6 +8,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -16,7 +17,7 @@ from stackexchange import enums, filters, models, serializers
     comments=extend_schema(summary='Gets the comments for an answer identified by id', description=' '),
     questions=extend_schema(summary='Gets the questions for an answer identified by id', description=' '),
 )
-class AnswerViewSet(viewsets.ReadOnlyModelViewSet):
+class AnswerViewSet(BaseViewSet):
     """The answers view set
     """
     filter_backends = (filters.OrderingFilter, )
