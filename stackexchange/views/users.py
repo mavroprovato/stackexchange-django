@@ -80,6 +80,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action == 'comments':
             return ('creation', 'desc', 'creation_date'),
 
+    @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:
         """Get the answers for a user.
 
@@ -88,6 +89,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         """
         return super().list(request, *args, **kwargs)
 
+    @action(detail=True, url_path='badges')
     def badges(self, request: Request, *args, **kwargs) -> Response:
         """Get the badges for a user.
 
@@ -105,6 +107,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         """
         return super().list(request, *args, **kwargs)
 
+    @action(detail=True, url_path='posts')
     def posts(self, request: Request, *args, **kwargs) -> Response:
         """Get the posts for a user.
 
@@ -113,6 +116,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         """
         return super().list(request, *args, **kwargs)
 
+    @action(detail=True, url_path='questions')
     def questions(self, request: Request, *args, **kwargs) -> Response:
         """Get the questions for a user.
 
