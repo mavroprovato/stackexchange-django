@@ -44,7 +44,7 @@ class UserViewSet(BaseViewSet):
             ).select_related('owner')
         elif self.action == 'questions':
             return models.Post.objects.filter(owner=self.kwargs['pk'], type=enums.PostType.QUESTION).select_related(
-                'owner')
+                'owner').prefetch_related('tags')
 
     def get_serializer_class(self):
         """Return the serializer class for the action.
