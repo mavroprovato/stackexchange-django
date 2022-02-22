@@ -2,7 +2,7 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import viewsets
 
-from stackexchange import filters, models, serializers
+from stackexchange import enums, filters, models, serializers
 
 
 @extend_schema_view(
@@ -37,4 +37,4 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve'):
-            return ('popular', 'desc', 'count'), ('name', 'asc')
+            return ('popular', enums.OrderingDirection.DESC.value, 'count'), ('name', enums.OrderingDirection.ASC.value)

@@ -53,11 +53,15 @@ class PostViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve'):
             return (
-                ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
-                ('votes', 'desc', 'score')
+                ('activity', enums.OrderingDirection.DESC.value, 'last_activity_date'),
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
         elif self.action == 'comments':
-            return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
+            return (
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('votes', enums.OrderingDirection.DESC.value, 'score')
+            )
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:

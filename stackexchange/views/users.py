@@ -71,16 +71,25 @@ class UserViewSet(BaseViewSet):
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve'):
-            return ('reputation', 'desc'), ('creation', 'desc', 'creation_date'), ('name', 'asc', 'display_name')
+            return (
+                ('reputation', enums.OrderingDirection.DESC.value),
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('name', enums.OrderingDirection.ASC.value, 'display_name')
+            )
         elif self.action in ('answers', 'posts', 'questions'):
             return (
-                ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
-                ('votes', 'desc', 'score')
+                ('activity', enums.OrderingDirection.DESC.value, 'last_activity_date'),
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
         elif self.action == 'badges':
-            return ('name', 'asc', 'badge__name'), ('type', 'asc', 'badge__class'), ('awarded', 'desc', 'date_awarded')
+            return (
+                ('name', enums.OrderingDirection.ASC.value, 'badge__name'),
+                ('type', enums.OrderingDirection.ASC.value, 'badge__class'),
+                ('awarded', enums.OrderingDirection.DESC.value, 'date_awarded')
+            )
         elif self.action == 'comments':
-            return ('creation', 'desc', 'creation_date'),
+            return ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:

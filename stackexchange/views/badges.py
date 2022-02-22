@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from stackexchange import filters, models, serializers
+from stackexchange import enums, filters, models, serializers
 from .base import BaseViewSet
 
 
@@ -57,7 +57,11 @@ class BadgeViewSet(BaseViewSet):
         :return: The ordering fields for the action.
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
-            return ('rank', 'desc', 'badge_class'), ('name', 'asc'), ('type', 'asc', 'tag_based')
+            return (
+                ('rank', enums.OrderingDirection.DESC.value, 'badge_class'),
+                ('name', enums.OrderingDirection.ASC.value),
+                ('type', enums.OrderingDirection.DESC.value, 'tag_based')
+            )
 
     @action(detail=False, url_path='name')
     def named(self, request: Request, *args, **kwargs) -> Response:

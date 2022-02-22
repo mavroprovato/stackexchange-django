@@ -1,6 +1,6 @@
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
-from stackexchange import filters, models, serializers
+from stackexchange import enums, filters, models, serializers
 from .base import BaseViewSet
 
 
@@ -21,4 +21,7 @@ class CommentViewSet(BaseViewSet):
 
         :return: The ordering fields for the action.
         """
-        return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
+        return (
+            ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+            ('votes', enums.OrderingDirection.DESC.value, 'score')
+        )

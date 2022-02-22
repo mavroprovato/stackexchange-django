@@ -2,7 +2,6 @@
 """
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -56,11 +55,15 @@ class AnswerViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'questions'):
             return (
-                ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
-                ('votes', 'desc', 'score')
+                ('activity', enums.OrderingDirection.DESC.value, 'last_activity_date'),
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
         elif self.action == 'comments':
-            return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
+            return (
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('votes', enums.OrderingDirection.DESC.value, 'score')
+            )
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:

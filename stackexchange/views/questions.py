@@ -61,11 +61,15 @@ class QuestionViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answers'):
             return (
-                ('activity', 'desc', 'last_activity_date'), ('creation', 'desc', 'creation_date'),
-                ('votes', 'desc', 'score')
+                ('activity', enums.OrderingDirection.DESC.value, 'last_activity_date'),
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
         elif self.action == 'comments':
-            return ('creation', 'desc', 'creation_date'), ('votes', 'desc', 'score')
+            return (
+                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+                ('votes', enums.OrderingDirection.DESC.value, 'score')
+            )
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:
