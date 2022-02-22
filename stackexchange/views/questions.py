@@ -46,7 +46,7 @@ class QuestionViewSet(BaseViewSet):
 
         :return: The serializer class for the action.
         """
-        if self.action in ('list', 'retrieve'):
+        if self.action in ('list', 'retrieve', 'linked', 'no_answers'):
             return serializers.QuestionSerializer
         if self.action == 'answers':
             return serializers.AnswerSerializer

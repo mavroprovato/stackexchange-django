@@ -61,6 +61,8 @@ class UserViewSet(BaseViewSet):
             return serializers.CommentSerializer
         elif self.action == 'posts':
             return serializers.PostSerializer
+        elif self.action == 'questions':
+            return serializers.QuestionSerializer
 
     @property
     def ordering_fields(self):
