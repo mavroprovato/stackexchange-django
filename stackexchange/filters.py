@@ -69,6 +69,14 @@ class OrderingFilter(BaseFilterBackend):
 
     @staticmethod
     def get_ordering_fields(view: View) -> typing.List[OrderingField]:
+        """Get the ordering fields for the view. The method searches for an `ordering_fields` property. The property
+        must be an iterable of tuples. The first tuple field is the name of the field to order by, the second is the
+        default ordering direction (by default, descending) and the third the name of the database field to order by
+        (by default, the same name as the field name).
+
+        :param view: The view to get the ordering fields for.
+        :return: The ordering fields.
+        """
         fields = []
         ordering_fields = getattr(view, 'ordering_fields')
         if ordering_fields:
