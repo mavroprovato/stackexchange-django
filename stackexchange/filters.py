@@ -36,6 +36,34 @@ class OrderingFilter(BaseFilterBackend):
         """
         return queryset.order_by(*self.get_ordering(request, view))
 
+    def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
+        """Get the schema operation parameters.
+
+        :param view: The view to get the parameters for.
+        :return: The parameters.
+        """
+        return [
+            {
+                'name': self.ordering_name_param,
+                'required': False,
+                'in': 'query',
+                'description': 'The field to sort by',
+                'schema': {
+                    'type': 'string',
+                    'enum': [of.name for of in self.get_ordering_fields(view)]
+                },
+            }, {
+                'name': self.ordering_sort_param,
+                'required': False,
+                'in': 'query',
+                'description': 'The sort direction',
+                'schema': {
+                    'type': 'string',
+                    'enum': [od.value for od in enums.OrderingDirection]
+                },
+            },
+        ]
+
     def get_ordering(self, request: Request, view: View) -> typing.Iterable[str]:
         """Get the ordering for the view. Returns an iterable of fields that can be used in an order by clause of a
         queryset. If no fields can be found, the primary key is returned.
