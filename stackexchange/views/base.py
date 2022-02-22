@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+# The maximum number of fields to retrieve
 MAX_RETRIEVE_OBJECTS = 100
 
 
