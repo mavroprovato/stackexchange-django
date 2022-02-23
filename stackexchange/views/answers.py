@@ -1,5 +1,7 @@
 """Answers view set
 """
+import typing
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.decorators import action
@@ -30,10 +32,22 @@ class AnswerViewSet(BaseViewSet):
             return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related(
                 'owner', 'parent').prefetch_related('tags')
         elif self.action == 'comments':
-            return models.Comment.objects.filter(post=self.kwargs['pk']).select_related('user')
+            return models.Comment.objects.select_related('user')
         elif self.action == 'questions':
-            return models.Post.objects.filter(children=self.kwargs['pk']).select_related('owner').prefetch_related(
-                'tags')
+            return models.Post.objects.select_related('owner').prefetch_related('tags')
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action == 'comments':
+            return 'post'
+        elif self.action == 'questions':
+            return 'children'
+
+        return super().detail_field
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

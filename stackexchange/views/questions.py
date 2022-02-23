@@ -1,3 +1,5 @@
+import typing
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.decorators import action
@@ -29,17 +31,30 @@ class QuestionViewSet(BaseViewSet):
             return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
                 'tags')
         elif self.action == 'answers':
-            return models.Post.objects.filter(type=enums.PostType.ANSWER, parent=self.kwargs['pk']).select_related(
-                'owner')
+            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner')
         elif self.action == 'comments':
-            return models.Comment.objects.filter(post=self.kwargs['pk']).select_related('user')
+            return models.Comment.objects.select_related('user')
         elif self.action == 'linked':
-            return models.Post.objects.filter(
-                post_links__related_post=self.kwargs['pk'], post_links__type=enums.PostType.QUESTION
-            ).select_related('owner').prefetch_related('tags')
+            return models.Post.objects.filter(post_links__type=enums.PostType.QUESTION).select_related(
+                'owner').prefetch_related('tags')
         elif self.action == 'no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action == 'answers':
+            return 'parent'
+        elif self.action == 'comments':
+            return 'post'
+        elif self.action == 'linked':
+            return 'post_links__related_post'
+
+        return super().detail_field
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

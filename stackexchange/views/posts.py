@@ -1,3 +1,5 @@
+import typing
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.decorators import action
@@ -28,10 +30,21 @@ class PostViewSet(BaseViewSet):
                 type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)
             ).select_related('owner')
         elif self.action == 'comments':
-            return models.Comment.objects.filter(post=self.kwargs['pk']).select_related('post', 'user')
+            return models.Comment.objects.select_related('post', 'user')
         elif self.action == 'revisions':
-            return models.PostHistory.objects.filter(post=self.kwargs['pk'], user__isnull=False).select_related(
-                'post', 'user').order_by('-creation_date')
+            return models.PostHistory.objects.filter(user__isnull=False).select_related('post', 'user').order_by(
+                '-creation_date')
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action in ('comments', 'revisions'):
+            return 'post'
+
+        return super().detail_field
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

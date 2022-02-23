@@ -1,5 +1,7 @@
 """The badges view set.
 """
+import typing
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.decorators import action
@@ -32,13 +34,21 @@ class BadgeViewSet(BaseViewSet):
             return models.Badge.objects.with_award_count()
         elif self.action == 'named':
             return models.Badge.objects.filter(tag_based=False).with_award_count()
-        elif self.action == 'recipients':
+        elif self.action in ('recipients', 'recipients_detail'):
             return models.UserBadge.objects.select_related('user', 'badge').order_by('-date_awarded')
-        elif self.action == 'recipients_detail':
-            return models.UserBadge.objects.filter(badge=self.kwargs['pk']).select_related(
-                'user', 'badge').order_by('-date_awarded')
         elif self.action == 'tags':
             return models.Badge.objects.filter(tag_based=True).with_award_count()
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action == 'recipients_detail':
+            return 'badge'
+
+        return super().detail_field
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

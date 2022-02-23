@@ -1,15 +1,14 @@
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
-from rest_framework import viewsets
 
 from stackexchange import enums, filters, models, serializers
+from .base import BaseListViewSet
 
 
 @extend_schema_view(
     list=extend_schema(summary='Get all tags on the site'),
-    retrieve=extend_schema(summary='Gets the tag identified by id'),
 )
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
+class TagViewSet(BaseListViewSet):
     """The tag view set
     """
     filter_backends = (filters.OrderingFilter, )
@@ -19,7 +18,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The queryset for the action.
         """
-        if self.action in ('list', 'retrieve'):
+        if self.action == 'list':
             return models.Tag.objects.all()
 
     def get_serializer_class(self):
@@ -27,7 +26,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The serializer class for the action.
         """
-        if self.action in ('list', 'retrieve'):
+        if self.action == 'list':
             return serializers.TagSerializer
 
     @property
@@ -36,5 +35,5 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action in ('list', 'retrieve'):
+        if self.action == 'list':
             return ('popular', enums.OrderingDirection.DESC.value, 'count'), ('name', enums.OrderingDirection.ASC.value)

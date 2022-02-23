@@ -1,17 +1,19 @@
 """The users view set.
 """
-from rest_framework import viewsets
+import typing
+
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 # The maximum number of fields to retrieve
 MAX_RETRIEVE_OBJECTS = 100
 
 
-class BaseViewSet(viewsets.ReadOnlyModelViewSet):
-    """Base view set
+class BaseListViewSet(GenericViewSet):
+    """Base list view set
     """
-    def retrieve(self, request: Request, *args, **kwargs) -> Response:
+    def list(self, request: Request, *args, **kwargs) -> Response:
         """Override the retrieve method in order to accept a list of semicolon separated list of object ids.
 
         :param request: The request.
@@ -19,9 +21,13 @@ class BaseViewSet(viewsets.ReadOnlyModelViewSet):
         :param kwargs: The keyword arguments.
         :return: The response.
         """
+        queryset = self.filter_queryset(self.get_queryset())
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-        filter_kwargs = {f"{self.lookup_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:MAX_RETRIEVE_OBJECTS]}
-        queryset = self.filter_queryset(self.get_queryset().filter(**filter_kwargs))
+        if lookup_url_kwarg in self.kwargs:
+            assert self.detail_field is not None, f'Detail field for action {self.action} should not be None'
+            queryset = queryset.filter(**{
+                f"{self.detail_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:MAX_RETRIEVE_OBJECTS]
+            })
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -31,3 +37,29 @@ class BaseViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action == 'retrieve':
+            return 'pk'
+
+        return None
+
+
+class BaseViewSet(BaseListViewSet):
+    """Base view set
+    """
+    def retrieve(self, request: Request, *args, **kwargs) -> Response:
+        """The retrieve action.
+
+        :param request: The request.
+        :param args: The positional arguments.
+        :param kwargs: The keyword arguments.
+        :return: The response.
+        """
+        return self.list(request, *args, **kwargs)
+

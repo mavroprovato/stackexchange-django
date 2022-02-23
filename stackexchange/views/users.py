@@ -1,5 +1,7 @@
 """The users view set.
 """
+import typing
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.decorators import action
@@ -32,19 +34,30 @@ class UserViewSet(BaseViewSet):
         if self.action in ('list', 'retrieve'):
             return models.User.objects.with_badge_counts()
         elif self.action == 'answers':
-            return models.Post.objects.filter(owner=self.kwargs['pk'], type=enums.PostType.ANSWER).select_related(
-                'owner', 'parent')
+            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner', 'parent')
         elif self.action == 'badges':
-            return models.UserBadge.objects.filter(user=self.kwargs['pk']).select_related('user', 'badge')
+            return models.UserBadge.objects.select_related('user', 'badge')
         elif self.action == 'comments':
-            return models.Comment.objects.filter(user=self.kwargs['pk']).select_related('post', 'user')
+            return models.Comment.objects.select_related('post', 'user')
         elif self.action == 'posts':
             return models.Post.objects.filter(
-                type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER), owner=self.kwargs['pk']
-            ).select_related('owner')
+                type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
         elif self.action == 'questions':
-            return models.Post.objects.filter(owner=self.kwargs['pk'], type=enums.PostType.QUESTION).select_related(
-                'owner').prefetch_related('tags')
+            return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
+                'tags')
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action in ('answers', 'posts', 'questions'):
+            return 'owner'
+        elif self.action in ('badges', 'comments'):
+            return 'user'
+
+        return super().detail_field
 
     def get_serializer_class(self):
         """Return the serializer class for the action.
