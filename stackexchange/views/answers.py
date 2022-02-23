@@ -3,7 +3,7 @@
 import typing
 
 from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -14,9 +14,28 @@ from .base import BaseViewSet
 
 @extend_schema_view(
     list=extend_schema(summary='Get all answers on the site', description=' '),
-    retrieve=extend_schema(summary='Gets the answer identified by id', description=' '),
-    comments=extend_schema(summary='Gets the comments for an answer identified by id', description=' '),
-    questions=extend_schema(summary='Gets the questions for an answer identified by id', description=' '),
+    retrieve=extend_schema(summary='Get answers identified by a set of ids', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated answer identifiers'
+        )
+    ]),
+    comments=extend_schema(
+        summary='Get comments on the answers identified by a set of ids', description=' ', parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated answer identifiers'
+            )
+        ]
+    ),
+    questions=extend_schema(
+        summary='Gets all questions the answers identified by ids are on', description=' ', parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated answer identifiers'
+            )
+        ]
+    ),
 )
 class AnswerViewSet(BaseViewSet):
     """The answers view set

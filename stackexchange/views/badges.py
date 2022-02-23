@@ -3,7 +3,7 @@
 import typing
 
 from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -14,10 +14,22 @@ from .base import BaseViewSet
 
 @extend_schema_view(
     list=extend_schema(summary='Get all badges on the site', description=' '),
-    retrieve=extend_schema(summary='Gets the badge identified by id', description=' '),
+    retrieve=extend_schema(summary='Get the badges identified by ids', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated badge identifiers'
+        )
+    ]),
     named=extend_schema(summary='Get all non-tagged-based badges', description=' '),
     recipients=extend_schema(summary='Get badges recently awarded on the site', description=' '),
-    recipients_detail=extend_schema(summary='Get the recent recipients of the given badges', description=' '),
+    recipients_detail=extend_schema(
+        summary='Get the recent recipients of the given badges', description=' ', parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated badge identifiers'
+            )
+        ]
+    ),
     tags=extend_schema(summary='Get all tagged-based badges', description=' '),
 )
 class BadgeViewSet(BaseViewSet):

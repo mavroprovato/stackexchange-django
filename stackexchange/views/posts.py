@@ -1,7 +1,7 @@
 import typing
 
 from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -11,9 +11,26 @@ from .base import BaseViewSet
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all posts on the site', description=' '),
-    retrieve=extend_schema(summary='Gets the post identified by id', description=' '),
-    comments=extend_schema(summary='Gets the comments for a post identified by id', description=' '),
+    list=extend_schema(summary='Get all posts (questions and answers) in the system', description=' '),
+    retrieve=extend_schema(
+        summary='Get all posts identified by a set of ids. Useful for when the type of post (question or answer) is '
+                'not known',
+        description=' ', parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated post identifiers'
+            )
+        ]
+    ),
+    comments=extend_schema(
+        summary='Get comments on the posts (question or answer) identified by a set of ids', description=' ',
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated post identifiers'
+            )
+        ]
+    ),
 )
 class PostViewSet(BaseViewSet):
     """The post view set

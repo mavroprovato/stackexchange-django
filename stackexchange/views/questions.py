@@ -1,7 +1,7 @@
 import typing
 
 from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -12,9 +12,38 @@ from .base import BaseViewSet
 
 @extend_schema_view(
     list=extend_schema(summary='Get all questions on the site', description=' '),
-    retrieve=extend_schema(summary='Gets the question identified by id', description=' '),
-    answers=extend_schema(summary='Gets the answers for a question identified by id', description=' '),
-    linked=extend_schema(summary='Get the questions that link to the question identified by an id', description=' '),
+    retrieve=extend_schema(summary='Get the questions identified by a set of ids', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated question identifiers'
+        )
+    ]),
+    answers=extend_schema(
+        summary='Get the answers to the questions identified by a set of ids', description=' ',
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated question identifiers'
+            )
+        ]
+    ),
+    comments=extend_schema(
+        summary='Get the comments on the questions identified by a set of ids', description=' ',
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated question identifiers'
+            )
+        ]
+    ),
+    linked=extend_schema(
+        summary='Get the questions that link to the questions identified by a set of ids', description=' ', parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated question identifiers'
+            )
+        ]
+    ),
     no_answers=extend_schema(summary='Get all questions on the site with no answers', description=' '),
 )
 class QuestionViewSet(BaseViewSet):

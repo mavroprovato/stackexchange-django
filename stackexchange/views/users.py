@@ -3,7 +3,7 @@
 import typing
 
 from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema_view, extend_schema
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -13,13 +13,45 @@ from stackexchange import enums, filters, models, serializers
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all users on the site', description=' '),
-    retrieve=extend_schema(summary='Gets the user identified by id', description=' '),
-    answers=extend_schema(summary='Get the answers posted by the user identified by id', description=' '),
-    badges=extend_schema(summary='Get the badges earned by the user identified by id', description=' '),
-    comments=extend_schema(summary='Get the comments posted by the user identified by id', description=' '),
-    posts=extend_schema(summary='Get all posts (questions and answers) owned by a user', description=' '),
-    questions=extend_schema(summary='Get the questions posted by the user identified by id', description=' '),
+    list=extend_schema(summary='Get all users on the site', description=' ',),
+    retrieve=extend_schema(summary='Gets the user identified by id', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated user identifiers'
+        )
+    ]),
+    answers=extend_schema(summary='Get the answers posted by the user identified by id', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated user identifiers'
+        )
+    ]),
+    badges=extend_schema(summary='Get the badges earned by the user identified by id', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated user identifiers'
+        )
+    ]),
+    comments=extend_schema(summary='Get the comments posted by the user identified by id', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated user identifiers'
+        )
+    ]),
+    posts=extend_schema(summary='Get all posts (questions and answers) owned by a user', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=str, location=OpenApiParameter.PATH,
+            description='A list of semicolon separated user identifiers'
+        )
+    ]),
+    questions=extend_schema(
+        summary='Get the questions posted by the user identified by id', description=' ', parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated user identifiers'
+            )
+        ]
+    ),
 )
 class UserViewSet(BaseViewSet):
     """The user view set
