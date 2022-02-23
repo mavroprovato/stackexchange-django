@@ -1,5 +1,10 @@
+import typing
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from rest_framework.decorators import action
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
 from .base import BaseListViewSet
@@ -20,6 +25,19 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action == 'list':
             return models.Tag.objects.all()
+        elif self.action == 'wikis':
+            return models.Tag.objects.all().select_related('excerpt', 'wiki')
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action == 'wikis':
+            return 'name'
+
+        return super().detail_field
 
     def get_serializer_class(self):
         """Get the serializer class for the action.
@@ -28,6 +46,8 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action == 'list':
             return serializers.TagSerializer
+        elif self.action == 'wikis':
+            return serializers.TagWikiSerializer
 
     @property
     def ordering_fields(self):
@@ -37,3 +57,12 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action == 'list':
             return ('popular', enums.OrderingDirection.DESC.value, 'count'), ('name', enums.OrderingDirection.ASC.value)
+
+    @action(detail=True, url_path='wikis')
+    def wikis(self, request: Request, *args, **kwargs) -> Response:
+        """Gets the wikis for tags identified by ids.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
