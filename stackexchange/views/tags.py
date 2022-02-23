@@ -32,7 +32,7 @@ class TagViewSet(BaseListViewSet):
         if self.action == 'list':
             return models.Tag.objects.all()
         elif self.action == 'wikis':
-            return models.Tag.objects.all().select_related('excerpt', 'wiki')
+            return models.Tag.objects.all().select_related('excerpt', 'wiki').order_by('name')
 
     @property
     def detail_field(self) -> typing.Optional[str]:
