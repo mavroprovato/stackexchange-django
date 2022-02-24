@@ -50,7 +50,17 @@ class BaseListViewSet(GenericViewSet):
         return None
 
 
-class BaseViewSet(BaseListViewSet):
+class DateFilteringViewSetMixin:
+    @property
+    def date_field(self) -> str:
+        """Return the field used for date filtering. By default, it is the `creation_date` field.
+
+        :return: The fields used to filter detail actions.
+        """
+        return 'creation_date'
+
+
+class BaseViewSet(BaseListViewSet, DateFilteringViewSetMixin):
     """Base view set
     """
     def retrieve(self, request: Request, *args, **kwargs) -> Response:

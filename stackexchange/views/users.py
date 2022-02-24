@@ -56,7 +56,7 @@ from stackexchange import enums, filters, models, serializers
 class UserViewSet(BaseViewSet):
     """The user view set
     """
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
@@ -90,6 +90,13 @@ class UserViewSet(BaseViewSet):
             return 'user'
 
         return super().detail_field
+
+    @property
+    def date_field(self) -> str:
+        if self.action == 'badges':
+            return 'date_awarded'
+
+        return super().date_field
 
     def get_serializer_class(self):
         """Return the serializer class for the action.
