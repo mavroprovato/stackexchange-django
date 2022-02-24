@@ -7,7 +7,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseViewSet
+from .base import BaseViewSet, DateFilteringViewSetMixin
 
 
 @extend_schema_view(
@@ -46,10 +46,10 @@ from .base import BaseViewSet
     ),
     no_answers=extend_schema(summary='Get all questions on the site with no answers', description=' '),
 )
-class QuestionViewSet(BaseViewSet):
+class QuestionViewSet(BaseViewSet, DateFilteringViewSetMixin):
     """The question view set
     """
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
@@ -84,6 +84,14 @@ class QuestionViewSet(BaseViewSet):
             return 'post_links__related_post'
 
         return super().detail_field
+
+    @property
+    def date_field(self) -> str:
+        """Return the field used for date filtering.
+
+        :return: The field used for date filtering.
+        """
+        return 'creation_date'
 
     def get_serializer_class(self):
         """Get the serializer class for the action.
