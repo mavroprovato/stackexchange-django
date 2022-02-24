@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .base import BaseViewSet
+from .base import BaseViewSet, DateFilteringViewSetMixin
 from stackexchange import enums, filters, models, serializers
 
 
@@ -53,7 +53,7 @@ from stackexchange import enums, filters, models, serializers
         ]
     ),
 )
-class UserViewSet(BaseViewSet):
+class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
     """The user view set
     """
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
@@ -93,10 +93,14 @@ class UserViewSet(BaseViewSet):
 
     @property
     def date_field(self) -> str:
+        """Return the field used for date filtering.
+
+        :return: The field used for date filtering.
+        """
         if self.action == 'badges':
             return 'date_awarded'
 
-        return super().date_field
+        return 'creation_date'
 
     def get_serializer_class(self):
         """Return the serializer class for the action.

@@ -1,12 +1,13 @@
 """The users view set.
 """
+import abc
 import typing
 
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-# The maximum number of fields to retrieve
+# The maximum number of object to retrieve for detail actions
 MAX_RETRIEVE_OBJECTS = 100
 
 
@@ -51,16 +52,18 @@ class BaseListViewSet(GenericViewSet):
 
 
 class DateFilteringViewSetMixin:
+    """Mixin for view sets that provide date range filtering.
+    """
     @property
+    @abc.abstractmethod
     def date_field(self) -> str:
-        """Return the field used for date filtering. By default, it is the `creation_date` field.
+        """Return the field used for date filtering.
 
-        :return: The fields used to filter detail actions.
+        :return: The field used for date filtering.
         """
-        return 'creation_date'
 
 
-class BaseViewSet(BaseListViewSet, DateFilteringViewSetMixin):
+class BaseViewSet(BaseListViewSet):
     """Base view set
     """
     def retrieve(self, request: Request, *args, **kwargs) -> Response:

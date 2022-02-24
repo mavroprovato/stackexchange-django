@@ -145,6 +145,8 @@ class DateRangeFilter(BaseFilterBackend):
         from stackexchange.views.base import DateFilteringViewSetMixin
         if not isinstance(view, DateFilteringViewSetMixin):
             raise ValueError("The view must implement the DateFilteringViewSetMixin")
+        if not view.date_field:
+            return queryset
 
         from_date = self.get_date(request, self.from_date_param)
         if from_date is not None:
@@ -177,6 +179,10 @@ class DateRangeFilter(BaseFilterBackend):
         :param view: The view to get the parameters for.
         :return: The parameters.
         """
+        from stackexchange.views.base import DateFilteringViewSetMixin
+        if not isinstance(view, DateFilteringViewSetMixin) or not view.date_field:
+            return []
+
         return [
             {
                 'name': self.from_date_param,

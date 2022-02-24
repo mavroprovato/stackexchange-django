@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseViewSet
+from .base import BaseViewSet, DateFilteringViewSetMixin
 
 
 @extend_schema_view(
@@ -32,10 +32,10 @@ from .base import BaseViewSet
     ),
     tags=extend_schema(summary='Get all tagged-based badges', description=' '),
 )
-class BadgeViewSet(BaseViewSet):
+class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
     """The badge view set
     """
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
@@ -61,6 +61,15 @@ class BadgeViewSet(BaseViewSet):
             return 'badge'
 
         return super().detail_field
+
+    @property
+    def date_field(self) -> str:
+        """Return the field used for date filtering.
+
+        :return: The field used for date filtering.
+        """
+        if self.action in ('recipients', 'recipients_detail'):
+            return 'date_awarded'
 
     def get_serializer_class(self):
         """Get the serializer class for the action.
