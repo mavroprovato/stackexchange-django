@@ -36,17 +36,6 @@ class TagViewSet(BaseListViewSet):
 
         return models.Tag.objects.all()
 
-    @property
-    def detail_field(self) -> typing.Optional[str]:
-        """Return the field used to filter detail actions.
-
-        :return: The fields used to filter detail actions.
-        """
-        if self.action == 'wikis':
-            return 'name'
-
-        return super().detail_field
-
     def get_serializer_class(self):
         """Get the serializer class for the action.
 
@@ -67,6 +56,17 @@ class TagViewSet(BaseListViewSet):
             return ('popular', enums.OrderingDirection.DESC.value, 'count'), ('name', enums.OrderingDirection.ASC.value)
 
         return None
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action == 'wikis':
+            return 'name'
+
+        return super().detail_field
 
     @property
     def name_field(self) -> typing.Optional[str]:

@@ -72,29 +72,6 @@ class QuestionViewSet(BaseViewSet):
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
             'tags')
 
-    @property
-    def detail_field(self) -> typing.Optional[str]:
-        """Return the field used to filter detail actions.
-
-        :return: The fields used to filter detail actions.
-        """
-        if self.action == 'answers':
-            return 'parent'
-        if self.action == 'comments':
-            return 'post'
-        if self.action == 'linked':
-            return 'post_links__related_post'
-
-        return super().detail_field
-
-    @property
-    def date_field(self) -> str:
-        """Return the field used for date filtering.
-
-        :return: The field used for date filtering.
-        """
-        return 'creation_date'
-
     def get_serializer_class(self):
         """Get the serializer class for the action.
 
@@ -126,6 +103,29 @@ class QuestionViewSet(BaseViewSet):
             )
 
         return None
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action == 'answers':
+            return 'parent'
+        if self.action == 'comments':
+            return 'post'
+        if self.action == 'linked':
+            return 'post_links__related_post'
+
+        return super().detail_field
+
+    @property
+    def date_field(self) -> str:
+        """Return the field used for date filtering.
+
+        :return: The field used for date filtering.
+        """
+        return 'creation_date'
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:

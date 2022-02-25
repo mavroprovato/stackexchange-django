@@ -52,25 +52,6 @@ class PostViewSet(BaseViewSet):
             type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)
         ).select_related('owner')
 
-    @property
-    def detail_field(self) -> typing.Optional[str]:
-        """Return the field used to filter detail actions.
-
-        :return: The fields used to filter detail actions.
-        """
-        if self.action in ('comments', 'revisions'):
-            return 'post'
-
-        return super().detail_field
-
-    @property
-    def date_field(self) -> str:
-        """Return the field used for date filtering.
-
-        :return: The field used for date filtering.
-        """
-        return 'creation_date'
-
     def get_serializer_class(self):
         """Get the serializer class for the action.
 
@@ -102,6 +83,25 @@ class PostViewSet(BaseViewSet):
             )
 
         return None
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action in ('comments', 'revisions'):
+            return 'post'
+
+        return super().detail_field
+
+    @property
+    def date_field(self) -> str:
+        """Return the field used for date filtering.
+
+        :return: The field used for date filtering.
+        """
+        return 'creation_date'
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:

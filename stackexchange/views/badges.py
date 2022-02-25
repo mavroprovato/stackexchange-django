@@ -51,6 +51,16 @@ class BadgeViewSet(BaseViewSet):
 
         return models.Badge.objects.with_award_count()
 
+    def get_serializer_class(self):
+        """Get the serializer class for the action.
+
+        :return: The serializer class for the action.
+        """
+        if self.action in ('recipients', 'recipients_detail'):
+            return serializers.UserBadgeSerializer
+
+        return serializers.BadgeSerializer
+
     @property
     def detail_field(self) -> typing.Optional[str]:
         """Return the field used to filter detail actions.
@@ -83,16 +93,6 @@ class BadgeViewSet(BaseViewSet):
             return 'name'
 
         return None
-
-    def get_serializer_class(self):
-        """Get the serializer class for the action.
-
-        :return: The serializer class for the action.
-        """
-        if self.action in ('recipients', 'recipients_detail'):
-            return serializers.UserBadgeSerializer
-
-        return serializers.BadgeSerializer
 
     @property
     def ordering_fields(self):

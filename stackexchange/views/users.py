@@ -78,41 +78,6 @@ class UserViewSet(BaseViewSet):
 
         return models.User.objects.with_badge_counts()
 
-    @property
-    def detail_field(self) -> typing.Optional[str]:
-        """Return the field used to filter detail actions.
-
-        :return: The fields used to filter detail actions.
-        """
-        if self.action in ('answers', 'posts', 'questions'):
-            return 'owner'
-        if self.action in ('badges', 'comments'):
-            return 'user'
-
-        return super().detail_field
-
-    @property
-    def date_field(self) -> str:
-        """Return the field used for date filtering.
-
-        :return: The field used for date filtering.
-        """
-        if self.action == 'badges':
-            return 'date_awarded'
-
-        return 'creation_date'
-
-    @property
-    def name_field(self) -> typing.Optional[str]:
-        """Return the field used for in name filtering.
-
-        :return: The field used for in name filtering.
-        """
-        if self.action == 'list':
-            return 'display_name'
-
-        return None
-
     def get_serializer_class(self):
         """Return the serializer class for the action.
 
@@ -157,6 +122,41 @@ class UserViewSet(BaseViewSet):
             )
         if self.action == 'comments':
             return ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+
+        return None
+
+    @property
+    def detail_field(self) -> typing.Optional[str]:
+        """Return the field used to filter detail actions.
+
+        :return: The fields used to filter detail actions.
+        """
+        if self.action in ('answers', 'posts', 'questions'):
+            return 'owner'
+        if self.action in ('badges', 'comments'):
+            return 'user'
+
+        return super().detail_field
+
+    @property
+    def date_field(self) -> str:
+        """Return the field used for date filtering.
+
+        :return: The field used for date filtering.
+        """
+        if self.action == 'badges':
+            return 'date_awarded'
+
+        return 'creation_date'
+
+    @property
+    def name_field(self) -> typing.Optional[str]:
+        """Return the field used for in name filtering.
+
+        :return: The field used for in name filtering.
+        """
+        if self.action == 'list':
+            return 'display_name'
 
         return None
 
