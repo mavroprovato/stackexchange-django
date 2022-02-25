@@ -1,8 +1,106 @@
 import collections
+import collections.abc
 import typing
 
+from django.core.paginator import InvalidPage, PageNotAnInteger, EmptyPage
+from django.db.models import QuerySet
+from django.views import View
+from django.utils.translation import gettext_lazy as _
 from rest_framework import pagination
+from rest_framework.exceptions import NotFound
+from rest_framework.request import Request
 from rest_framework.response import Response
+
+
+class Page(collections.abc.Sequence):
+    """The default page implementation.
+    """
+    def __init__(self, object_list: typing.Iterable, number: int, paginator) -> None:
+        """Create the page.
+
+        :param object_list: The object list.
+        :param number: The page number.
+        :param paginator: The paginator.
+        """
+        # The object_list is converted to a list so that if it was a QuerySet it won't be a database hit per
+        # __getitem__.
+        if isinstance(object_list, list):
+            self.object_list = object_list
+        else:
+            self.object_list = list(object_list)
+        self.number = number
+        self.paginator = paginator
+
+    def __getitem__(self, index: int) -> object:
+        """Get the item at the specified index.
+
+        :param index: The index.
+        :return: The item.
+        """
+        if not isinstance(index, (int, slice)):
+            raise TypeError(
+                'Page indices must be integers or slices, not %s.'
+                % type(index).__name__
+            )
+
+        return self.object_list[index]
+
+    def __len__(self) -> int:
+        """Get the actual number of items for the page.
+
+        :return: The actual number of items for the page.
+        """
+        return len(self.object_list[:self.paginator.page_size])
+
+    def has_next(self) -> bool:
+        """Return true if there is a next page.
+
+        :return: true if there is a next page.
+        """
+        return self.number > self.__len__()
+
+
+class Paginator:
+    """The default paginator.
+    """
+    def __init__(self, queryset: QuerySet, page_size: int) -> None:
+        """Create the paginator.
+
+        :param queryset: The queryset to paginate.
+        :param page_size: The page size.
+        """
+        self.queryset = queryset
+        self.page_size = page_size
+
+    def page(self, number: str) -> Page:
+        """Return a Page object for the given 1-based page number.
+
+        :param number: The page number as a string.
+        :return: The page object.
+        """
+        number = self.validate_number(number)
+        bottom = (number - 1) * self.page_size
+        top = bottom + self.page_size
+
+        return Page(self.queryset[bottom:top+1], number, self)
+
+    @staticmethod
+    def validate_number(number: str) -> int:
+        """Validate the given 1-based page number.
+
+        :param number: The given number.
+        :return: The page number as an integer.
+        """
+        try:
+            if isinstance(number, float) and not number.is_integer():
+                raise ValueError
+            number = int(number)
+        except (TypeError, ValueError):
+            raise PageNotAnInteger(_('That page number is not an integer'))
+        if number < 1:
+            raise EmptyPage(_('That page number is less than 1'))
+
+        return number
 
 
 class Pagination(pagination.PageNumberPagination):
@@ -11,6 +109,27 @@ class Pagination(pagination.PageNumberPagination):
     page_size = 30
     page_size_query_param = 'pagesize'
     max_page_size = 100
+    django_paginator_class = Paginator
+
+    def __init__(self) -> None:
+        self.page = None
+
+    def paginate_queryset(self, queryset: QuerySet, request: Request, view: View = None) -> list:
+        page_size = self.get_page_size(request)
+        if not page_size:
+            return []
+        paginator = self.django_paginator_class(queryset, page_size)
+        page_number = self.get_page_number(request, paginator)
+
+        try:
+            self.page = paginator.page(page_number)
+        except InvalidPage as exc:
+            msg = self.invalid_page_message.format(
+                page_number=page_number, message=str(exc)
+            )
+            raise NotFound(msg)
+
+        return list(self.page)
 
     def get_paginated_response(self, data: typing.Iterable) -> Response:
         """Return the paginated response.
