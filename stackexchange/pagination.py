@@ -31,7 +31,7 @@ class Page(collections.abc.Sequence):
         self.number = number
         self.paginator = paginator
 
-    def __getitem__(self, index: int) -> object:
+    def __getitem__(self, index: typing.Union[int, slice]) -> object:
         """Get the item at the specified index.
 
         :param index: The index.
