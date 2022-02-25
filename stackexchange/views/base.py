@@ -1,6 +1,5 @@
 """The users view set.
 """
-import abc
 import typing
 
 from rest_framework.request import Request
@@ -50,18 +49,6 @@ class BaseListViewSet(GenericViewSet):
             return 'pk'
 
         return None
-
-
-class DateFilteringViewSetMixin:
-    """Mixin for view sets that provide date range filtering.
-    """
-    @property
-    @abc.abstractmethod
-    def date_field(self) -> typing.Optional[str]:
-        """Return the field used for date filtering.
-
-        :return: The field used for date filtering.
-        """
 
 
 class BaseViewSet(BaseListViewSet):

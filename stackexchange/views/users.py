@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseViewSet, DateFilteringViewSetMixin
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -53,7 +53,7 @@ from .base import BaseViewSet, DateFilteringViewSetMixin
         ]
     ),
 )
-class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
+class UserViewSet(BaseViewSet):
     """The user view set
     """
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter, filters.InNameFilter)

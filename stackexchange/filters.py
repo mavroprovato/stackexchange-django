@@ -12,7 +12,6 @@ from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
 
 from stackexchange import enums
-from .views.base import DateFilteringViewSetMixin
 
 
 @dataclasses.dataclass
@@ -143,17 +142,16 @@ class DateRangeFilter(BaseFilterBackend):
         :param view: The view.
         :return: The filtered queryset.
         """
-        if not isinstance(view, DateFilteringViewSetMixin):
-            raise ValueError("The view must implement the DateFilteringViewSetMixin")
-        if not view.date_field:
+        date_field = getattr(view, 'date_field', None)
+        if not date_field:
             return queryset
 
         from_date = self.get_date(request, self.from_date_param)
         if from_date is not None:
-            queryset = queryset.filter(**{f'{view.date_field}__gte': from_date})
+            queryset = queryset.filter(**{f'{date_field}__gte': from_date})
         to_date = self.get_date(request, self.to_date_param)
         if to_date is not None:
-            queryset = queryset.filter(**{f'{view.date_field}__gte': to_date})
+            queryset = queryset.filter(**{f'{date_field}__gte': to_date})
 
         return queryset
 
@@ -181,7 +179,7 @@ class DateRangeFilter(BaseFilterBackend):
         :param view: The view to get the parameters for.
         :return: The parameters.
         """
-        if not isinstance(view, DateFilteringViewSetMixin) or not view.date_field:
+        if not getattr(view, 'date_field', None):
             return []
 
         return [

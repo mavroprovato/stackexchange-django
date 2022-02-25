@@ -3,14 +3,14 @@
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseViewSet, DateFilteringViewSetMixin
+from .base import BaseViewSet
 
 
 @extend_schema_view(
     list=extend_schema(summary='Get all comments on the site'),
     retrieve=extend_schema(summary='Gets the comment identified by id'),
 )
-class CommentViewSet(BaseViewSet, DateFilteringViewSetMixin):
+class CommentViewSet(BaseViewSet):
     """The answers view set
     """
     queryset = models.Comment.objects.select_related('post', 'user')

@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseViewSet, DateFilteringViewSetMixin
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -32,7 +32,7 @@ from .base import BaseViewSet, DateFilteringViewSetMixin
     ),
     tags=extend_schema(summary='Get all tagged-based badges', description=' '),
 )
-class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
+class BadgeViewSet(BaseViewSet):
     """The badge view set
     """
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter, filters.InNameFilter)

@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseViewSet, DateFilteringViewSetMixin
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -48,7 +48,7 @@ from .base import BaseViewSet, DateFilteringViewSetMixin
     ),
     no_answers=extend_schema(summary='Get all questions on the site with no answers', description=' '),
 )
-class QuestionViewSet(BaseViewSet, DateFilteringViewSetMixin):
+class QuestionViewSet(BaseViewSet):
     """The question view set
     """
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
