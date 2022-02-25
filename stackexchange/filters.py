@@ -96,7 +96,7 @@ class OrderingFilter(BaseFilterBackend):
                 f"{'-' if ordering_field.ordering == enums.OrderingDirection.DESC else ''}{ordering_field.field}", 'pk'
             )
 
-        return tuple('pk', )
+        return 'pk',
 
     @staticmethod
     def get_ordering_fields(view: View) -> typing.List[OrderingField]:
