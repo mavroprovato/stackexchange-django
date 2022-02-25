@@ -277,7 +277,8 @@ class Importer:
                     row.get('ViewCount', '<NULL>'), row.get('AnswerCount', '<NULL>'), row.get('CommentCount', '<NULL>'),
                     row.get('FavoriteCount', '<NULL>'), row.get('OwnerUserId', '<NULL>'),
                     row.get('LastEditorUserId', '<NULL>'), row.get('ParentId', '<NULL>'),
-                    row['AcceptedAnswerId'] if row.get('') in post_ids else '<NULL>', row['ContentLicense']
+                    row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in post_ids else '<NULL>',
+                    row['ContentLicense']
                 ])
         with (self.temp_dir / 'posts.csv').open('rt') as f:
             with connection.cursor() as cursor:
