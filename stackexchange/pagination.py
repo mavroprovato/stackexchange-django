@@ -112,12 +112,22 @@ class Pagination(pagination.PageNumberPagination):
     django_paginator_class = Paginator
 
     def __init__(self) -> None:
+        """Create the pagination object.
+        """
         self.page = None
 
-    def paginate_queryset(self, queryset: QuerySet, request: Request, view: View = None) -> list:
+    def paginate_queryset(self, queryset: QuerySet, request: Request, view: View = None) -> typing.Optional[list]:
+        """Paginate a queryset if required, either returning a page object, or `None` if pagination is not configured
+        for this view.
+
+        :param queryset: The queryset.
+        :param request: The request.
+        :param view: The view.
+        :return: The page object if pagination is required.
+        """
         page_size = self.get_page_size(request)
         if not page_size:
-            return []
+            return None
         paginator = self.django_paginator_class(queryset, page_size)
         page_number = self.get_page_number(request, paginator)
 
