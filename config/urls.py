@@ -6,22 +6,17 @@ import debug_toolbar
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
 from rest_framework import routers
 
-import stackexchange.views.answers
-import stackexchange.views.badges
-import stackexchange.views.comments
-import stackexchange.views.questions
-import stackexchange.views.posts
-import stackexchange.views.tags
-import stackexchange.views.users
+from stackexchange import views
 
 router = routers.DefaultRouter()
-router.register(r'badges', stackexchange.views.badges.BadgeViewSet, basename='badge')
-router.register(r'users', stackexchange.views.users.UserViewSet, basename='user')
-router.register(r'tags', stackexchange.views.tags.TagViewSet, basename='tag')
-router.register(r'posts', stackexchange.views.posts.PostViewSet, basename='post')
-router.register(r'questions', stackexchange.views.questions.QuestionViewSet, basename='question')
-router.register(r'answers', stackexchange.views.answers.AnswerViewSet, basename='answer')
-router.register(r'comments', stackexchange.views.comments.CommentViewSet, basename='comment')
+router.register('answers', views.AnswerViewSet, basename='answer')
+router.register('badges', views.BadgeViewSet, basename='badge')
+router.register('comments', views.CommentViewSet, basename='comment')
+router.register('info', views.InfoViewSet, basename='info')
+router.register('posts', views.PostViewSet, basename='post')
+router.register('questions', views.QuestionViewSet, basename='question')
+router.register('tags', views.TagViewSet, basename='tag')
+router.register('users', views.UserViewSet, basename='user')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
