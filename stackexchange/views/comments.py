@@ -7,8 +7,8 @@ from .base import BaseViewSet
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all comments on the site'),
-    retrieve=extend_schema(summary='Gets the comment identified by id'),
+    list=extend_schema(summary='Get all comments on the site', description=' '),
+    retrieve=extend_schema(summary='Gets the comment identified by id', description=' '),
 )
 class CommentViewSet(BaseViewSet):
     """The answers view set
