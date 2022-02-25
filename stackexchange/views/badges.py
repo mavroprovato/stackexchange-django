@@ -35,7 +35,7 @@ from .base import BaseViewSet, DateFilteringViewSetMixin
 class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
     """The badge view set
     """
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
+    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter, filters.InNameFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
@@ -70,6 +70,17 @@ class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
         """
         if self.action in ('recipients', 'recipients_detail'):
             return 'date_awarded'
+
+        return None
+
+    @property
+    def name_field(self) -> typing.Optional[str]:
+        """Return the field used for in name filtering.
+
+        :return: The field used for in name filtering.
+        """
+        if self.action in ('list', 'named', 'tags'):
+            return 'name'
 
         return None
 
