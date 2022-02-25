@@ -25,7 +25,8 @@ class BaseListViewSet(GenericViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         if lookup_url_kwarg in self.kwargs:
-            assert self.detail_field is not None, f'Detail field for action {self.action} should not be None'
+            if self.detail_field is None:
+                raise AssertionError(f'Detail field for action {self.action} should not be None')
             queryset = queryset.filter(**{
                 f"{self.detail_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:MAX_RETRIEVE_OBJECTS]
             })
