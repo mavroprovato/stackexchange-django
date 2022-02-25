@@ -56,7 +56,7 @@ from .base import BaseViewSet, DateFilteringViewSetMixin
 class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
     """The user view set
     """
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
+    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter, filters.InNameFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
@@ -101,6 +101,17 @@ class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
             return 'date_awarded'
 
         return 'creation_date'
+
+    @property
+    def name_field(self) -> typing.Optional[str]:
+        """Return the field used for in name filtering.
+
+        :return: The field used for in name filtering.
+        """
+        if self.action == 'list':
+            return 'display_name'
+
+        return None
 
     def get_serializer_class(self):
         """Return the serializer class for the action.

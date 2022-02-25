@@ -24,7 +24,7 @@ from .base import BaseListViewSet
 class TagViewSet(BaseListViewSet):
     """The tag view set
     """
-    filter_backends = (filters.OrderingFilter, )
+    filter_backends = (filters.OrderingFilter, filters.InNameFilter)
 
     def get_queryset(self) -> typing.Optional[QuerySet]:
         """Return the queryset for the action.
@@ -65,6 +65,17 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action == 'list':
             return ('popular', enums.OrderingDirection.DESC.value, 'count'), ('name', enums.OrderingDirection.ASC.value)
+
+        return None
+
+    @property
+    def name_field(self) -> typing.Optional[str]:
+        """Return the field used for in name filtering.
+
+        :return: The field used for in name filtering.
+        """
+        if self.action == 'list':
+            return 'name'
 
         return None
 
