@@ -55,8 +55,9 @@ class BadgeCountSerializer(BaseSerializer):
         :return: The fields for the serializer.
         """
         serializer_fields = super().get_fields()
-        for bc in enums.BadgeClass:
-            serializer_fields[bc.name.lower()] = fields.IntegerField(source=f"{bc.name.lower()}_count")
+        for badge_class in enums.BadgeClass:
+            serializer_fields[badge_class.name.lower()] = fields.IntegerField(
+                source=f"{badge_class.name.lower()}_count")
 
         return serializer_fields
 

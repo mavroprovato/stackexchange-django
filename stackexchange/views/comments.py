@@ -1,3 +1,5 @@
+"""The comments view set
+"""
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 from stackexchange import enums, filters, models, serializers

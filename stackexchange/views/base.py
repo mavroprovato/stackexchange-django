@@ -57,7 +57,7 @@ class DateFilteringViewSetMixin:
     """
     @property
     @abc.abstractmethod
-    def date_field(self) -> str:
+    def date_field(self) -> typing.Optional[str]:
         """Return the field used for date filtering.
 
         :return: The field used for date filtering.
@@ -76,4 +76,3 @@ class BaseViewSet(BaseListViewSet):
         :return: The response.
         """
         return self.list(request, *args, **kwargs)
-

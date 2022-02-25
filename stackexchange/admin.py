@@ -1,5 +1,7 @@
+"""Admin for the application
+"""
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as UserAdminBase
 
 from stackexchange import models
 
@@ -15,7 +17,7 @@ class BadgeAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.User)
-class UserAdmin(UserAdmin):
+class UserAdmin(UserAdminBase):
     """Admin for users
     """
     list_display = ('display_name', 'website_url', 'location', 'reputation', 'creation_date')

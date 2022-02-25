@@ -1,3 +1,5 @@
+"""The tag views
+"""
 import typing
 
 from django.db.models import QuerySet
@@ -24,15 +26,15 @@ class TagViewSet(BaseListViewSet):
     """
     filter_backends = (filters.OrderingFilter, )
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> typing.Optional[QuerySet]:
         """Return the queryset for the action.
 
         :return: The queryset for the action.
         """
-        if self.action == 'list':
-            return models.Tag.objects.all()
-        elif self.action == 'wikis':
+        if self.action == 'wikis':
             return models.Tag.objects.all().select_related('excerpt', 'wiki').order_by('name')
+
+        return models.Tag.objects.all()
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -50,10 +52,10 @@ class TagViewSet(BaseListViewSet):
 
         :return: The serializer class for the action.
         """
-        if self.action == 'list':
-            return serializers.TagSerializer
-        elif self.action == 'wikis':
+        if self.action == 'wikis':
             return serializers.TagWikiSerializer
+
+        return serializers.TagSerializer
 
     @property
     def ordering_fields(self):
@@ -63,6 +65,8 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action == 'list':
             return ('popular', enums.OrderingDirection.DESC.value, 'count'), ('name', enums.OrderingDirection.ASC.value)
+
+        return None
 
     @action(detail=True, url_path='wikis')
     def wikis(self, request: Request, *args, **kwargs) -> Response:

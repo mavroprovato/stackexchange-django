@@ -3,7 +3,7 @@
 
 from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.db.models import Manager, OuterRef, Count, Subquery, QuerySet
+from django.db.models import OuterRef, Count, Subquery, QuerySet
 from django.db.models.functions import Coalesce
 
 from stackexchange import enums

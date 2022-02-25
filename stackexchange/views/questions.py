@@ -1,3 +1,5 @@
+"""The question views
+"""
 import typing
 
 from django.db.models import QuerySet
@@ -56,19 +58,19 @@ class QuestionViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The queryset for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
-                'tags')
-        elif self.action == 'answers':
+        if self.action == 'answers':
             return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner')
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return models.Comment.objects.select_related('user')
-        elif self.action == 'linked':
+        if self.action == 'linked':
             return models.Post.objects.filter(post_links__type=enums.PostType.QUESTION).select_related(
                 'owner').prefetch_related('tags')
-        elif self.action == 'no_answers':
+        if self.action == 'no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')
+
+        return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
+            'tags')
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -78,9 +80,9 @@ class QuestionViewSet(BaseViewSet, DateFilteringViewSetMixin):
         """
         if self.action == 'answers':
             return 'parent'
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return 'post'
-        elif self.action == 'linked':
+        if self.action == 'linked':
             return 'post_links__related_post'
 
         return super().detail_field
@@ -98,12 +100,12 @@ class QuestionViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The serializer class for the action.
         """
-        if self.action in ('list', 'retrieve', 'linked', 'no_answers'):
-            return serializers.QuestionSerializer
         if self.action == 'answers':
             return serializers.AnswerSerializer
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return serializers.CommentSerializer
+
+        return serializers.QuestionSerializer
 
     @property
     def ordering_fields(self):
@@ -117,11 +119,13 @@ class QuestionViewSet(BaseViewSet, DateFilteringViewSetMixin):
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return (
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
+
+        return None
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:

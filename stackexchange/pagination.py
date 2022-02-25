@@ -1,3 +1,5 @@
+"""Pagination classes
+"""
 import collections
 import collections.abc
 import typing
@@ -38,10 +40,7 @@ class Page(collections.abc.Sequence):
         :return: The item.
         """
         if not isinstance(index, (int, slice)):
-            raise TypeError(
-                'Page indices must be integers or slices, not %s.'
-                % type(index).__name__
-            )
+            raise TypeError(f'Page indices must be integers or slices, not {type(index).__name__}.')
 
         return self.object_list[index]
 
@@ -95,8 +94,8 @@ class Paginator:
             if isinstance(number, float) and not number.is_integer():
                 raise ValueError
             number = int(number)
-        except (TypeError, ValueError):
-            raise PageNotAnInteger(_('That page number is not an integer'))
+        except (TypeError, ValueError) as exeption:
+            raise PageNotAnInteger(_('That page number is not an integer')) from exeption
         if number < 1:
             raise EmptyPage(_('That page number is less than 1'))
 
@@ -133,11 +132,11 @@ class Pagination(pagination.PageNumberPagination):
 
         try:
             self.page = paginator.page(page_number)
-        except InvalidPage as exc:
+        except InvalidPage as exception:
             msg = self.invalid_page_message.format(
-                page_number=page_number, message=str(exc)
+                page_number=page_number, message=str(exception)
             )
-            raise NotFound(msg)
+            raise NotFound(msg) from exception
 
         return list(self.page)
 

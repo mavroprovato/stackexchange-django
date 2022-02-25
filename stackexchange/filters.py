@@ -12,6 +12,7 @@ from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
 
 from stackexchange import enums
+from .views.base import DateFilteringViewSetMixin
 
 
 @dataclasses.dataclass
@@ -95,8 +96,8 @@ class OrderingFilter(BaseFilterBackend):
             return (
                 f"{'-' if ordering_field.ordering == enums.OrderingDirection.DESC else ''}{ordering_field.field}", 'pk'
             )
-        else:
-            return 'pk',
+
+        return tuple('pk', )
 
     @staticmethod
     def get_ordering_fields(view: View) -> typing.List[OrderingField]:
@@ -142,7 +143,6 @@ class DateRangeFilter(BaseFilterBackend):
         :param view: The view.
         :return: Th filtered queryset.
         """
-        from stackexchange.views.base import DateFilteringViewSetMixin
         if not isinstance(view, DateFilteringViewSetMixin):
             raise ValueError("The view must implement the DateFilteringViewSetMixin")
         if not view.date_field:
@@ -170,8 +170,10 @@ class DateRangeFilter(BaseFilterBackend):
         if request.query_params.get(param_name):
             try:
                 return timezone.make_aware(datetime.datetime.strptime(request.query_params.get(param_name), '%Y-%m-%d'))
-            except ValueError:
-                raise ValidationError({param_name: 'Invalid date'})
+            except ValueError as exception:
+                raise ValidationError({param_name: 'Invalid date'}) from exception
+
+        return None
 
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
         """Get the schema operation parameters.
@@ -179,7 +181,6 @@ class DateRangeFilter(BaseFilterBackend):
         :param view: The view to get the parameters for.
         :return: The parameters.
         """
-        from stackexchange.views.base import DateFilteringViewSetMixin
         if not isinstance(view, DateFilteringViewSetMixin) or not view.date_field:
             return []
 

@@ -42,18 +42,18 @@ class AnswerViewSet(BaseViewSet, DateFilteringViewSetMixin):
     """
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
 
-    def get_queryset(self) -> QuerySet:
+    def get_queryset(self) -> typing.Optional[QuerySet]:
         """Return the queryset for the action.
 
         :return: The queryset for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related(
-                'owner', 'parent').prefetch_related('tags')
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return models.Comment.objects.select_related('user')
-        elif self.action == 'questions':
+        if self.action == 'questions':
             return models.Post.objects.select_related('owner').prefetch_related('tags')
+
+        return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related(
+            'owner', 'parent').prefetch_related('tags')
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -63,7 +63,7 @@ class AnswerViewSet(BaseViewSet, DateFilteringViewSetMixin):
         """
         if self.action == 'comments':
             return 'post'
-        elif self.action == 'questions':
+        if self.action == 'questions':
             return 'children'
 
         return super().detail_field
@@ -81,12 +81,12 @@ class AnswerViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The serializer class for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return serializers.AnswerSerializer
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return serializers.CommentSerializer
-        elif self.action == 'questions':
+        if self.action == 'questions':
             return serializers.QuestionSerializer
+
+        return serializers.AnswerSerializer
 
     @property
     def ordering_fields(self):
@@ -100,11 +100,13 @@ class AnswerViewSet(BaseViewSet, DateFilteringViewSetMixin):
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return (
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
+
+        return None
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:

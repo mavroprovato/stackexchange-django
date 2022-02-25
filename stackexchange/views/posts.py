@@ -42,15 +42,15 @@ class PostViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The queryset for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return models.Post.objects.filter(
-                type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)
-            ).select_related('owner')
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return models.Comment.objects.select_related('post', 'user')
-        elif self.action == 'revisions':
+        if self.action == 'revisions':
             return models.PostHistory.objects.filter(user__isnull=False).select_related('post', 'user').order_by(
                 '-creation_date')
+
+        return models.Post.objects.filter(
+            type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)
+        ).select_related('owner')
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -76,12 +76,12 @@ class PostViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The serializer class for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return serializers.PostSerializer
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return serializers.CommentSerializer
-        elif self.action == 'revisions':
+        if self.action == 'revisions':
             return serializers.PostHistorySerializer
+
+        return serializers.PostSerializer
 
     @property
     def ordering_fields(self):
@@ -95,11 +95,13 @@ class PostViewSet(BaseViewSet, DateFilteringViewSetMixin):
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return (
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
+
+        return None
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:

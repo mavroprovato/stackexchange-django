@@ -42,14 +42,14 @@ class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The queryset for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return models.Badge.objects.with_award_count()
-        elif self.action == 'named':
+        if self.action == 'named':
             return models.Badge.objects.filter(tag_based=False).with_award_count()
-        elif self.action in ('recipients', 'recipients_detail'):
+        if self.action in ('recipients', 'recipients_detail'):
             return models.UserBadge.objects.select_related('user', 'badge').order_by('-date_awarded')
-        elif self.action == 'tags':
+        if self.action == 'tags':
             return models.Badge.objects.filter(tag_based=True).with_award_count()
+
+        return models.Badge.objects.with_award_count()
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -63,7 +63,7 @@ class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
         return super().detail_field
 
     @property
-    def date_field(self) -> str:
+    def date_field(self) -> typing.Optional[str]:
         """Return the field used for date filtering.
 
         :return: The field used for date filtering.
@@ -71,15 +71,17 @@ class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
         if self.action in ('recipients', 'recipients_detail'):
             return 'date_awarded'
 
+        return None
+
     def get_serializer_class(self):
         """Get the serializer class for the action.
 
         :return: The serializer class for the action.
         """
-        if self.action in ('list', 'retrieve', 'named', 'tags'):
-            return serializers.BadgeSerializer
-        elif self.action in ('recipients', 'recipients_detail'):
+        if self.action in ('recipients', 'recipients_detail'):
             return serializers.UserBadgeSerializer
+
+        return serializers.BadgeSerializer
 
     @property
     def ordering_fields(self):
@@ -93,6 +95,8 @@ class BadgeViewSet(BaseViewSet, DateFilteringViewSetMixin):
                 ('name', enums.OrderingDirection.ASC.value),
                 ('type', enums.OrderingDirection.DESC.value, 'tag_based')
             )
+
+        return None
 
     @action(detail=False, url_path='name')
     def named(self, request: Request, *args, **kwargs) -> Response:

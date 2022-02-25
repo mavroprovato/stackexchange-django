@@ -8,8 +8,8 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .base import BaseViewSet, DateFilteringViewSetMixin
 from stackexchange import enums, filters, models, serializers
+from .base import BaseViewSet, DateFilteringViewSetMixin
 
 
 @extend_schema_view(
@@ -63,20 +63,20 @@ class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The queryset for the action
         """
-        if self.action in ('list', 'retrieve'):
-            return models.User.objects.with_badge_counts()
-        elif self.action == 'answers':
+        if self.action == 'answers':
             return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner', 'parent')
-        elif self.action == 'badges':
+        if self.action == 'badges':
             return models.UserBadge.objects.select_related('user', 'badge')
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return models.Comment.objects.select_related('post', 'user')
-        elif self.action == 'posts':
+        if self.action == 'posts':
             return models.Post.objects.filter(
                 type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
-        elif self.action == 'questions':
+        if self.action == 'questions':
             return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
                 'tags')
+
+        return models.User.objects.with_badge_counts()
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -86,7 +86,7 @@ class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
         """
         if self.action in ('answers', 'posts', 'questions'):
             return 'owner'
-        elif self.action in ('badges', 'comments'):
+        if self.action in ('badges', 'comments'):
             return 'user'
 
         return super().detail_field
@@ -107,18 +107,18 @@ class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
 
         :return: The serializer class for the action.
         """
-        if self.action in ('list', 'retrieve'):
-            return serializers.UserSerializer
-        elif self.action == 'answers':
+        if self.action == 'answers':
             return serializers.AnswerSerializer
-        elif self.action == 'badges':
+        if self.action == 'badges':
             return serializers.UserBadgeSerializer
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return serializers.CommentSerializer
-        elif self.action == 'posts':
+        if self.action == 'posts':
             return serializers.PostSerializer
-        elif self.action == 'questions':
+        if self.action == 'questions':
             return serializers.QuestionSerializer
+
+        return serializers.UserSerializer
 
     @property
     def ordering_fields(self):
@@ -132,20 +132,22 @@ class UserViewSet(BaseViewSet, DateFilteringViewSetMixin):
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('name', enums.OrderingDirection.ASC.value, 'display_name')
             )
-        elif self.action in ('answers', 'posts', 'questions'):
+        if self.action in ('answers', 'posts', 'questions'):
             return (
                 ('activity', enums.OrderingDirection.DESC.value, 'last_activity_date'),
                 ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
                 ('votes', enums.OrderingDirection.DESC.value, 'score')
             )
-        elif self.action == 'badges':
+        if self.action == 'badges':
             return (
                 ('name', enums.OrderingDirection.ASC.value, 'badge__name'),
                 ('type', enums.OrderingDirection.ASC.value, 'badge__class'),
                 ('awarded', enums.OrderingDirection.DESC.value, 'date_awarded')
             )
-        elif self.action == 'comments':
+        if self.action == 'comments':
             return ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+
+        return None
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:
