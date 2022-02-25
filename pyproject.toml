@@ -14,6 +14,7 @@ drf-spectacular = "*"
 py7zr = "*"
 requests = "*"
 tqdm = "*"
+defusedxml = "^0.7.1"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"

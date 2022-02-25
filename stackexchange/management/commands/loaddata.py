@@ -6,8 +6,8 @@ import re
 import time
 import tempfile
 import typing
-import xml.etree.ElementTree as eT
 
+import defusedxml.ElementTree as eT
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandParser
