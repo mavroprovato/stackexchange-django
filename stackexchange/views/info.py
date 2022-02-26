@@ -53,6 +53,6 @@ class InfoViewSet(BaseListViewSet):
                     info['last_answer_date'] - info['first_answer_date']
             ).total_seconds() / 60)
 
-        queryset = self.paginate_queryset([info])
+        queryset = self.paginate_queryset([self.serializer_class(info).data])
 
         return self.get_paginated_response(queryset)
