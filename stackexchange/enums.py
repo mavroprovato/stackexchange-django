@@ -94,3 +94,43 @@ class PostVoteType(BaseEnum):
     UN_DELETION = 11
     SPAM = 12
     INFORM_MODERATOR = 13
+
+
+class Privileges(enum.Enum):
+    """Enumeration for user privileges
+    """
+    CREATE_POSTS = 1, "Ask a question or contribute an answer"
+    PARTICIPATE_IN_META = 5, "Discuss the site itself: bugs, feedback, and governance"
+    CREATE_WIKI_POSTS = 10, "Create answers that can be easily edited by most users"
+    REMOVE_NEW_USER_RESTRICTIONS = 10, "Post more links, answer protected questions"
+    VOTE_UP = 15, "Indicate when questions and answers are useful"
+    FLAG_POSTS = 15, "Bring content to the attention of the community via flags"
+    TALK_IN_CHATS = 20, "Participate in this site's chat rooms"
+    COMMENT_EVERYWHERE = 50, "Leave comments on other people's posts"
+    SET_BOUNTIES = 75, "Offer some of your reputation as bounty on a question"
+    CREATE_CHAT_ROOMS = 100, "Create new chat rooms"
+    EDIT_COMMUNITY_WIKI = 100, "Collaborate on the editing and improvement of wiki posts"
+    VOTE_DOWN = 125, "Indicate when questions and answers are not useful"
+    REDUCE_ADS = 200, "Some ads are now automatically disabled"
+    VIEW_CLOSE_VOTES = 250, "View and cast close/reopen votes on your own questions"
+    ACCESS_REVIEW_QUEUES = 500, "Access the First posts and Late answers review queues"
+    CREATE_GALLERY_CHAT_ROOMS = 1000, "Create chat rooms where only specific users may talk"
+    ESTABLISHED_USER = 1500, "You've been around for a while; see vote counts"
+    CREATE_TAGS = 1500, "Add new tags to the site"
+    EDIT_QUESTIONS_AND_ANSWERS = 2000, "Edits to any question or answer are applied immediately"
+    CREATE_TAG_SYNONYMS = 2500, "Decide which tags have the same meaning as others"
+    CAST_CLOSE_AND_REOPEN_VOTES = 3000, "Help decide whether posts are off-topic or duplicates"
+    APPROVE_TAG_WIKI_EDITS = 5000, "Approve edits to tag wikis made by regular users"
+    ACCESS_TO_MODERATOR_TOOLS = 10000, "Access reports, delete questions, review reviews"
+    PROTECT_QUESTIONS = 15000, "Mark questions as protected"
+    TRUSTED_USER = 20000, "Expanded editing, deletion and undeletion privileges"
+    ACCESS_TO_SITE_ANALYTICS = 25000, "Access to internal and Google site analytics"
+
+    def __init__(self, reputation: int, description: str) -> None:
+        """Creates the privilege.
+
+        :param reputation: The required reputation.
+        :param description: The privilege description.
+        """
+        self.reputation = reputation
+        self.description = description
