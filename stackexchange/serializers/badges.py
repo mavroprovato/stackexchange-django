@@ -32,7 +32,7 @@ class BadgeSerializer(serializers.ModelSerializer):
         """Get the badge rank.
 
         :param badge: The badges.
-        :return: The badge type.
+        :return: The badge rank.
         """
         return enums.BadgeClass(badge.badge_class).name.lower()
 
