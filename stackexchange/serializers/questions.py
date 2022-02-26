@@ -9,9 +9,10 @@ from .posts import PostSerializer
 class QuestionSerializer(PostSerializer):
     """The question serializer
     """
-    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
-    is_answered = fields.SerializerMethodField()
-    question_id = fields.IntegerField(source="pk")
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name',
+                                        help_text="The tags for the question")
+    is_answered = fields.SerializerMethodField(help_text="True if the question is answered")
+    question_id = fields.IntegerField(source="pk", help_text="The question identifier")
 
     class Meta:
         model = models.Post

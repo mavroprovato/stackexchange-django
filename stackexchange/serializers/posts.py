@@ -9,8 +9,8 @@ from .users import BaseUserSerializer
 class PostSerializer(serializers.ModelSerializer):
     """The post serializer
     """
-    owner = BaseUserSerializer()
-    post_type = fields.SerializerMethodField()
+    owner = BaseUserSerializer(help_text="The post owner")
+    post_type = fields.SerializerMethodField(help_text="The post type")
     post_id = fields.IntegerField(source="pk")
 
     class Meta:
@@ -24,14 +24,14 @@ class PostSerializer(serializers.ModelSerializer):
         :param post: The post.
         :return: The post type.
         """
-        return enums.PostType(post.type).description
+        return enums.PostType(post.type).name.lower()
 
 
 class PostHistorySerializer(serializers.ModelSerializer):
     """The post history serializer
     """
-    user = BaseUserSerializer()
-    post_type = fields.SerializerMethodField()
+    user = BaseUserSerializer(help_text="The user")
+    post_type = fields.SerializerMethodField(help_text="The post type")
 
     class Meta:
         model = models.PostHistory
@@ -44,4 +44,4 @@ class PostHistorySerializer(serializers.ModelSerializer):
         :param post_history: The post history.
         :return: The post type.
         """
-        return enums.PostHistoryType(post_history.type).description
+        return enums.PostHistoryType(post_history.type).name.lower()

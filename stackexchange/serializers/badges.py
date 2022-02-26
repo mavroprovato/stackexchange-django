@@ -9,9 +9,9 @@ from .base import BaseSerializer
 class BadgeSerializer(serializers.ModelSerializer):
     """The badge serializer
     """
-    badge_type = fields.SerializerMethodField()
-    award_count = fields.IntegerField()
-    rank = fields.SerializerMethodField()
+    badge_type = fields.SerializerMethodField(help_text="The badge type")
+    award_count = fields.IntegerField(help_text="The badge award count")
+    rank = fields.SerializerMethodField(help_text="The badge rank")
     badge_id = fields.IntegerField(source='pk')
 
     class Meta:
@@ -34,7 +34,7 @@ class BadgeSerializer(serializers.ModelSerializer):
         :param badge: The badges.
         :return: The badge type.
         """
-        return enums.BadgeClass(badge.badge_class).description
+        return enums.BadgeClass(badge.badge_class).name.lower()
 
 
 class BadgeCountSerializer(BaseSerializer):
@@ -48,6 +48,6 @@ class BadgeCountSerializer(BaseSerializer):
         serializer_fields = super().get_fields()
         for badge_class in enums.BadgeClass:
             serializer_fields[badge_class.name.lower()] = fields.IntegerField(
-                source=f"{badge_class.name.lower()}_count")
+                source=f"{badge_class.name.lower()}_count", help_text=f"The {badge_class.name.lower()} badge count")
 
         return serializer_fields

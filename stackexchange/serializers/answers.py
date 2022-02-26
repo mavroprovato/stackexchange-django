@@ -9,9 +9,9 @@ from .posts import PostSerializer
 class AnswerSerializer(PostSerializer):
     """The answer serializer
     """
-    is_accepted = fields.SerializerMethodField()
-    answer_id = fields.IntegerField(source="pk")
-    question_id = fields.IntegerField(source="parent_id")
+    is_accepted = fields.SerializerMethodField(help_text="True if the answer is accepted")
+    answer_id = fields.IntegerField(source="pk", help_text="The answer identifier")
+    question_id = fields.IntegerField(source="parent_id", help_text="The question identifier")
 
     class Meta:
         model = models.Post

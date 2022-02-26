@@ -9,7 +9,7 @@ from .badges import BadgeCountSerializer
 class BaseUserSerializer(serializers.ModelSerializer):
     """The base user serializer.
     """
-    user_id = fields.IntegerField(source="pk")
+    user_id = fields.IntegerField(source="pk", help_text="The user identifier")
 
     class Meta:
         model = models.User
@@ -19,8 +19,8 @@ class BaseUserSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """The user serializer.
     """
-    badge_counts = BadgeCountSerializer(source="*")
-    user_id = fields.IntegerField(source="pk")
+    badge_counts = BadgeCountSerializer(source="*", help_text="The user badge counts")
+    user_id = fields.IntegerField(source="pk", help_text="The user identifier")
 
     class Meta:
         model = models.User
@@ -33,11 +33,11 @@ class UserSerializer(serializers.ModelSerializer):
 class UserBadgeSerializer(serializers.ModelSerializer):
     """The user badge serializer
     """
-    user = BaseUserSerializer()
-    name = fields.CharField(source='badge.name')
-    badge_type = fields.SerializerMethodField(source='badge.badge_type')
-    rank = fields.SerializerMethodField(source='badge.rank')
-    badge_id = fields.IntegerField(source='pk')
+    user = BaseUserSerializer(help_text="The user")
+    name = fields.CharField(source='badge.name', help_text="The badge name")
+    badge_type = fields.SerializerMethodField(source='badge.badge_type', help_text="The badge type")
+    rank = fields.SerializerMethodField(source='badge.rank', help_text="The badge rank")
+    badge_id = fields.IntegerField(source='pk', help_text="The badge identifier")
 
     class Meta:
         model = models.UserBadge
@@ -59,4 +59,4 @@ class UserBadgeSerializer(serializers.ModelSerializer):
         :param user_badge: The badges.
         :return: The badge type.
         """
-        return enums.BadgeClass(user_badge.badge.badge_class).description
+        return enums.BadgeClass(user_badge.badge.badge_class).name.lower()

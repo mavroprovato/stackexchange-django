@@ -10,8 +10,8 @@ from .users import BaseUserSerializer
 class CommentSerializer(PostSerializer):
     """The comment serializer
     """
-    owner = BaseUserSerializer(source="user")
-    comment_id = fields.IntegerField(source="pk")
+    owner = BaseUserSerializer(source="user", help_text="The user that posted the comment")
+    comment_id = fields.IntegerField(source="pk", help_text="The comment identifier")
 
     class Meta:
         model = models.Post
