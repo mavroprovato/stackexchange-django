@@ -96,7 +96,7 @@ class PostVoteType(BaseEnum):
     INFORM_MODERATOR = 13
 
 
-class Privileges(enum.Enum):
+class Privilege(enum.Enum):
     """Enumeration for user privileges
     """
     CREATE_POSTS = 1, "Ask a question or contribute an answer"
