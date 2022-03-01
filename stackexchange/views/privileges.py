@@ -23,7 +23,6 @@ class PrivilegesViewSet(BaseListViewSet):
         :return: The earnable privileges.
         """
         page = self.paginate_queryset(list(enums.Privilege))
-        print(type(page))
         serializer = self.serializer_class(page, many=True)
 
         return self.get_paginated_response(serializer.data)

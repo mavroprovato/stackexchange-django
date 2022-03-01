@@ -4,6 +4,7 @@ from rest_framework import fields, serializers
 
 from stackexchange import enums, models
 from .badges import BadgeCountSerializer
+from .base import BaseSerializer
 
 
 class BaseUserSerializer(serializers.ModelSerializer):
@@ -60,3 +61,21 @@ class UserBadgeSerializer(serializers.ModelSerializer):
         :return: The badge type.
         """
         return enums.BadgeClass(user_badge.badge.badge_class).name.lower()
+
+
+class UserPrivilegesSerializer(BaseSerializer):
+    """Serializer for a user privilege.
+    """
+    reputation = fields.IntegerField(help_text="The reputation needed to acquire this privilege")
+    description = fields.CharField(help_text="The description for the privilege")
+    short_description = fields.SerializerMethodField(help_text="The short description for the privilege")
+
+    @staticmethod
+    def get_short_description(privilege: enums.Privilege) -> str:
+        """The short description of the privilege. It returns the name of the corresponding enum, replacing underscores
+        with spaces and converting the first letter to uppercase.
+
+        :param privilege: The privilege.
+        :return: The short description.
+        """
+        return privilege.name.replace('_', ' ').capitalize()

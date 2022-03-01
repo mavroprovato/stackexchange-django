@@ -5,6 +5,7 @@ import typing
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -42,6 +43,11 @@ from .base import BaseViewSet
         OpenApiParameter(
             name='id', type=str, location=OpenApiParameter.PATH,
             description='A list of semicolon separated user identifiers'
+        )
+    ]),
+    privileges=extend_schema(summary='Returns the privileges a user has', description=' ', parameters=[
+        OpenApiParameter(
+            name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier'
         )
     ]),
     questions=extend_schema(
@@ -91,6 +97,8 @@ class UserViewSet(BaseViewSet):
             return serializers.CommentSerializer
         if self.action == 'posts':
             return serializers.PostSerializer
+        if self.action == 'privileges':
+            return serializers.UserPrivilegesSerializer
         if self.action == 'questions':
             return serializers.QuestionSerializer
 
@@ -195,6 +203,21 @@ class UserViewSet(BaseViewSet):
         :return: The response.
         """
         return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='privileges')
+    def privileges(self, request: Request, *args, **kwargs) -> Response:
+        """Get the privileges for a user.
+
+        :param request: The request.
+        :return: The response.
+        """
+        user = get_object_or_404(models.User, pk=kwargs['pk'])
+        privileges = self.paginate_queryset(
+            [privilege for privilege in enums.Privilege if user.reputation >= privilege.reputation]
+        )
+        serializer = self.get_serializer(privileges, many=True)
+
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, url_path='questions')
     def questions(self, request: Request, *args, **kwargs) -> Response:
