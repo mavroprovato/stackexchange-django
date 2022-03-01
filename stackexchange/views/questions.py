@@ -5,6 +5,7 @@ import typing
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
+from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -51,8 +52,6 @@ from .base import BaseViewSet
 class QuestionViewSet(BaseViewSet):
     """The question view set
     """
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
-
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
 
@@ -126,6 +125,17 @@ class QuestionViewSet(BaseViewSet):
         :return: The field used for date filtering.
         """
         return 'creation_date'
+
+    @property
+    def filter_backends(self):
+        """Return the filter backends for the action.
+
+        :return: The filter backends for the action.
+        """
+        if self.action in ('list', 'no_answers'):
+            return filters.OrderingFilter, filters.DateRangeFilter, filters.TaggedFilter
+
+        return filters.OrderingFilter, filters.DateRangeFilter
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:
