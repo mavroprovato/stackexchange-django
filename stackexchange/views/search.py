@@ -13,7 +13,7 @@ from .base import BaseListViewSet
 class SearchViewSet(BaseListViewSet):
     """The search view set
     """
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter, filters.TaggedFilter)
+    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter, filters.TaggedFilter, filters.NotTaggedFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
