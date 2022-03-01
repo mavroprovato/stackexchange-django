@@ -2,6 +2,7 @@
 """
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.fields import CITextField, CIEmailField
+from django.contrib.postgres import indexes, search
 from django.db import models
 
 from stackexchange import enums, managers
@@ -119,13 +120,14 @@ class Post(models.Model):
                                related_name='children')
     accepted_answer = models.ForeignKey('Post', help_text="The accepted answer", on_delete=models.CASCADE, null=True,
                                         blank=True, related_name='accepted_answers')
+    title_search = search.SearchVectorField(null=True, help_text="The title search vector")
     tags = models.ManyToManyField('Tag', related_name='posts', through='PostTag')
 
     class Meta:
         db_table = 'posts'
         indexes = (
             models.Index(fields=('-last_activity_date', 'id')), models.Index(fields=('-creation_date', 'id')),
-            models.Index(fields=('-score', 'id'))
+            models.Index(fields=('-score', 'id')), indexes.GinIndex(fields=('title_search',)),
         )
 
 
