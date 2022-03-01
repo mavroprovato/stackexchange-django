@@ -16,6 +16,7 @@ router.register('info', views.InfoViewSet, basename='info')
 router.register('posts', views.PostViewSet, basename='post')
 router.register('privileges', views.PrivilegesViewSet, basename='privileges')
 router.register('questions', views.QuestionViewSet, basename='question')
+router.register('search', views.SearchViewSet, basename='search')
 router.register('tags', views.TagViewSet, basename='tag')
 router.register('users', views.UserViewSet, basename='user')
 
