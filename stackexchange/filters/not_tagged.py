@@ -1,5 +1,7 @@
 """The questions tagged filter
 """
+import functools
+import operator
 import typing
 
 from django.db.models import QuerySet, Exists, OuterRef
@@ -13,22 +15,25 @@ from stackexchange import models
 class NotTaggedFilter(BaseFilterBackend):
     """The questions not tagged filter
     """
-    tagged_param = 'nottagged'
+    nottagged_param = 'nottagged'
 
     def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
-        """Filter questions based on .
+        """Filter questions that are not tagged with any of the provided tags. The tags are a semicolon separated list
+        that is provided by the `NotTaggedFilter.nottagged_param` parameter.
 
         :param request: The request.
         :param queryset: The queryset.
         :param view: The view.
         :return: The filtered queryset.
         """
-        for tag_name in request.query_params.get(self.tagged_param, '').split(';'):
-            tag_name = tag_name.strip()
-            if tag_name:
-                queryset = queryset.filter(~Exists(
-                    models.PostTag.objects.filter(post=OuterRef('pk'), tag__name=tag_name)
-                ))
+        conditions = [
+            ~Exists(
+                models.PostTag.objects.filter(post=OuterRef('pk'), tag__name=tag_name.strip())
+            )
+            for tag_name in request.query_params.get(self.nottagged_param, '').split(';') if tag_name.strip()
+        ]
+        if conditions:
+            queryset = queryset.filter(functools.reduce(operator.and_, conditions))
 
         return queryset
 
@@ -40,7 +45,7 @@ class NotTaggedFilter(BaseFilterBackend):
         """
         return [
             {
-                'name': self.tagged_param,
+                'name': self.nottagged_param,
                 'required': False,
                 'in': 'query',
                 'description': 'Include questions that are not tagged with the semicolon seperated list of tags',

@@ -1,5 +1,7 @@
 """The questions tagged filter
 """
+import functools
+import operator
 import typing
 
 from django.db.models import QuerySet, Exists, OuterRef
@@ -16,20 +18,22 @@ class TaggedFilter(BaseFilterBackend):
     tagged_param = 'tagged'
 
     def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
-        """Filter questions based on .
+        """Filter questions that are tagged with any of the provided tags. The tags are a semicolon separated list that
+        is provided by the `TaggedFilter.tagged_param` parameter.
 
         :param request: The request.
         :param queryset: The queryset.
         :param view: The view.
         :return: The filtered queryset.
         """
-        for tag_name in request.query_params.get(self.tagged_param, '').split(';'):
-            tag_name = tag_name.strip()
-            if tag_name:
-                queryset = queryset.filter(Exists(
-                    models.PostTag.objects.filter(post=OuterRef('pk'), tag__name=tag_name)
-                ))
-
+        conditions = [
+            Exists(
+                models.PostTag.objects.filter(post=OuterRef('pk'), tag__name=tag_name.strip())
+            )
+            for tag_name in request.query_params.get(self.tagged_param, '').split(';') if tag_name.strip()
+        ]
+        if conditions:
+            queryset = queryset.filter(functools.reduce(operator.or_, conditions))
         return queryset
 
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
@@ -43,7 +47,7 @@ class TaggedFilter(BaseFilterBackend):
                 'name': self.tagged_param,
                 'required': False,
                 'in': 'query',
-                'description': 'Include questions that are tagged with the semicolon seperated list of tags',
+                'description': 'Include questions that are tagged with any of the semicolon seperated list of tags',
                 'schema': {
                     'type': 'string'
                 },
