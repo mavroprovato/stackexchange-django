@@ -91,14 +91,14 @@ class QuestionViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answers'):
             return (
-                ('activity', enums.OrderingDirection.DESC.value, 'last_activity_date'),
-                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
-                ('votes', enums.OrderingDirection.DESC.value, 'score')
+                filters.OrderingField('activity', 'last_activity_date'),
+                filters.OrderingField('creation', 'creation_date'),
+                filters.OrderingField('votes', 'score')
             )
         if self.action == 'comments':
             return (
-                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
-                ('votes', enums.OrderingDirection.DESC.value, 'score')
+                filters.OrderingField('creation', 'creation_date'),
+                filters.OrderingField('votes', 'score')
             )
 
         return None
