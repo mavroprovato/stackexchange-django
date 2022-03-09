@@ -2,6 +2,7 @@
 """
 import dataclasses
 import datetime
+import enum
 import typing
 
 from django.db.models import QuerySet
@@ -21,7 +22,7 @@ class OrderingField:
     name: str
     field: str = None
     direction: enums.OrderingDirection = enums.OrderingDirection.DESC
-    type: object = None
+    type: typing.Type = str
 
     def __post_init__(self):
         """Post init method. Sets the database field to sort by to the field name if the database field name is not set.
@@ -118,9 +119,15 @@ class OrderingFilter(BaseFilterBackend):
             if ordering_field.type == datetime.date:
                 try:
                     return timezone.make_aware(
-                        datetime.datetime.strptime(request.query_params.get(param_name), '%Y-%m-%d'))
+                        datetime.datetime.strptime(value_str, '%Y-%m-%d'))
                 except ValueError as exception:
                     raise ValidationError({param_name: 'Expected date'}) from exception
+            if issubclass(ordering_field.type, enum.Enum):
+                try:
+                    return ordering_field.type[value_str.upper()].value
+                except KeyError:
+                    raise ValidationError(
+                        {param_name: f'Expected one of {",".join(f.name.lower() for f in ordering_field.type)}'})
 
             return value_str
 

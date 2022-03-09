@@ -126,7 +126,7 @@ class UserViewSet(BaseViewSet):
         if self.action == 'badges':
             return (
                 filters.OrderingField('name', 'badge__name', enums.OrderingDirection.ASC),
-                filters.OrderingField('type', 'badge__badge_class', enums.OrderingDirection.ASC),
+                filters.OrderingField('rank', 'badge__badge_class', enums.OrderingDirection.ASC, type=enums.BadgeClass),
                 filters.OrderingField('awarded', 'date_awarded', type=datetime.date),
             )
         if self.action == 'comments':
