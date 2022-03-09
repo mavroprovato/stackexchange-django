@@ -16,8 +16,15 @@ class OrderingField:
     """Ordering field information
     """
     name: str
-    ordering: enums.OrderingDirection
-    field: str
+    field: str = None
+    ordering: enums.OrderingDirection = enums.OrderingDirection.DESC
+    type: object = None
+
+    def __post_init__(self):
+        """Post init method. Sets the database field to sort by to the field name if the database field name is not set.
+        """
+        if self.field is None:
+            self.field = self.name
 
 
 class OrderingFilter(BaseFilterBackend):
@@ -50,7 +57,7 @@ class OrderingFilter(BaseFilterBackend):
                 'description': 'The field to sort by',
                 'schema': {
                     'type': 'string',
-                    'enum': [of.name for of in self.get_ordering_fields(view)]
+                    'enum': [of.name for of in getattr(view, 'ordering_fields', [])]
                 },
             }, {
                 'name': self.ordering_sort_param,
@@ -72,55 +79,33 @@ class OrderingFilter(BaseFilterBackend):
         :param view: The view.
         :return: The ordering fields.
         """
-        ordering_fields = self.get_ordering_fields(view)
+        ordering_fields = getattr(view, 'ordering_fields', [])
+        for ordering_field in ordering_fields:
+            if not isinstance(ordering_field, OrderingField):
+                raise ValueError("The ordering fields must be an instance of the OrderingField class")
 
         if ordering_fields:
             # Get the ordering field from the request, or the first available if it cannot be found
-            name = request.query_params.get(self.ordering_name_param)
-            ordering_field = next(
-                iter(ordering_field for ordering_field in ordering_fields if ordering_field.name == name),
-                ordering_fields[0]
-            )
-            # Customize the sort order if it exists and the request and is valid.
-            sort = request.query_params.get(self.ordering_sort_param)
-            if sort:
+            ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
+            ordering = None
+            if ordering_name:
+                for ordering_field in ordering_fields:
+                    if ordering_field.name == ordering_name:
+                        ordering = ordering_field
+            if ordering is None:
+                ordering = ordering_fields[0]
+
+            # Customize the sort order if it exists in the request and is valid.
+            direction = enums.OrderingDirection.DESC
+            direction_value = request.query_params.get(self.ordering_sort_param, '').strip()
+            if direction_value:
                 try:
-                    ordering_field.ordering = enums.OrderingDirection(sort.lower())
+                    direction = enums.OrderingDirection(direction_value)
                 except ValueError:
                     pass
 
             return (
-                f"{'-' if ordering_field.ordering == enums.OrderingDirection.DESC else ''}{ordering_field.field}", 'pk'
+                f"{'-' if direction == enums.OrderingDirection.DESC else ''}{ordering.field}", 'pk'
             )
 
         return 'pk',
-
-    @staticmethod
-    def get_ordering_fields(view: View) -> typing.List[OrderingField]:
-        """Get the ordering fields for the view. The method searches for an `ordering_fields` property. The property
-        must be an iterable of tuples. The first tuple field is the name of the field to order by, the second is the
-        default ordering direction (by default, descending) and the third the name of the database field to order by
-        (by default, the same name as the field name).
-
-        :param view: The view to get the ordering fields for.
-        :return: The ordering fields.
-        """
-        fields = []
-        ordering_fields = getattr(view, 'ordering_fields')
-        if ordering_fields:
-            for ordering_field in ordering_fields:
-                name = ordering_field[0]
-                ordering = enums.OrderingDirection.DESC
-                if len(ordering_field) > 1:
-                    try:
-                        ordering = enums.OrderingDirection(ordering_field[1].lower())
-                    except ValueError:
-                        pass
-                if len(ordering_field) > 2:
-                    field = ordering_field[2]
-                else:
-                    field = name
-                fields.append(OrderingField(name, ordering, field))
-
-        return fields
-

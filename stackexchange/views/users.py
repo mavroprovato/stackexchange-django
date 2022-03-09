@@ -112,24 +112,24 @@ class UserViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve'):
             return (
-                ('reputation', enums.OrderingDirection.DESC.value),
-                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
-                ('name', enums.OrderingDirection.ASC.value, 'display_name')
+                filters.OrderingField('reputation'),
+                filters.OrderingField('creation', 'creation_date'),
+                filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC.value),
             )
         if self.action in ('answers', 'posts', 'questions'):
             return (
-                ('activity', enums.OrderingDirection.DESC.value, 'last_activity_date'),
-                ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
-                ('votes', enums.OrderingDirection.DESC.value, 'score')
+                filters.OrderingField('activity', 'last_activity_date'),
+                filters.OrderingField('creation', 'creation_date'),
+                filters.OrderingField('votes', 'score'),
             )
         if self.action == 'badges':
             return (
-                ('name', enums.OrderingDirection.ASC.value, 'badge__name'),
-                ('type', enums.OrderingDirection.ASC.value, 'badge__class'),
-                ('awarded', enums.OrderingDirection.DESC.value, 'date_awarded')
+                filters.OrderingField('name', 'badge__name', enums.OrderingDirection.ASC.value),
+                filters.OrderingField('type', 'badge__badge_class', enums.OrderingDirection.ASC.value),
+                filters.OrderingField('awarded', 'date_awarded'),
             )
         if self.action == 'comments':
-            return ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
+            return filters.OrderingField('creation', 'creation_date'),
 
         return None
 
