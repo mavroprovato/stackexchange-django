@@ -1,8 +1,10 @@
 """The comments view set
 """
+import datetime
+
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
-from stackexchange import enums, filters, models, serializers
+from stackexchange import filters, models, serializers
 from .base import BaseViewSet
 
 
@@ -17,7 +19,7 @@ class CommentViewSet(BaseViewSet):
     serializer_class = serializers.CommentSerializer
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
     ordering_fields = (
-        filters.OrderingField('creation', 'creation_date'),
-        filters.OrderingField('votes', 'score')
+        filters.OrderingField('creation', 'creation_date', type=datetime.date),
+        filters.OrderingField('votes', 'score', type=int)
     )
     date_field = 'creation_date'

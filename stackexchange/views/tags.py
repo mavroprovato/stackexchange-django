@@ -54,7 +54,7 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action == 'list':
             return (
-                filters.OrderingField('popular', 'count'),
+                filters.OrderingField('popular', 'count', type=int),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC)
             )
 

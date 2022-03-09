@@ -1,5 +1,6 @@
 """The users view set.
 """
+import datetime
 import typing
 
 from django.db.models import QuerySet
@@ -112,24 +113,24 @@ class UserViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve'):
             return (
-                filters.OrderingField('reputation'),
-                filters.OrderingField('creation', 'creation_date'),
+                filters.OrderingField('reputation', type=int),
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
                 filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
             )
         if self.action in ('answers', 'posts', 'questions'):
             return (
-                filters.OrderingField('activity', 'last_activity_date'),
-                filters.OrderingField('creation', 'creation_date'),
-                filters.OrderingField('votes', 'score'),
+                filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('votes', 'score', type=int),
             )
         if self.action == 'badges':
             return (
                 filters.OrderingField('name', 'badge__name', enums.OrderingDirection.ASC),
                 filters.OrderingField('type', 'badge__badge_class', enums.OrderingDirection.ASC),
-                filters.OrderingField('awarded', 'date_awarded'),
+                filters.OrderingField('awarded', 'date_awarded', type=datetime.date),
             )
         if self.action == 'comments':
-            return filters.OrderingField('creation', 'creation_date'),
+            return filters.OrderingField('creation', 'creation_date', type=datetime.date),
 
         return None
 

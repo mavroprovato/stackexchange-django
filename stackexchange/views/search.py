@@ -1,5 +1,7 @@
 """The search view set
 """
+import datetime
+
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
@@ -41,9 +43,9 @@ class SearchViewSet(BaseListViewSet):
         """
         if self.action == 'list':
             return (
-                filters.OrderingField('activity', 'last_activity_date'),
-                filters.OrderingField('creation', 'creation_date'),
-                filters.OrderingField('votes', 'score')
+                filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('votes', 'score', type=int)
             )
 
         return None

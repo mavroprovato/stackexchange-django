@@ -1,5 +1,6 @@
 """Answers view set
 """
+import datetime
 import typing
 
 from django.db.models import QuerySet
@@ -75,14 +76,14 @@ class AnswerViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'questions'):
             return (
-                filters.OrderingField('activity', 'last_activity_date'),
-                filters.OrderingField('creation', 'creation_date'),
-                filters.OrderingField('votes', 'score')
+                filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('votes', 'score', type=int)
             )
         if self.action == 'comments':
             return (
-                filters.OrderingField('creation', 'creation_date'),
-                filters.OrderingField('votes', 'score')
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('votes', 'score', type=int)
             )
 
         return None

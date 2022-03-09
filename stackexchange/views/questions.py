@@ -1,11 +1,11 @@
 """The question views
 """
+import datetime
 import typing
 
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
-from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -91,14 +91,14 @@ class QuestionViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answers'):
             return (
-                filters.OrderingField('activity', 'last_activity_date'),
-                filters.OrderingField('creation', 'creation_date'),
-                filters.OrderingField('votes', 'score')
+                filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('votes', 'score', type=int)
             )
         if self.action == 'comments':
             return (
-                filters.OrderingField('creation', 'creation_date'),
-                filters.OrderingField('votes', 'score')
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('votes', 'score', type=int)
             )
 
         return None
