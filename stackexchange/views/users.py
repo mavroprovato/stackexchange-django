@@ -114,7 +114,7 @@ class UserViewSet(BaseViewSet):
             return (
                 filters.OrderingField('reputation'),
                 filters.OrderingField('creation', 'creation_date'),
-                filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC.value),
+                filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
             )
         if self.action in ('answers', 'posts', 'questions'):
             return (
@@ -124,8 +124,8 @@ class UserViewSet(BaseViewSet):
             )
         if self.action == 'badges':
             return (
-                filters.OrderingField('name', 'badge__name', enums.OrderingDirection.ASC.value),
-                filters.OrderingField('type', 'badge__badge_class', enums.OrderingDirection.ASC.value),
+                filters.OrderingField('name', 'badge__name', enums.OrderingDirection.ASC),
+                filters.OrderingField('type', 'badge__badge_class', enums.OrderingDirection.ASC),
                 filters.OrderingField('awarded', 'date_awarded'),
             )
         if self.action == 'comments':
