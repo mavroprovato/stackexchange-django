@@ -41,7 +41,52 @@ class OrderingFilter(BaseFilterBackend):
         :param view: The view to filter.
         :return: The filtered queryset.
         """
-        return queryset.order_by(*self.get_ordering(request, view))
+        ordering_fields = getattr(view, 'ordering_fields', [])
+
+        queryset = self.order_queryset(request, queryset, ordering_fields)
+
+        return queryset
+
+    def order_queryset(self, request: Request, queryset: QuerySet, ordering_fields: typing.Iterable[OrderingField]
+                       ) -> QuerySet:
+        """Order the queryset based on the ordering parameters from the request.
+
+        :param request: The request.
+        :param queryset: The queryset to order.
+        :param ordering_fields: The view ordering fields.
+        :return: The ordered queryset.
+        """
+        order_by = 'pk',
+        if ordering_fields:
+            # Validate that the ordering fields
+            for ordering_field in ordering_fields:
+                if not isinstance(ordering_field, OrderingField):
+                    raise ValueError("The ordering fields must be an instance of the OrderingField class")
+
+            # Get the ordering field from the request, or the first available if it cannot be found
+            ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
+            ordering = None
+            if ordering_name:
+                for ordering_field in ordering_fields:
+                    if ordering_field.name == ordering_name:
+                        ordering = ordering_field
+            if ordering is None:
+                ordering = ordering_fields[0]
+
+            # Customize the sort order if it exists in the request and is valid.
+            direction = ordering.direction
+            direction_value = request.query_params.get(self.ordering_sort_param, '').strip()
+            if direction_value:
+                try:
+                    direction = enums.OrderingDirection(direction_value)
+                except ValueError:
+                    pass
+
+            order_by = (
+                f"{'-' if direction == enums.OrderingDirection.DESC else ''}{ordering.field}", 'pk'
+            )
+
+        return queryset.order_by(*order_by)
 
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
         """Get the schema operation parameters.
@@ -70,44 +115,3 @@ class OrderingFilter(BaseFilterBackend):
                 },
             },
         ]
-
-    def get_ordering(self, request: Request, view: View) -> typing.Iterable[str]:
-        """Get the ordering for the view. Returns an iterable of fields that can be used in an order by clause of a
-        queryset. If no fields can be found, the primary key is returned.
-
-        :param request: The request.
-        :param view: The view.
-        :return: The ordering fields.
-        """
-        ordering_fields = getattr(view, 'ordering_fields', [])
-
-        if ordering_fields:
-            # Validate that the ordering fields
-            for ordering_field in ordering_fields:
-                if not isinstance(ordering_field, OrderingField):
-                    raise ValueError("The ordering fields must be an instance of the OrderingField class")
-
-            # Get the ordering field from the request, or the first available if it cannot be found
-            ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
-            ordering = None
-            if ordering_name:
-                for ordering_field in ordering_fields:
-                    if ordering_field.name == ordering_name:
-                        ordering = ordering_field
-            if ordering is None:
-                ordering = ordering_fields[0]
-
-            # Customize the sort order if it exists in the request and is valid.
-            direction = ordering.direction
-            direction_value = request.query_params.get(self.ordering_sort_param, '').strip()
-            if direction_value:
-                try:
-                    direction = enums.OrderingDirection(direction_value)
-                except ValueError:
-                    pass
-
-            return (
-                f"{'-' if direction == enums.OrderingDirection.DESC else ''}{ordering.field}", 'pk'
-            )
-
-        return 'pk',
