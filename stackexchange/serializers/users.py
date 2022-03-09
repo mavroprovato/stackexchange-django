@@ -51,7 +51,7 @@ class UserBadgeSerializer(serializers.ModelSerializer):
         :param user_badge: The badges.
         :return: The badge type.
         """
-        return "tag_based" if user_badge.badge.tag_based else "named"
+        return enums.BadgeType(user_badge.badge.badge_type).name.lower()
 
     @staticmethod
     def get_rank(user_badge: models.UserBadge) -> str:

@@ -104,7 +104,7 @@ class BadgeViewSet(BaseViewSet):
             return (
                 filters.OrderingField('rank', 'badge_class', type=enums.BadgeClass),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
-                filters.OrderingField('type', 'tag_based')
+                filters.OrderingField('type', 'badge_type', type=enums.BadgeType)
             )
 
         return None
