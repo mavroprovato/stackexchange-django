@@ -67,7 +67,8 @@ class Badge(models.Model):
     name = models.CharField(help_text="The badge name", max_length=255, unique=True)
     badge_class = models.SmallIntegerField(
         help_text="The badge class", choices=((bc.value, bc.description) for bc in enums.BadgeClass))
-    tag_based = models.BooleanField(help_text="If the badge is tag based")
+    badge_type = models.SmallIntegerField(
+        help_text="The badge type", choices=((bt.value, bt.description) for bt in enums.BadgeType))
 
     objects = managers.BadgeQuerySet().as_manager()
 

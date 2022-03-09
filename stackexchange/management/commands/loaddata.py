@@ -17,6 +17,8 @@ import requests
 import py7zr
 import tqdm
 
+from stackexchange import enums
+
 
 class Downloader:
     """Helper class to download stack exchange site data.
@@ -227,7 +229,11 @@ class Importer:
         """
         self.output.write(f"Loading badges")
         badges = {
-            row['Name']: {'Name': row['Name'], 'Class': row['Class'], 'TagBased': row['TagBased']}
+            row['Name']: {
+                'Name': row['Name'], 'Class': row['Class'],
+                'TagBased': enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True'
+                else enums.BadgeType.NAMED.value
+            }
             for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE)
         }
         with (self.temp_dir / 'badges.csv').open('wt') as f:
@@ -239,7 +245,7 @@ class Importer:
         with (self.temp_dir / 'badges.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE badges CASCADE")
-                cursor.copy_from(f, table='badges', columns=('name', 'badge_class', 'tag_based'), sep=',')
+                cursor.copy_from(f, table='badges', columns=('name', 'badge_class', 'badge_type'), sep=',')
         self.output.write("Badges loaded")
 
     def load_user_badges(self):

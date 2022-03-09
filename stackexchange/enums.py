@@ -30,6 +30,13 @@ class BadgeClass(BaseEnum):
     BRONZE = 3
 
 
+class BadgeType(BaseEnum):
+    """Enumeration for badge types.
+    """
+    NAMED = 1
+    TAG_BASED = 2
+
+
 class ContentLicense(enum.Enum):
     """The content license enumeration
     """
