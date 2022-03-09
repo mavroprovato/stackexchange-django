@@ -43,11 +43,11 @@ class BadgeViewSet(BaseViewSet):
         :return: The queryset for the action.
         """
         if self.action == 'named':
-            return models.Badge.objects.filter(tag_based=False).with_award_count()
+            return models.Badge.objects.filter(badge_type=enums.BadgeType.NAMED).with_award_count()
         if self.action in ('recipients', 'recipients_detail'):
             return models.UserBadge.objects.select_related('user', 'badge').order_by('-date_awarded')
         if self.action == 'tags':
-            return models.Badge.objects.filter(tag_based=True).with_award_count()
+            return models.Badge.objects.filter(badge_type=enums.BadgeType.TAG_BASED).with_award_count()
 
         return models.Badge.objects.with_award_count()
 
