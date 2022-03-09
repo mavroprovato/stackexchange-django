@@ -17,7 +17,7 @@ class CommentViewSet(BaseViewSet):
     serializer_class = serializers.CommentSerializer
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
     ordering_fields = (
-        ('creation', enums.OrderingDirection.DESC.value, 'creation_date'),
-        ('votes', enums.OrderingDirection.DESC.value, 'score')
+        filters.OrderingField('creation', 'creation_date'),
+        filters.OrderingField('votes', 'score')
     )
     date_field = 'creation_date'
