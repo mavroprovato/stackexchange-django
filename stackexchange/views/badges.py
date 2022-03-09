@@ -102,9 +102,9 @@ class BadgeViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'named', 'tags'):
             return (
-                ('rank', enums.OrderingDirection.DESC.value, 'badge_class'),
-                ('name', enums.OrderingDirection.ASC.value),
-                ('type', enums.OrderingDirection.DESC.value, 'tag_based')
+                filters.OrderingField('rank', 'badge_class'),
+                filters.OrderingField('name', direction=enums.OrderingDirection.ASC.value),
+                filters.OrderingField('type', 'tag_based')
             )
 
         return None

@@ -17,7 +17,7 @@ class OrderingField:
     """
     name: str
     field: str = None
-    ordering: enums.OrderingDirection = enums.OrderingDirection.DESC
+    direction: enums.OrderingDirection = enums.OrderingDirection.DESC
     type: object = None
 
     def __post_init__(self):
@@ -80,11 +80,13 @@ class OrderingFilter(BaseFilterBackend):
         :return: The ordering fields.
         """
         ordering_fields = getattr(view, 'ordering_fields', [])
-        for ordering_field in ordering_fields:
-            if not isinstance(ordering_field, OrderingField):
-                raise ValueError("The ordering fields must be an instance of the OrderingField class")
 
         if ordering_fields:
+            # Validate that the ordering fields
+            for ordering_field in ordering_fields:
+                if not isinstance(ordering_field, OrderingField):
+                    raise ValueError("The ordering fields must be an instance of the OrderingField class")
+
             # Get the ordering field from the request, or the first available if it cannot be found
             ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
             ordering = None
@@ -96,7 +98,7 @@ class OrderingFilter(BaseFilterBackend):
                 ordering = ordering_fields[0]
 
             # Customize the sort order if it exists in the request and is valid.
-            direction = enums.OrderingDirection.DESC
+            direction = ordering.direction
             direction_value = request.query_params.get(self.ordering_sort_param, '').strip()
             if direction_value:
                 try:
