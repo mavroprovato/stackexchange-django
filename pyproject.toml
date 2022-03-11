@@ -16,6 +16,7 @@ py7zr = "*"
 requests = "*"
 tqdm = "*"
 pylint-django = "^2.5.2"
+factory-boy = "^3.2.1"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
