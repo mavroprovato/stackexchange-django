@@ -76,3 +76,15 @@ class UserTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         display_names = [row['display_name'] for row in response.json()['items']]
         self.assertListEqual(display_names, sorted(display_names, reverse=True))
+
+    def test_list_in_name(self):
+        """Test the in name filter for users.
+        """
+        # Create a user that will surely be returned
+        user = factories.UserFactory.create(display_name='John Doe')
+        response = self.client.get(reverse('user-list'), data={'inname': 'oh'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Assert that all users contain the string in their display name
+        self.assertTrue(all('oh' in row['display_name'] for row in response.json()['items']))
+        # Assert that the user was returned
+        self.assertIn(user.id, [int(row['user_id']) for row in response.json()['items']])
