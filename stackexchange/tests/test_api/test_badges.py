@@ -30,6 +30,45 @@ class BadgeTests(APITestCase):
             self.assertEqual(row['rank'], enums.BadgeClass(badge.badge_class).name.lower())
             self.assertEqual(row['name'], badge.name)
 
+    def test_list_sort_by_rank(self):
+        """Test the badges list sorted by badge rank.
+        """
+        response = self.client.get(reverse('badge-list'), data={'sort': 'rank', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_ranks = [enums.BadgeClass[row['rank'].upper()].value for row in response.json()['items']]
+        self.assertListEqual(badge_ranks, sorted(badge_ranks))
+
+        response = self.client.get(reverse('user-list'), data={'sort': 'rank', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_ranks = [enums.BadgeClass[row['rank'].upper()].value for row in response.json()['items']]
+        self.assertListEqual(badge_ranks, sorted(badge_ranks, reverse=True))
+
+    def test_list_sort_by_name(self):
+        """Test the badges list sorted by badge name.
+        """
+        response = self.client.get(reverse('badge-list'), data={'sort': 'name', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_names = [row['name'].lower() for row in response.json()['items']]
+        self.assertListEqual(badge_names, sorted(badge_names))
+
+        response = self.client.get(reverse('user-list'), data={'sort': 'name', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_names = [row['name'].lower() for row in response.json()['items']]
+        self.assertListEqual(badge_names, sorted(badge_names, reverse=True))
+
+    def test_list_sort_by_type(self):
+        """Test the badges list sorted by badge type.
+        """
+        response = self.client.get(reverse('badge-list'), data={'sort': 'type', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_types = [enums.BadgeType[row['badge_type'].upper()].value for row in response.json()['items']]
+        self.assertListEqual(badge_types, sorted(badge_types))
+
+        response = self.client.get(reverse('user-list'), data={'sort': 'type', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_types = [enums.BadgeType[row['badge_type'].upper()].value for row in response.json()['items']]
+        self.assertListEqual(badge_types, sorted(badge_types, reverse=True))
+
     def test_named(self):
         """Test badges named endpoint
         """
