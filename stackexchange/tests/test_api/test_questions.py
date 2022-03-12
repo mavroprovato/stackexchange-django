@@ -1,6 +1,7 @@
 """Questions view set testing
 """
 import dateutil.parser
+import random
 
 from django.urls import reverse
 from rest_framework import status
@@ -17,7 +18,7 @@ class QuestionTests(APITestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.QuestionAnswerFactory.create_batch(size=1000)
+        factories.QuestionFactory.create_batch(size=1000)
 
     def test_list(self):
         """Test question list endpoint
@@ -41,3 +42,59 @@ class QuestionTests(APITestCase):
         """
         response = self.client.get(reverse('question-no-answers'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_list_sort_by_activity(self):
+        """Test the question list sorted by activity date.
+        """
+        response = self.client.get(reverse('question-list'), data={'sort': 'activity', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations))
+
+        response = self.client.get(reverse('question-list'), data={'sort': 'activity', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+
+    def test_list_sort_by_creation(self):
+        """Test the question list sorted by creation date.
+        """
+        response = self.client.get(reverse('question-list'), data={'sort': 'creation', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['creation_date'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations))
+
+        response = self.client.get(reverse('question-list'), data={'sort': 'creation', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['creation_date'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+
+    def test_list_sort_by_votes(self):
+        """Test the question list sorted by votes.
+        """
+        response = self.client.get(reverse('question-list'), data={'sort': 'votes', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations))
+
+        response = self.client.get(reverse('question-list'), data={'sort': 'votes', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+
+    def test_detail(self):
+        """Test the question detail endpoint.
+        """
+        # Test getting one question
+        post = random.sample(list(models.Post.objects.all()), 1)[0]
+        response = self.client.get(reverse('question-detail', kwargs={'pk': post.pk}))
+        self.assertEqual(response.json()['items'][0]['question_id'], post.pk)
+
+    def test_detail_multiple(self):
+        """Test the question detail endpoint for multiple ids.
+        """
+        # Test getting multiple questions
+        posts = random.sample(list(models.Post.objects.all()), 3)
+        response = self.client.get(reverse('question-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertSetEqual({row['question_id'] for row in response.json()['items']}, {post.pk for post in posts})

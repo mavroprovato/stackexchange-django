@@ -27,10 +27,3 @@ class QuestionAnswerFactory(PostFactory):
     """The question or answer factory
     """
     type = factory.Faker('random_element', elements=(enums.PostType.QUESTION.value, enums.PostType.ANSWER.value))
-
-
-class QuestionFactory(PostFactory):
-    """The question factory
-    """
-    type = enums.PostType.QUESTION.value
-
