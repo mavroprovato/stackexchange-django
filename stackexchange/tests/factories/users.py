@@ -1,4 +1,4 @@
-"""The user factory
+"""The users factory
 """
 import factory
 
@@ -6,7 +6,7 @@ from stackexchange import models
 
 
 class UserFactory(factory.django.DjangoModelFactory):
-    """The user factory
+    """The users factory
     """
     class Meta:
         model = models.User

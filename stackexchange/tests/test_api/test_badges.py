@@ -4,10 +4,18 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from .. import factories
+
 
 class BadgeTests(APITestCase):
     """Badges view set tests
     """
+    @classmethod
+    def setUpTestData(cls):
+        """Set up the test data.
+        """
+        factories.BadgeFactory.create_batch(size=100)
+
     def test_list(self):
         """Test badges list endpoint
         """
