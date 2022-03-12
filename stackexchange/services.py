@@ -1,3 +1,5 @@
+"""Services module
+"""
 from django.db.models import Count, Max, Min, Q
 
 from stackexchange import enums, models

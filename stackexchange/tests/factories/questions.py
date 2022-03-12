@@ -1,7 +1,7 @@
 """The questions factory
 """
-from .posts import PostFactory
 from stackexchange import enums
+from .posts import PostFactory
 
 
 class QuestionFactory(PostFactory):

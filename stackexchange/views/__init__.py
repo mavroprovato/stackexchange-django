@@ -1,3 +1,5 @@
+"""Views module
+"""
 from .base import *
 
 from .answers import *

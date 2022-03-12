@@ -1,3 +1,5 @@
+"""Factories module
+"""
 from .answers import *
 from .badges import *
 from .posts import *

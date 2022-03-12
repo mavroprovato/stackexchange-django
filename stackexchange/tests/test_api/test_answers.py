@@ -1,14 +1,14 @@
 """Answers view set testing
 """
-import dateutil.parser
 import random
 
+import dateutil.parser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .. import factories
 from stackexchange import enums, models
+from .. import factories
 
 
 class AnswerTests(APITestCase):
@@ -89,4 +89,3 @@ class AnswerTests(APITestCase):
         response = self.client.get(reverse('answer-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertSetEqual({row['answer_id'] for row in response.json()['items']}, {post.pk for post in posts})
-

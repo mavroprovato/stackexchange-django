@@ -13,7 +13,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ('username', )
 
     username = factory.Faker('user_name')
-    email = factory.LazyAttribute(lambda obj: '%s@example.com' % obj.username)
+    email = factory.LazyAttribute(lambda obj: f'{obj.username}@example.com')
     display_name = factory.Faker('name')
     website_url = factory.Faker('url')
     location = factory.Faker('city')

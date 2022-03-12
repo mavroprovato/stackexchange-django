@@ -114,8 +114,8 @@ class OrderingFilter(BaseFilterBackend):
             if ordering_field.type == int:
                 try:
                     return int(value_str)
-                except ValueError:
-                    raise ValidationError({param_name: 'Expected integer'})
+                except ValueError as exception:
+                    raise ValidationError({param_name: 'Expected integer'}) from exception
             if ordering_field.type == datetime.date:
                 try:
                     return timezone.make_aware(
@@ -125,11 +125,14 @@ class OrderingFilter(BaseFilterBackend):
             if issubclass(ordering_field.type, enum.Enum):
                 try:
                     return ordering_field.type[value_str.upper()].value
-                except KeyError:
+                except KeyError as exception:
                     raise ValidationError(
-                        {param_name: f'Expected one of {",".join(f.name.lower() for f in ordering_field.type)}'})
+                        {param_name: f'Expected one of {",".join(f.name.lower() for f in ordering_field.type)}'}
+                    ) from exception
 
             return value_str
+
+        return None
 
     def get_ordering_field(self, request: Request, ordering_fields: typing.Sequence[OrderingField]
                            ) -> typing.Optional[OrderingField]:
@@ -155,6 +158,8 @@ class OrderingFilter(BaseFilterBackend):
                 ordering = ordering_fields[0]
 
             return ordering
+
+        return None
 
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
         """Get the schema operation parameters.
