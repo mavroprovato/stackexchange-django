@@ -1,3 +1,4 @@
+from .answers import *
 from .badges import *
 from .posts import *
 from .questions import *

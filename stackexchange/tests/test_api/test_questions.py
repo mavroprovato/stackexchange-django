@@ -86,15 +86,18 @@ class QuestionTests(APITestCase):
         """Test the question detail endpoint.
         """
         # Test getting one question
-        post = random.sample(list(models.Post.objects.all()), 1)[0]
-        response = self.client.get(reverse('question-detail', kwargs={'pk': post.pk}))
-        self.assertEqual(response.json()['items'][0]['question_id'], post.pk)
+        question = random.sample(list(models.Post.objects.all()), 1)[0]
+        response = self.client.get(reverse('question-detail', kwargs={'pk': question.pk}))
+        self.assertEqual(response.json()['items'][0]['question_id'], question.pk)
 
     def test_detail_multiple(self):
         """Test the question detail endpoint for multiple ids.
         """
         # Test getting multiple questions
-        posts = random.sample(list(models.Post.objects.all()), 3)
-        response = self.client.get(reverse('question-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
+        questions = random.sample(list(models.Post.objects.all()), 3)
+        response = self.client.get(reverse('question-detail', kwargs={
+            'pk': ';'.join(str(question.pk) for question in questions)
+        }))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertSetEqual({row['question_id'] for row in response.json()['items']}, {post.pk for post in posts})
+        self.assertSetEqual({row['question_id'] for row in response.json()['items']},
+                            {question.pk for question in questions})
