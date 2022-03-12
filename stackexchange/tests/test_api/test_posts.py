@@ -26,7 +26,7 @@ class PostTests(APITestCase):
         response = self.client.get(reverse('post-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        # Check that the user information returned is correct
+        # Check that the post information returned is correct
         for row in response.json()['items']:
             post = models.Post.objects.get(pk=row['post_id'])
             self.assertEqual(row['score'], post.score)
