@@ -98,6 +98,10 @@ class UserTests(APITestCase):
         response = self.client.get(reverse('user-detail', kwargs={'pk': user.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()['items'][0]['user_id'], user.pk)
+
+    def test_detail_multiple(self):
+        """Test the user detail endpoint for multiple ids.
+        """
         # Test getting multiple users
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(reverse('user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
