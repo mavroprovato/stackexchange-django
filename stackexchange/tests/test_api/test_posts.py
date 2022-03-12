@@ -1,6 +1,7 @@
 """Posts view set testing
 """
 import dateutil.parser
+import random
 
 from django.urls import reverse
 from rest_framework import status
@@ -17,7 +18,7 @@ class PostTests(APITestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.PostFactory.create_batch(size=1000)
+        factories.QuestionAnswerFactory.create_batch(size=1000)
 
     def test_list(self):
         """Test post list endpoint
@@ -72,3 +73,20 @@ class PostTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         reputations = [row['score'] for row in response.json()['items']]
         self.assertListEqual(reputations, sorted(reputations, reverse=True))
+
+    def test_detail(self):
+        """Test the post detail endpoint.
+        """
+        # Test getting one post
+        post = random.sample(list(models.Post.objects.all()), 1)[0]
+        response = self.client.get(reverse('post-detail', kwargs={'pk': post.pk}))
+        self.assertEqual(response.json()['items'][0]['post_id'], post.pk)
+
+    def test_detail_multiple(self):
+        """Test the post detail endpoint for multiple ids.
+        """
+        # Test getting multiple posts
+        posts = random.sample(list(models.Post.objects.all()), 3)
+        response = self.client.get(reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertSetEqual({row['post_id'] for row in response.json()['items']}, {post.pk for post in posts})
