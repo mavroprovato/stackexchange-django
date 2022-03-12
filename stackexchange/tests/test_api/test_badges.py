@@ -71,6 +71,22 @@ class BadgeTests(APITestCase):
         badge_types = [enums.BadgeType[row['badge_type'].upper()].value for row in response.json()['items']]
         self.assertListEqual(badge_types, sorted(badge_types, reverse=True))
 
+    def test_detail(self):
+        """Test the badges detail endpoint.
+        """
+        badge = random.sample(list(models.Badge.objects.all()), 1)[0]
+        response = self.client.get(reverse('badge-detail', kwargs={'pk': badge.pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()['items'][0]['badge_id'], badge.pk)
+
+    def test_detail_multiple(self):
+        """Test the badges detail endpoint for multiple ids.
+        """
+        badges = random.sample(list(models.Badge.objects.all()), 3)
+        response = self.client.get(reverse('badge-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertSetEqual({row['badge_id'] for row in response.json()['items']}, {badge.pk for badge in badges})
+
     def test_named(self):
         """Test badges named endpoint
         """
