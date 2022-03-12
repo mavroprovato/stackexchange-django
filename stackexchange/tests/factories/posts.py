@@ -1,0 +1,23 @@
+"""The posts factory
+"""
+import factory
+import pytz
+
+from stackexchange import enums, models
+
+
+class PostFactory(factory.django.DjangoModelFactory):
+    """The posts factory
+    """
+    class Meta:
+        model = models.Post
+
+    title = factory.Faker('sentence')
+    body = factory.Faker('paragraph')
+    type = factory.Faker('random_element', elements=[pt.value for pt in enums.PostType])
+    last_activity_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
+    score = factory.Faker('pyint')
+    view_count = factory.Faker('pyint')
+    answer_count = factory.Faker('pyint')
+    comment_count = factory.Faker('pyint')
+    favorite_count = factory.Faker('pyint')
