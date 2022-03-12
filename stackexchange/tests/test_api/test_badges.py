@@ -1,5 +1,7 @@
 """Badges view set testing
 """
+import random
+
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -38,7 +40,7 @@ class BadgeTests(APITestCase):
         badge_ranks = [enums.BadgeClass[row['rank'].upper()].value for row in response.json()['items']]
         self.assertListEqual(badge_ranks, sorted(badge_ranks))
 
-        response = self.client.get(reverse('user-list'), data={'sort': 'rank', 'order': 'desc'})
+        response = self.client.get(reverse('badge-list'), data={'sort': 'rank', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         badge_ranks = [enums.BadgeClass[row['rank'].upper()].value for row in response.json()['items']]
         self.assertListEqual(badge_ranks, sorted(badge_ranks, reverse=True))
@@ -51,7 +53,7 @@ class BadgeTests(APITestCase):
         badge_names = [row['name'].lower() for row in response.json()['items']]
         self.assertListEqual(badge_names, sorted(badge_names))
 
-        response = self.client.get(reverse('user-list'), data={'sort': 'name', 'order': 'desc'})
+        response = self.client.get(reverse('badge-list'), data={'sort': 'name', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         badge_names = [row['name'].lower() for row in response.json()['items']]
         self.assertListEqual(badge_names, sorted(badge_names, reverse=True))
@@ -64,7 +66,7 @@ class BadgeTests(APITestCase):
         badge_types = [enums.BadgeType[row['badge_type'].upper()].value for row in response.json()['items']]
         self.assertListEqual(badge_types, sorted(badge_types))
 
-        response = self.client.get(reverse('user-list'), data={'sort': 'type', 'order': 'desc'})
+        response = self.client.get(reverse('badge-list'), data={'sort': 'type', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         badge_types = [enums.BadgeType[row['badge_type'].upper()].value for row in response.json()['items']]
         self.assertListEqual(badge_types, sorted(badge_types, reverse=True))
