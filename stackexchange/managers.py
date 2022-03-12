@@ -61,9 +61,9 @@ class BadgeQuerySet(QuerySet):
         :return: The annotated queryset.
         """
         return self.annotate(
-            award_count=Subquery(
+            award_count=Coalesce(Subquery(
                 apps.get_model('stackexchange', 'UserBadge').objects.filter(
                     badge=OuterRef('pk')
                 ).values('badge').annotate(count=Count('pk')).values('count')
-            )
+            ), 0)
         )
