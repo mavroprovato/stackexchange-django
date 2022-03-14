@@ -1,5 +1,6 @@
 """The privileges view set
 """
+from django.contrib.staticfiles import finders
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -9,7 +10,10 @@ from stackexchange.views import BaseListViewSet
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Returns the earnable privileges on the site', description=' ')
+    list=extend_schema(
+        summary='Get all the privileges available on the site',
+        description=open(finders.find('stackexchange/doc/privileges/list.md')).read()
+    )
 )
 class PrivilegesViewSet(BaseListViewSet):
     """The privileges view set
