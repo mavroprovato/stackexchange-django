@@ -3,6 +3,7 @@
 import factory
 import pytz
 
+from .users import UserFactory
 from stackexchange import enums, models
 
 
@@ -21,6 +22,7 @@ class PostFactory(factory.django.DjangoModelFactory):
     answer_count = factory.Faker('pyint')
     comment_count = factory.Faker('pyint')
     favorite_count = factory.Faker('pyint')
+    owner = factory.SubFactory(UserFactory)
 
 
 class QuestionAnswerFactory(PostFactory):
