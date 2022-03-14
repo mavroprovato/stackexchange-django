@@ -3,6 +3,7 @@
 import datetime
 import typing
 
+from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -14,11 +15,15 @@ from .base import BaseViewSet
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all posts (questions and answers) in the system', description=' '),
+    list=extend_schema(
+        summary='Get all posts (questions and answers) in the system',
+        description=open(finders.find('stackexchange/doc/posts/list.md')).read()
+    ),
     retrieve=extend_schema(
         summary='Get all posts identified by a set of ids. Useful for when the type of post (question or answer) is '
                 'not known',
-        description=' ', parameters=[
+        description=open(finders.find('stackexchange/doc/posts/retrieve.md')).read(),
+        parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated post identifiers'
@@ -26,7 +31,18 @@ from .base import BaseViewSet
         ]
     ),
     comments=extend_schema(
-        summary='Get comments on the posts (question or answer) identified by a set of ids', description=' ',
+        summary='Get comments on the posts (question or answer) identified by a set of ids',
+        description=open(finders.find('stackexchange/doc/posts/comments.md')).read(),
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated post identifiers'
+            )
+        ]
+    ),
+    revisions=extend_schema(
+        summary='Get revisions on the set of posts in ids',
+        description=open(finders.find('stackexchange/doc/posts/revisions.md')).read(),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
