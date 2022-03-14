@@ -2,6 +2,7 @@
 """
 import typing
 
+from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -13,24 +14,41 @@ from .base import BaseViewSet
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all badges on the site', description=' '),
-    retrieve=extend_schema(summary='Get the badges identified by ids', description=' ', parameters=[
-        OpenApiParameter(
-            name='id', type=str, location=OpenApiParameter.PATH,
-            description='A list of semicolon separated badge identifiers'
-        )
-    ]),
-    named=extend_schema(summary='Get all non-tagged-based badges', description=' '),
-    recipients=extend_schema(summary='Get badges recently awarded on the site', description=' '),
-    recipients_detail=extend_schema(
-        summary='Get the recent recipients of the given badges', description=' ', parameters=[
+    list=extend_schema(
+        summary='Get all badges on the site', description=open(finders.find('stackexchange/doc/badges/list.md')).read()
+    ),
+    retrieve=extend_schema(
+        summary='Get the badges identified by ids',
+        description=open(finders.find('stackexchange/doc/badges/retrieve.md')).read(),
+        parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated badge identifiers'
             )
         ]
     ),
-    tags=extend_schema(summary='Get all tagged-based badges', description=' '),
+    named=extend_schema(
+        summary='Get all non-tagged-based badges',
+        description=open(finders.find('stackexchange/doc/badges/named.md')).read()
+    ),
+    recipients=extend_schema(
+        summary='Get badges recently awarded on the site',
+        description=open(finders.find('stackexchange/doc/badges/recipients.md')).read()
+    ),
+    recipients_detail=extend_schema(
+        summary='Get the recent recipients of the given badges',
+        description=open(finders.find('stackexchange/doc/badges/recipients-detail.md')).read(),
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated badge identifiers'
+            )
+        ]
+    ),
+    tags=extend_schema(
+        summary='Get all tagged-based badges',
+        description=open(finders.find('stackexchange/doc/badges/tags.md')).read()
+    ),
 )
 class BadgeViewSet(BaseViewSet):
     """The badge view set
