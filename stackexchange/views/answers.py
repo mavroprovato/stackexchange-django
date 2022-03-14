@@ -3,6 +3,7 @@
 import datetime
 import typing
 
+from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -14,32 +15,20 @@ from .base import BaseViewSet
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all answers on the site', description='''
-Returns all the undeleted answers in the system.
-
-The sorts accepted by this method operate on the following fields of the answer object:
-
-**activity**
-`last_activity_date`
-
-**creation**
-`creation_date`
-
-**votes**
-`score`
-
-`activity` is the default sort.
-
-It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
-
-This method returns a list of [`answers`](#model-Answer).
-    '''),
-    retrieve=extend_schema(summary='Get answers identified by a set of ids', description=' ', parameters=[
-        OpenApiParameter(
-            name='id', type=str, location=OpenApiParameter.PATH,
-            description='A list of semicolon separated answer identifiers'
-        )
-    ]),
+    list=extend_schema(
+        summary='Get all answers on the site',
+        description=open(finders.find('stackexchange/doc/answers/list.md')).read()
+    ),
+    retrieve=extend_schema(
+        summary='Get answers identified by a set of ids',
+        description=open(finders.find('stackexchange/doc/answers/retrieve.md')).read(),
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated answer identifiers'
+            )
+        ]
+    ),
     comments=extend_schema(
         summary='Get comments on the answers identified by a set of ids', description=' ', parameters=[
             OpenApiParameter(
