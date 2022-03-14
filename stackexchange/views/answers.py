@@ -30,7 +30,9 @@ from .base import BaseViewSet
         ]
     ),
     comments=extend_schema(
-        summary='Get comments on the answers identified by a set of ids', description=' ', parameters=[
+        summary='Get comments on the answers identified by a set of ids',
+        description=open(finders.find('stackexchange/doc/answers/comments.md')).read(),
+        parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated answer identifiers'
@@ -38,7 +40,9 @@ from .base import BaseViewSet
         ]
     ),
     questions=extend_schema(
-        summary='Gets all questions the answers identified by ids are on', description=' ', parameters=[
+        summary='Gets all questions the answers identified by ids are on',
+        description=open(finders.find('stackexchange/doc/answers/questions.md')).read(),
+        parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated answer identifiers'
