@@ -1,7 +1,7 @@
 Gets the badges identified in id.
 
-Note that badge ids are not constant across sites, and thus should be looked up via the /badges method. A badge id on a
-single site is, however, guaranteed to be stable.
+Note that badge ids are not constant across sites, and thus should be looked up via the
+[/badges](#operations-badges-badges_list) method. A badge id on a single site is, however, guaranteed to be stable.
 
 Badge sorts are a tad complicated. For the purposes of sorting (and min/max) `tag_based` is considered to be **greater
 than** `named`.

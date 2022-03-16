@@ -1,7 +1,8 @@
 Gets the comments on a set of answers.
 
 If you know that you have an answer id and need the comments, use this method. If you know you have a question id, use
-/questions/{id}/comments. If you are unsure, use /posts/{id}/comments.
+[/questions/{id}/comments](#operations-questions-questions_comments_list). If you are unsure, use
+[/posts/{id}/comments](#operations-posts-posts_comments_list).
 
 `{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `answer_id` on
 [answer objects](#model-Answer).

@@ -1,7 +1,7 @@
 Gets the comments identified in id.
 
 This method is most useful if you have a cache of comment ids obtained through other means (such as
-/questions/{id}/comments) but suspect the data may be stale.
+[/questions/{id}/comments](#operations-questions-questions_comments_list) ) but suspect the data may be stale.
 
 `{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `comment_id` on
 [comment objects](#model-Comment).
