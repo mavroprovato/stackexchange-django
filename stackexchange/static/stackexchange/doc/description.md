@@ -31,8 +31,8 @@ identical to `/users/3;2;1`.
 ## Complex Queries
 
 Simple usage of the API focuses around getting large sets of data about sites quickly. It's fairly obvious how to grab
-all of a user's answers, even all of a large set of users' via vectorized requests, all recent comments, and so on.
-What's less obvious is how to cull our datasets to smaller chunks of data.
+all of a user's answers, even all of a large set of users' via [vectorized requests](#vectorized-requests), all recent
+comments, and so on. What's less obvious is how to cull our datasets to smaller chunks of data.
 
 The API provides the `sort`, `min`, `max`, `fromdate`, and `todate` parameters on many methods to allow for more
 complicated queries. `min` and `max` specify the range of a field must fall in (that field being specified by sort) to
