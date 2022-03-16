@@ -2,6 +2,7 @@
 """
 import typing
 
+from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -13,13 +14,20 @@ from .base import BaseListViewSet
 
 
 @extend_schema_view(
-    list=extend_schema(summary='Get all tags on the site', description=' '),
-    wikis=extend_schema(summary='Get the wiki entries for a set of tags', description=' ', parameters=[
-        OpenApiParameter(
-            name='id', type=str, location=OpenApiParameter.PATH,
-            description='A list of semicolon separated tag names'
-        )
-    ])
+    list=extend_schema(
+        summary='Get all tags on the site',
+        description=open(finders.find('stackexchange/doc/tags/list.md')).read()
+    ),
+    wikis=extend_schema(
+        summary='Get the wiki entries for a set of tags',
+        description=open(finders.find('stackexchange/doc/tags/wikis.md')).read(),
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated tag names'
+            )
+        ]
+    )
 )
 class TagViewSet(BaseListViewSet):
     """The tag view set
