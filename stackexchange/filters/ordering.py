@@ -167,6 +167,10 @@ class OrderingFilter(BaseFilterBackend):
         :param view: The view to get the parameters for.
         :return: The parameters.
         """
+        ordering_fields = getattr(view, 'ordering_fields')
+        if not ordering_fields:
+            return []
+
         return [
             {
                 'name': self.ordering_name_param,
@@ -175,7 +179,7 @@ class OrderingFilter(BaseFilterBackend):
                 'description': 'The field to sort by',
                 'schema': {
                     'type': 'string',
-                    'enum': [of.name for of in getattr(view, 'ordering_fields', [])]
+                    'enum': [of.name for of in ordering_fields]
                 },
             }, {
                 'name': self.ordering_sort_param,
