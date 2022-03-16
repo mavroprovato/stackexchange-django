@@ -4,9 +4,9 @@ If you know that you have an answer id and need the comments, use this method. I
 /questions/{id}/comments. If you are unsure, use /posts/{id}/comments.
 
 `{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `answer_id` on
-[`answer`](#model-Answer) objects.
+[answer objects](#model-Answer).
 
-The sorts accepted by this method operate on the following fields of the [`comment`](#model-Comment) object:
+The sorts accepted by this method operate on the following fields of the [comment object](#model-Comment):
 
 **creation**
 `creation_date`
@@ -18,4 +18,4 @@ The sorts accepted by this method operate on the following fields of the [`comme
 
 It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
 
-This method returns a list of [`comments`](#model-Comment).
+This method returns a list of [comments](#model-Comment).

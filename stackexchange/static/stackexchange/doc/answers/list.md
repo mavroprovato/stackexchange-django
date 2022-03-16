@@ -1,6 +1,6 @@
 Returns all the undeleted answers in the system.
 
-The sorts accepted by this method operate on the following fields of the answer object:
+The sorts accepted by this method operate on the following fields of the [answer object](#model-Answer):
 
 **activity**
 `last_activity_date`
@@ -15,4 +15,4 @@ The sorts accepted by this method operate on the following fields of the answer 
 
 It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
 
-This method returns a list of [`answers`](#model-Answer).
+This method returns a list of [answers](#model-Answer).

@@ -5,4 +5,4 @@ method.
 
 This data is cached very aggressively, by design. Query sparingly, ideally no more than once an hour.
 
-This method returns an [`info`](#model-Info) object.
+This method returns an [info](#model-Info) object.

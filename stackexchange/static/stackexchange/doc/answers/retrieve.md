@@ -5,9 +5,9 @@ This is meant for batch fetching of questions. A useful trick to poll for update
 date of the last time you polled.
 
 `{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `answer_id` on
-[`answer`](#model-Answer) objects.
+[answer objects](#model-Answer).
 
-The sorts accepted by this method operate on the following fields of the [`answer`](#model-Answer) object:
+The sorts accepted by this method operate on the following fields of the [answer object](#model-Answer):
 
 **activity**
 `last_activity_date`
@@ -22,4 +22,4 @@ The sorts accepted by this method operate on the following fields of the [`answe
 
 It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
 
-This method returns a list of [`answers`](#model-Answer).
+This method returns a list of [answers](#model-Answer).

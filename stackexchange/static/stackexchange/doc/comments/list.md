@@ -6,7 +6,7 @@ appropriate min and max values.
 If you're looking to query conversations between users, instead use the /users/{ids}/mentioned and
 /users/{ids}/comments/{toid} methods.
 
-The sorts accepted by this method operate on the following fields of the [`comment object`](#model-Comment):
+The sorts accepted by this method operate on the following fields of the [comment object](#model-Comment):
 
 **creation**
 `creation_date`
@@ -18,4 +18,4 @@ The sorts accepted by this method operate on the following fields of the [`comme
 
 It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
 
-This method returns a list of [`comments`](#model-Comment).
+This method returns a list of [comments](#model-Comment).

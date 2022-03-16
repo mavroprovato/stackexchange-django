@@ -1,7 +1,9 @@
-Returns the questions that answers identied by {ids} are on.
+Returns the questions identified in {ids}.
 
-`{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `answer_id` on
-[answer objects](#model-Answer).
+This is most useful for fetching fresh data when maintaining a cache of question ids, or polling for changes.
+
+`{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `question_id` on
+[question objects](#model-Question).
 
 The sorts accepted by this method operate on the following fields of the [question object](#model-Question):
 

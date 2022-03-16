@@ -8,7 +8,7 @@ Most applications should use the question or answer specific methods, but `/post
 where any activity is of interest. Examples of such queries would be: "all posts on Jan. 1st 2011" or "top 10 posts by
 score of all time".
 
-The sorts accepted by this method operate on the following fields of the [`post`](#model-Post) object:
+The sorts accepted by this method operate on the following fields of the [post object](#model-Post):
 
 **activity**
 `last_activity_date`
@@ -23,4 +23,4 @@ The sorts accepted by this method operate on the following fields of the [`post`
 
 It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
 
-This method returns a list of [`posts`](#model-Post).
+This method returns a list of [posts](#model-Post).

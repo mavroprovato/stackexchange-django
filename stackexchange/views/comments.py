@@ -20,7 +20,7 @@ from .base import BaseViewSet
     ),
 )
 class CommentViewSet(BaseViewSet):
-    """The answers view set
+    """The comment view set
     """
     queryset = models.Comment.objects.select_related('post', 'user')
     serializer_class = serializers.CommentSerializer

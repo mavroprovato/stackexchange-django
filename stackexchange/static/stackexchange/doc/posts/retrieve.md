@@ -4,10 +4,10 @@ This method is meant for grabbing an object when unsure whether an id identifies
 common with user entered data.
 
 `{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `post_id`, `answer_id`, or
-`question_id` on [`post`](#model-Post), [`answer`](#model-Answer), and [`question`](#model-Question) objects
+`question_id` on [post](#model-Post), [answer](#model-Answer), and [question](#model-Question) objects
 respectively.
 
-The sorts accepted by this method operate on the following fields of the post object:
+The sorts accepted by this method operate on the following fields of the [post object](#model-Post):
 
 **activity**
 `last_activity_date`
@@ -22,4 +22,4 @@ The sorts accepted by this method operate on the following fields of the post ob
 
 It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
 
-This method returns a list of [`comments`](#model-Comment).
+This method returns a list of [posts](#model-Post).

@@ -11,4 +11,4 @@ gold badges, `max=silver&min=silver` for just silver, and `min=bronze` for just 
 
 `rank` is the default sort.
 
-This method returns a list of [`badges`](#model-Badge).
+This method returns a list of [badges](#model-Badge).

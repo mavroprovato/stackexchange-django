@@ -15,6 +15,6 @@ gold badges, `max=silver&min=silver` for just silver, and `min=bronze` for just 
 `rank` is the default sort.
 
 `{ids}` can contain up to 100 semicolon delimited ids. To find ids programmatically look for `badge_id` on
-[`badge objects`](#model-Badge).
+[badge objects](#model-Badge).
 
-This method returns a list of [`badges`](#model-Badge).
+This method returns a list of [badges](#model-Badge).
