@@ -5,7 +5,7 @@ would return both "download" and "owner" amongst others.
 
 This method returns a list of [tags](#model-Tag).
 
-The sorts accepted by this method operate on the following fields of the tag object:
+The sorts accepted by this method operate on the following fields of the [tag object](#model-Tag):
 
 **popular**
 `count`

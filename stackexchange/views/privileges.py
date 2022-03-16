@@ -18,7 +18,7 @@ from stackexchange.views import BaseListViewSet
 class PrivilegesViewSet(BaseListViewSet):
     """The privileges view set
     """
-    serializer_class = serializers.PrivilegesSerializer
+    serializer_class = serializers.PrivilegeSerializer
 
     def list(self, request: Request, *args, **kwargs) -> Response:
         """The list endpoint. Returns earnable privileges on the site.

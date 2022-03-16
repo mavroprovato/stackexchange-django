@@ -6,7 +6,7 @@ from stackexchange import enums
 from .base import BaseSerializer
 
 
-class PrivilegesSerializer(BaseSerializer):
+class PrivilegeSerializer(BaseSerializer):
     """The privileges serializer
     """
     reputation = fields.IntegerField(help_text="The required reputation to acquire the privilege")

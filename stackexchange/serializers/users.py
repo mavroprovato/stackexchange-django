@@ -63,7 +63,7 @@ class UserBadgeSerializer(serializers.ModelSerializer):
         return enums.BadgeClass(user_badge.badge.badge_class).name.lower()
 
 
-class UserPrivilegesSerializer(BaseSerializer):
+class UserPrivilegeSerializer(BaseSerializer):
     """Serializer for a user privilege.
     """
     reputation = fields.IntegerField(help_text="The reputation needed to acquire this privilege")
