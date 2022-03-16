@@ -147,6 +147,14 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'stackexchange.openapi.AutoSchema',
 }
 
+# DRF Spectacular configuration
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Stack Exchange API',
+    'DESCRIPTION': open(BASE_DIR / 'stackexchange/static/stackexchange/doc/description.md').read(),
+    'VERSION': '2.3',
+}
+
 # Debug toolbar configuration
 
 INTERNAL_IPS = ['127.0.0.1']
