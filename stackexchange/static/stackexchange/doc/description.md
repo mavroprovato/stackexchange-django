@@ -24,7 +24,7 @@ would fetch users with ids 1 through 5.
 Vectors are not restricted to integer values, /tags/{tags}/synonyms takes a list of tags (strings) and /revisions/{ids}
 takes a list of revision ids (guids).
 
-Note that for caching and throttling purposes, vectors are considered unordered. That is,
+Note that for caching and throttling purposes, vectors are considered *unordered*. That is,
 [/users/1;2;3](#operations-users-users_list) is semantically identical to [/users/3;2;1](#operations-users-users_list).
 
 <div id="complex-queries"></div>
