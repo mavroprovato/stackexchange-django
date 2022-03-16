@@ -13,6 +13,7 @@ The sorts accepted by this method operate on the following fields of the [answer
 
 `activity` is the default sort.
 
-It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
+It is possible to create [moderately complex queries](#complex-queries) using `sort`, `min`, `max`, `fromdate`, and
+`todate`.
 
 This method returns a list of [answers](#model-Answer).

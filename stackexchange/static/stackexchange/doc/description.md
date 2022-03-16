@@ -9,6 +9,8 @@ It is possible to compose reasonably complex queries against the live Stack Exch
 `fromdate`, `todate`, and `sort` parameters. Most, but not all, methods accept some or all of these parameters, the
 documentation for individual methods will highlight which do. Most methods also have a common set of paging parameters.
 
+<div id="vectorized-requests"></div>
+
 ## Vectorized Requests
 
 Most methods that take ids in the API will take up to 100 of them in a single go. This allows applications to batch work
@@ -24,6 +26,8 @@ takes a list of revision ids (guids).
 Note that for caching and throttling purposes, vectors are considered unordered. That is, `/users/1;2;3` is semantically
 identical to `/users/3;2;1`.
 
+<div id="complex-queries"></div>
+
 ## Complex Queries
 
 Simple usage of the API focuses around getting large sets of data about sites quickly. It's fairly obvious how to grab
@@ -36,6 +40,8 @@ be returned, while `fromdate` and `todate` always define the range of `creation_
 defining two "windows" in which data must fit to be returned.
 
 `min`, `max`, `fromdate`, and `todate` are inclusive.
+
+<div id="paging"></div>
 
 ## Paging
 

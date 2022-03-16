@@ -22,6 +22,7 @@ The sorts accepted by this method operate on the following fields of the [user o
 
 `reputation` is the default sort.
 
-It is possible to create moderately complex queries using `sort`, `min`, `max`, `fromdate`, and `todate`.
+It is possible to [create moderately complex queries](#complex-queries) using `sort`, `min`, `max`, `fromdate`, and
+`todate`.
 
 This method returns a list of [users](#model-User).
