@@ -18,14 +18,14 @@ Most methods that take ids in the API will take up to 100 of them in a single go
 and thereby avoid unnecessary round trips, which can be a significant user experience win on slow or high latency
 devices. Those methods with different vector limits will mention that in their individual documentation.
 
-When passing a vector, separate each id with a semicolon. For example, /users/1;2;3;4;5 would fetch users with ids 1
-through 5.
+When passing a vector, separate each id with a semicolon. For example, [/users/1;2;3;4;5](#operations-users-users_list)
+would fetch users with ids 1 through 5.
 
 Vectors are not restricted to integer values, /tags/{tags}/synonyms takes a list of tags (strings) and /revisions/{ids}
 takes a list of revision ids (guids).
 
-Note that for caching and throttling purposes, vectors are considered unordered. That is, `/users/1;2;3` is semantically
-identical to `/users/3;2;1`.
+Note that for caching and throttling purposes, vectors are considered unordered. That is,
+[/users/1;2;3](#operations-users-users_list) is semantically identical to [/users/3;2;1](#operations-users-users_list).
 
 <div id="complex-queries"></div>
 
@@ -47,9 +47,10 @@ defining two "windows" in which data must fit to be returned.
 ## Paging
 
 Nearly all methods in the API accept the `page` and `pagesize` parameters for fetching specific pages of results from
-the API. page starts at and defaults to 1, `pagesize` can be any value between 0 and 100 and defaults to 30.
+the API. `page` starts at and defaults to 1, `pagesize` can be any value between 0 and 100 and defaults to 30.
 
-Since the `{ids}` and similar parameters on methods like /questions/{ids} are constrained to 100 or fewer ids, it is
-always possible to fetch the entirety of a result from those methods in a single request (the same does not apply to
-methods like /users/{ids}/answers since the ids passed are not answer ids). However, it is sometimes more useful to run
-"top M of N by X" style queries as with this most recently active query.
+Since the `{ids}` and similar parameters on methods like [/questions/{ids}](#operations-questions-questions_list) are
+constrained to 100 or fewer ids, it is always possible to fetch the entirety of a result from those methods in a single
+request (the same does not apply to methods like [/users/{ids}/answers](#operations-users-users_answers_list) since the
+ids passed are not answer ids). However, it is sometimes more useful to run "top M of N by X" style queries as with this
+most recently active query.
