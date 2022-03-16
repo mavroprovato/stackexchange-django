@@ -21,6 +21,7 @@ from .base import BaseViewSet
     ),
     retrieve=extend_schema(
         summary='Get answers identified by a set of ids',
+        operation_id='answers_retrieve',
         description=open(finders.find('stackexchange/doc/answers/retrieve.md')).read(),
         parameters=[
             OpenApiParameter(

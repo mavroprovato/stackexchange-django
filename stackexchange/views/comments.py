@@ -12,11 +12,12 @@ from .base import BaseViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all comments on the site',
-        description=open(finders.find('stackexchange/doc/comments/list.md')).read()
+        description=open(finders.find('stackexchange/doc/comments/list.md')).read(),
     ),
     retrieve=extend_schema(
         summary='Gets the comment identified by id',
-        description=open(finders.find('stackexchange/doc/comments/retrieve.md')).read()
+        description=open(finders.find('stackexchange/doc/comments/retrieve.md')).read(),
+        operation_id='comments_retrieve',
     ),
 )
 class CommentViewSet(BaseViewSet):

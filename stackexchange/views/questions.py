@@ -17,11 +17,12 @@ from .base import BaseViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all questions on the site',
-        description=open(finders.find('stackexchange/doc/questions/list.md')).read()
+        description=open(finders.find('stackexchange/doc/questions/list.md')).read(),
     ),
     retrieve=extend_schema(
         summary='Get the questions identified by a set of ids',
         description=open(finders.find('stackexchange/doc/questions/retrieve.md')).read(),
+        operation_id='questions_retrieve',
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,

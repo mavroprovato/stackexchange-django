@@ -22,6 +22,7 @@ from .base import BaseViewSet
     ),
     retrieve=extend_schema(
         summary='Gets the user identified by id',
+        operation_id='users_retrieve',
         description=open(finders.find('stackexchange/doc/users/retrieve.md')).read(),
         parameters=[
             OpenApiParameter(

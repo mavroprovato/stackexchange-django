@@ -17,18 +17,19 @@ from .base import BaseViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all posts (questions and answers) in the system',
-        description=open(finders.find('stackexchange/doc/posts/list.md')).read()
+        description=open(finders.find('stackexchange/doc/posts/list.md')).read(),
     ),
     retrieve=extend_schema(
         summary='Get all posts identified by a set of ids. Useful for when the type of post (question or answer) is '
                 'not known',
         description=open(finders.find('stackexchange/doc/posts/retrieve.md')).read(),
+        operation_id='posts_retrieve',
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated post identifiers'
             )
-        ]
+        ],
     ),
     comments=extend_schema(
         summary='Get comments on the posts (question or answer) identified by a set of ids',
@@ -38,7 +39,7 @@ from .base import BaseViewSet
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated post identifiers'
             )
-        ]
+        ],
     ),
     revisions=extend_schema(
         summary='Get revisions on the set of posts in ids',
@@ -48,7 +49,7 @@ from .base import BaseViewSet
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated post identifiers'
             )
-        ]
+        ],
     ),
 )
 class PostViewSet(BaseViewSet):
