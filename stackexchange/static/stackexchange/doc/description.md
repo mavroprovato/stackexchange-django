@@ -7,7 +7,8 @@ elements, all indexes start at 1.
 
 It is possible to compose reasonably complex queries against the live Stack Exchange sites using the `min`, `max`,
 `fromdate`, `todate`, and `sort` parameters. Most, but not all, methods accept some or all of these parameters, the
-documentation for individual methods will highlight which do. Most methods also have a common set of paging parameters.
+documentation for individual methods will highlight which do. Most methods also have a common set of
+[paging parameters](#paging).
 
 <div id="vectorized-requests"></div>
 
