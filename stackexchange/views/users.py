@@ -160,7 +160,10 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('awarded', 'date_awarded', type=datetime.date),
             )
         if self.action == 'comments':
-            return filters.OrderingField('creation', 'creation_date', type=datetime.date),
+            return (
+                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('votes', 'score', type=int),
+            )
 
         return None
 
