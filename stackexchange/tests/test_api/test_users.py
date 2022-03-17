@@ -21,8 +21,13 @@ class UserTests(APITestCase):
         """
         users = factories.UserFactory.create_batch(size=100)
         # Create some questions from the users
+        questions = []
         for user in users:
-            factories.QuestionFactory.create_batch(size=random.randint(0, 3), owner=user)
+            questions += factories.QuestionFactory.create_batch(size=random.randint(0, 3), owner=user)
+        # Post some answers to the questions
+        for question in questions:
+            factories.AnswersFactory.create_batch(
+                size=random.randint(0, 3), parent=question, owner=random.choice(users))
 
     def test_list(self):
         """Test users list endpoint
@@ -128,6 +133,74 @@ class UserTests(APITestCase):
                              [row['description'] for row in response.json()['items']])
         self.assertListEqual([privilege.name.replace('_', ' ').capitalize() for privilege in user_privileges],
                              [row['short_description'] for row in response.json()['items']])
+
+    def test_answers(self):
+        """Test user answers endpoint
+        """
+        # Test that the list endpoint returns successfully
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(reverse('user-answers', kwargs={'pk': user.pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check that the user information returned is correct
+        for row in response.json()['items']:
+            answer = models.Post.objects.get(pk=row['answer_id'])
+            self.assertEqual(row['owner']['reputation'], answer.owner.reputation)
+            self.assertEqual(row['owner']['user_id'], answer.owner.pk)
+            self.assertEqual(row['owner']['display_name'], answer.owner.display_name)
+            self.assertEqual(row['score'], answer.score)
+            self.assertEqual(dateutil.parser.parse(row['last_activity_date']), answer.last_activity_date)
+            self.assertEqual(dateutil.parser.parse(row['creation_date']), answer.creation_date)
+            self.assertEqual(row['question_id'], answer.parent.pk)
+            self.assertEqual(row['content_license'], enums.ContentLicense[answer.content_license].name)
+
+    def test_answers_sort_by_activity(self):
+        """Test the user answer list sorted by question activity date.
+        """
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations))
+
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputations = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+
+    def test_answers_sort_by_creation_date(self):
+        """Test the user answer list sorted by user creation date.
+        """
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'creation', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        creation_dates = [row['creation_date'] for row in response.json()['items']]
+        self.assertListEqual(creation_dates, sorted(creation_dates))
+
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'creation', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputation = [row['creation_date'] for row in response.json()['items']]
+        self.assertListEqual(reputation, sorted(reputation, reverse=True))
+
+    def test_answers_sort_by_votes(self):
+        """Test the user answer list sorted by votes.
+        """
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        creation_dates = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(creation_dates, sorted(creation_dates))
+
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reputation = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(reputation, sorted(reputation, reverse=True))
 
     def test_questions(self):
         """Test user questions endpoint
