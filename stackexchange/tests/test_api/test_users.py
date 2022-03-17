@@ -19,7 +19,11 @@ class UserTests(APITestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
+        # Create some users
         users = factories.UserFactory.create_batch(size=100)
+        # Award some badges to the users
+        for user in users:
+            factories.UserBadgeFactory.create_batch(size=random.randint(0, 20), user=user)
         # Create some questions from the users
         questions = []
         for user in users:
@@ -161,14 +165,14 @@ class UserTests(APITestCase):
         response = self.client.get(
             reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'asc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        activity_dates = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(activity_dates, sorted(activity_dates))
 
         response = self.client.get(
             reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        activity_dates = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(activity_dates, sorted(activity_dates, reverse=True))
 
     def test_answers_sort_by_creation_date(self):
         """Test the user answer list sorted by user creation date.
@@ -193,14 +197,102 @@ class UserTests(APITestCase):
         response = self.client.get(
             reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'asc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates))
+        votes = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(votes, sorted(votes))
 
         response = self.client.get(
             reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputation = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputation, sorted(reputation, reverse=True))
+        votes = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(votes, sorted(votes, reverse=True))
+
+    def test_badges(self):
+        """Test user badges endpoint
+        """
+        # Test that the list endpoint returns successfully
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(reverse('user-badges', kwargs={'pk': user.pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check that the user information returned is correct
+        for row in response.json()['items']:
+            badge = models.Badge.objects.get(pk=row['badge_id'])
+            self.assertEqual(row['user']['reputation'], user.reputation)
+            self.assertEqual(row['user']['user_id'], user.pk)
+            self.assertEqual(row['user']['display_name'], user.display_name)
+            self.assertEqual(row['badge_type'], enums.BadgeType(badge.badge_type).name.lower())
+            self.assertEqual(row['rank'], enums.BadgeClass(badge.badge_class).name.lower())
+            self.assertEqual(row['name'], badge.name)
+
+    def test_badges_sort_by_rank(self):
+        """Test the user badges list sorted by rank.
+        """
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'rank', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ranks = [enums.BadgeClass[row['rank'].upper()] for row in response.json()['items']]
+        self.assertListEqual(ranks, sorted(ranks))
+
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'rank', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ranks = [enums.BadgeClass[row['rank'].upper()] for row in response.json()['items']]
+        self.assertListEqual(ranks, sorted(ranks, reverse=True))
+
+    def test_badges_sort_by_name(self):
+        """Test the user badges list sorted by name.
+        """
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'name', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        names = [row['name'] for row in response.json()['items']]
+        self.assertListEqual(names, sorted(names))
+
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'name', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        names = [row['name'] for row in response.json()['items']]
+        self.assertListEqual(names, sorted(names, reverse=True))
+
+    def test_badges_sort_by_type(self):
+        """Test the user badges list sorted by type.
+        """
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'type', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_types = [row['badge_type'] for row in response.json()['items']]
+        self.assertListEqual(badge_types, sorted(badge_types))
+
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'type', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        badge_types = [row['badge_type'] for row in response.json()['items']]
+        self.assertListEqual(badge_types, sorted(badge_types, reverse=True))
+
+    def test_badges_sort_by_awarded(self):
+        """Test the user badges list sorted by date awarded.
+        """
+        user = random.sample(list(models.User.objects.all()), 1)[0]
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'awarded', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        awarded_dates = [
+            models.UserBadge.objects.get(badge_id=row['badge_id'], user=user).date_awarded
+            for row in response.json()['items']
+        ]
+        self.assertListEqual(awarded_dates, sorted(awarded_dates))
+
+        response = self.client.get(
+            reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'awarded', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        awarded_dates = [
+            models.UserBadge.objects.get(badge_id=row['badge_id'], user=user).date_awarded
+            for row in response.json()['items']
+        ]
+        self.assertListEqual(awarded_dates, sorted(awarded_dates, reverse=True))
 
     def test_questions(self):
         """Test user questions endpoint
@@ -233,14 +325,14 @@ class UserTests(APITestCase):
         response = self.client.get(
             reverse('user-questions', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'asc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        activity_dates = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(activity_dates, sorted(activity_dates))
 
         response = self.client.get(
             reverse('user-questions', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        activity_dates = [row['last_activity_date'] for row in response.json()['items']]
+        self.assertListEqual(activity_dates, sorted(activity_dates, reverse=True))
 
     def test_questions_sort_by_creation_date(self):
         """Test the user question list sorted by user creation date.
@@ -265,11 +357,11 @@ class UserTests(APITestCase):
         response = self.client.get(
             reverse('user-questions', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'asc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates))
+        votes = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(votes, sorted(votes))
 
         response = self.client.get(
             reverse('user-questions', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputation = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputation, sorted(reputation, reverse=True))
+        votes = [row['score'] for row in response.json()['items']]
+        self.assertListEqual(votes, sorted(votes, reverse=True))

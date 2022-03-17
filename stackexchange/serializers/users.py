@@ -38,7 +38,7 @@ class UserBadgeSerializer(serializers.ModelSerializer):
     name = fields.CharField(source='badge.name', help_text="The badge name")
     badge_type = fields.SerializerMethodField(source='badge.badge_type', help_text="The badge type")
     rank = fields.SerializerMethodField(source='badge.rank', help_text="The badge rank")
-    badge_id = fields.IntegerField(source='pk', help_text="The badge identifier")
+    badge_id = fields.IntegerField(source='badge.pk', help_text="The badge identifier")
 
     class Meta:
         model = models.UserBadge
