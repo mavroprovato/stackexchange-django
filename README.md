@@ -1,15 +1,16 @@
 # StackExchange Django
 
-This project implements an API for a StackExchange-like site. The data used for the site are fetched from StackExchange
-data dump that are published regularly at [archive.org](https://archive.org/details/stackexchange). The application is 
-built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) 3.8+ and
+This project implements an API for a StackExchange-like site. The API tries to be as faithful as possible to the 
+[official stackexchange API](https://api.stackexchange.com/docs).
+
+The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) 3.8+ and
 [Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used for
-storing the application data. Make sure you have Python, Poetry and PostreSQL installed before running the installation
-instructions.
+storing the application data.
 
 ## Installation
 
-The following installation instructions have been tested on Ubuntu 20.04.
+Before running these installation instructions, make sure you have [Python](https://www.python.org/downloads/),
+[Poetry](https://python-poetry.org/docs/#installation) and [PostgreSQL](https://www.postgresql.org/download/) installed.
 
 To install all dependencies needed for the application run:
 
@@ -58,11 +59,12 @@ the root directory of the application and is named `.env.example`. The environme
 
 ### Loading data
 
-In order to load data to the database you should run the `loaddata` Django command, depending on the site you wish to
-load. For example, in order to load the data for the `dba.stackexckange.com` site, run the following command:
+StackExchange data dumps are published regularly at [archive.org](https://archive.org/details/stackexchange). You can
+load data to the database by running the `loaddata` Django command, depending on the site you wish to load. For example,
+in order to load the data for the `dba.stackexckange.com` site, run the following command:
 
 ```
-$ python manage.py loaddata dba.stackexchange
+$ python manage.py loaddata dba.stackexckange.com
 ```
 
 ### Running the application
@@ -73,6 +75,9 @@ Now everything should be ready to launch the application by running:
 $ python manage.py runserver
 ```
 
-The API documentation is built with Swagger, and you can access it by opening http://127.0.0.1:8000/api/doc. It
-documents all the endpoints that you can use in order to access the data. You can also access the Django admin interface
-at http://127.0.0.1:8000/admin. The credentials to access the interface are admin/password.
+The application should now be available at http://127.0.0.1:8000/. The API documentation is built with Swagger, and you
+can access it by opening http://127.0.0.1:8000/api/doc. It documents all the endpoints that you can use in order to
+access the data.
+
+You can also access the Django admin interface at http://127.0.0.1:8000/admin. The credentials to access the interface
+are admin/password.
