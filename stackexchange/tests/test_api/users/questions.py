@@ -7,8 +7,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..test_data import setup_test_data
 from stackexchange import enums, models
+from stackexchange.tests import factories
 
 
 class UserQuestionTests(APITestCase):
@@ -16,7 +16,12 @@ class UserQuestionTests(APITestCase):
     """
     @classmethod
     def setUpTestData(cls):
-        setup_test_data()
+        # Create some users
+        users = factories.UserFactory.create_batch(size=10)
+        # Create some questions from the users
+        questions = []
+        for user in users:
+            questions += factories.QuestionFactory.create_batch(size=random.randint(0, 3), owner=user)
 
     def test(self):
         """Test user questions endpoint

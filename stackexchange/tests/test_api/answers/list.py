@@ -5,8 +5,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..test_data import setup_test_data
 from stackexchange import enums, models
+from stackexchange.tests import factories
 
 
 class AnswerListTests(APITestCase):
@@ -16,7 +16,7 @@ class AnswerListTests(APITestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        setup_test_data()
+        factories.AnswersFactory.create_batch(size=100)
 
     def test(self):
         """Test answer list endpoint

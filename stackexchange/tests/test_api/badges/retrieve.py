@@ -6,8 +6,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..test_data import setup_test_data
 from stackexchange import models
+from stackexchange.tests import factories
 
 
 class BadgeRetrieveTests(APITestCase):
@@ -15,7 +15,7 @@ class BadgeRetrieveTests(APITestCase):
     """
     @classmethod
     def setUpTestData(cls):
-        setup_test_data()
+        factories.BadgeFactory.create_batch(size=100)
 
     def test(self):
         """Test the badges detail endpoint.

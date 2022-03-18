@@ -6,8 +6,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..test_data import setup_test_data
 from stackexchange import models
+from stackexchange.tests import factories
 
 
 class UserRetrieveTests(APITestCase):
@@ -15,7 +15,7 @@ class UserRetrieveTests(APITestCase):
     """
     @classmethod
     def setUpTestData(cls):
-        setup_test_data()
+        factories.UserFactory.create_batch(size=10)
 
     def test_detail(self):
         """Test the user detail endpoint.
