@@ -1,26 +1,24 @@
-"""Answers view set testing
+"""Answers view set list testing
 """
-import random
-
 import dateutil.parser
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from ..test_data import setup_test_data
 from stackexchange import enums, models
-from .. import factories
 
 
-class AnswerTests(APITestCase):
-    """Answer view set tests
+class AnswerListTests(APITestCase):
+    """Answer view set list tests
     """
     @classmethod
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.AnswersFactory.create_batch(size=1000)
+        setup_test_data()
 
-    def test_list(self):
+    def test(self):
         """Test answer list endpoint
         """
         response = self.client.get(reverse('answer-list'))
@@ -34,7 +32,7 @@ class AnswerTests(APITestCase):
             self.assertEqual(dateutil.parser.parse(row['creation_date']), answer.creation_date)
             self.assertEqual(row['content_license'], enums.ContentLicense[answer.content_license].name)
 
-    def test_list_sort_by_activity(self):
+    def test_sort_by_activity(self):
         """Test the answer list sorted by activity date.
         """
         response = self.client.get(reverse('answer-list'), data={'sort': 'activity', 'order': 'asc'})
@@ -47,7 +45,7 @@ class AnswerTests(APITestCase):
         reputations = [row['last_activity_date'] for row in response.json()['items']]
         self.assertListEqual(reputations, sorted(reputations, reverse=True))
 
-    def test_list_sort_by_creation(self):
+    def test_sort_by_creation(self):
         """Test the answer list sorted by creation date.
         """
         response = self.client.get(reverse('answer-list'), data={'sort': 'creation', 'order': 'asc'})
@@ -60,7 +58,7 @@ class AnswerTests(APITestCase):
         reputations = [row['creation_date'] for row in response.json()['items']]
         self.assertListEqual(reputations, sorted(reputations, reverse=True))
 
-    def test_list_sort_by_votes(self):
+    def test_sort_by_votes(self):
         """Test the answer list sorted by votes.
         """
         response = self.client.get(reverse('answer-list'), data={'sort': 'votes', 'order': 'asc'})
@@ -72,20 +70,3 @@ class AnswerTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         reputations = [row['score'] for row in response.json()['items']]
         self.assertListEqual(reputations, sorted(reputations, reverse=True))
-
-    def test_detail(self):
-        """Test the answer detail endpoint.
-        """
-        # Test getting one answer
-        post = random.sample(list(models.Post.objects.all()), 1)[0]
-        response = self.client.get(reverse('answer-detail', kwargs={'pk': post.pk}))
-        self.assertEqual(response.json()['items'][0]['answer_id'], post.pk)
-
-    def test_detail_multiple(self):
-        """Test the answer detail endpoint for multiple ids.
-        """
-        # Test getting multiple answers
-        posts = random.sample(list(models.Post.objects.all()), 3)
-        response = self.client.get(reverse('answer-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertSetEqual({row['answer_id'] for row in response.json()['items']}, {post.pk for post in posts})
