@@ -4,14 +4,19 @@ import random
 
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from .base import BaseUserTests
+from ..test_data import setup_test_data
 from stackexchange import enums, models
 
 
-class UserBadgeTests(BaseUserTests):
+class UserBadgeTests(APITestCase):
     """Users view set badges tests
     """
+    @classmethod
+    def setUpTestData(cls):
+        setup_test_data()
+
     def test(self):
         """Test user badges endpoint
         """

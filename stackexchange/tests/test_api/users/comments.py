@@ -5,14 +5,19 @@ import random
 import dateutil.parser
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from .base import BaseUserTests
+from ..test_data import setup_test_data
 from stackexchange import enums, models
 
 
-class UserCommentTests(BaseUserTests):
+class UserCommentTests(APITestCase):
     """Users view set comments tests
     """
+    @classmethod
+    def setUpTestData(cls):
+        setup_test_data()
+
     def test(self):
         """Test user comments endpoint
         """

@@ -4,14 +4,18 @@ import random
 
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from .base import BaseUserTests
+from ..test_data import setup_test_data
 from stackexchange import enums, models
 
 
-class UserPrivilegeTests(BaseUserTests):
+class UserPrivilegeTests(APITestCase):
     """User view set privileges tests
     """
+    @classmethod
+    def setUpTestData(cls):
+        setup_test_data()
 
     def test(self):
         """Test the user privileges endpoint.

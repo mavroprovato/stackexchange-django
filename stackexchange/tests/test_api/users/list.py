@@ -5,15 +5,20 @@ import unittest
 import dateutil.parser
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from .base import BaseUserTests
+from ..test_data import setup_test_data
 from stackexchange import models
 from stackexchange.tests import factories
 
 
-class UserListTests(BaseUserTests):
+class UserListTests(APITestCase):
     """User view set list tests
     """
+    @classmethod
+    def setUpTestData(cls):
+        setup_test_data()
+
     def test(self):
         """Test users list endpoint
         """

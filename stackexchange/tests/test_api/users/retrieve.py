@@ -4,14 +4,19 @@ import random
 
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.test import APITestCase
 
-from .base import BaseUserTests
+from ..test_data import setup_test_data
 from stackexchange import models
 
 
-class UserRetrieveTests(BaseUserTests):
-    """User retrieve tests
+class UserRetrieveTests(APITestCase):
+    """User view set retrieve tests
     """
+    @classmethod
+    def setUpTestData(cls):
+        setup_test_data()
+
     def test_detail(self):
         """Test the user detail endpoint.
         """
