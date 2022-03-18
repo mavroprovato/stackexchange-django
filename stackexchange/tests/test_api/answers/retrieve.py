@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from ..test_data import setup_test_data
-from stackexchange import models
+from stackexchange import enums, models
 
 
 class AnswerTests(APITestCase):
@@ -23,15 +23,16 @@ class AnswerTests(APITestCase):
         """Test the answer detail endpoint.
         """
         # Test getting one answer
-        post = random.sample(list(models.Post.objects.all()), 1)[0]
-        response = self.client.get(reverse('answer-detail', kwargs={'pk': post.pk}))
-        self.assertEqual(response.json()['items'][0]['answer_id'], post.pk)
+        answer = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER.value)), 1)[0]
+        response = self.client.get(reverse('answer-detail', kwargs={'pk': answer.pk}))
+        self.assertEqual(response.json()['items'][0]['answer_id'], answer.pk)
 
     def test_detail_multiple(self):
         """Test the answer detail endpoint for multiple ids.
         """
         # Test getting multiple answers
-        posts = random.sample(list(models.Post.objects.all()), 3)
-        response = self.client.get(reverse('answer-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER.value)), 3)
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertSetEqual({row['answer_id'] for row in response.json()['items']}, {post.pk for post in posts})
+        self.assertSetEqual({row['answer_id'] for row in response.json()['items']}, {answer.pk for answer in answers})
