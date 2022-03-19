@@ -4,7 +4,7 @@ import datetime
 import typing
 
 from django.contrib.staticfiles import finders
-from django.db.models import QuerySet, F, Count, Min
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
