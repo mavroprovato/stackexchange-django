@@ -1,11 +1,13 @@
 """The users factory
 """
 import factory
+import pytz
 
 from stackexchange import models
+from .base import BaseModelFactory
 
 
-class UserFactory(factory.django.DjangoModelFactory):
+class UserFactory(BaseModelFactory):
     """The users factory
     """
     class Meta:
@@ -18,6 +20,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     website_url = factory.Faker('url')
     location = factory.Faker('city')
     about = factory.Faker('sentence')
+    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
     reputation = factory.Faker('pyint')
     views = factory.Faker('pyint')
     up_votes = factory.Faker('pyint')
