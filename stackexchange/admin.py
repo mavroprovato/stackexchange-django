@@ -81,7 +81,7 @@ class PostAdmin(admin.ModelAdmin):
     list_display = ('title', 'type', 'score', 'creation_date', 'last_edit_date')
     list_filter = ('type',)
     search_fields = ('title',)
-    autocomplete_fields = ('owner', 'last_editor', 'parent', 'accepted_answer')
+    autocomplete_fields = ('owner', 'last_editor', 'question', 'accepted_answer')
     ordering = ('-creation_date', )
     inlines = (PostTagInline, PostHistoryInline)
 

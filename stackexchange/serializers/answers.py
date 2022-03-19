@@ -11,7 +11,6 @@ class AnswerSerializer(PostSerializer):
     """
     is_accepted = fields.SerializerMethodField(help_text="True if the answer is accepted")
     answer_id = fields.IntegerField(source="pk", help_text="The answer identifier")
-    question_id = fields.IntegerField(source="parent_id", help_text="The question identifier")
 
     class Meta:
         model = models.Post

@@ -67,7 +67,7 @@ class AnswerViewSet(BaseViewSet):
             return models.Post.objects.select_related('owner').prefetch_related('tags')
 
         return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related(
-            'owner', 'parent').prefetch_related('tags')
+            'owner', 'question').prefetch_related('tags')
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

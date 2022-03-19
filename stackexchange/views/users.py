@@ -100,7 +100,7 @@ class UserViewSet(BaseViewSet):
         :return: The queryset for the action
         """
         if self.action == 'answers':
-            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner', 'parent')
+            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner', 'question')
         if self.action == 'badges':
             return models.UserBadge.objects.select_related('user', 'badge')
         if self.action == 'comments':

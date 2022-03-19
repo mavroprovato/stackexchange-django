@@ -65,9 +65,9 @@ class Badge(models.Model):
     """The badge model
     """
     name = models.CharField(help_text="The badge name", max_length=255, unique=True)
-    badge_class = models.SmallIntegerField(
+    badge_class = models.PositiveSmallIntegerField(
         help_text="The badge class", choices=((bc.value, bc.description) for bc in enums.BadgeClass))
-    badge_type = models.SmallIntegerField(
+    badge_type = models.PositiveSmallIntegerField(
         help_text="The badge type", choices=((bt.value, bt.description) for bt in enums.BadgeType))
 
     objects = managers.BadgeQuerySet().as_manager()
@@ -98,13 +98,27 @@ class UserBadge(models.Model):
 class Post(models.Model):
     """The post model
     """
-    title = models.CharField(help_text="The post title", max_length=1000, null=True, blank=True)
-    body = models.TextField(help_text="The post body")
     type = models.PositiveSmallIntegerField(
         help_text="The post type", choices=((pt.value, pt.description) for pt in enums.PostType))
+    title = models.CharField(help_text="The post title", max_length=1000, null=True, blank=True)
+    body = models.TextField(help_text="The post body")
+    question = models.ForeignKey(
+        'Post', help_text="The post question, if the post type is ANSWER",
+        on_delete=models.CASCADE, null=True, blank=True, related_name='answers')
+    accepted_answer = models.ForeignKey(
+        'Post', help_text="The accepted answer, if the post type is QUESTION", on_delete=models.CASCADE, null=True,
+        blank=True, related_name='accepted_answers')
+    owner = models.ForeignKey(User, help_text="The owner of the post", on_delete=models.CASCADE,
+                              related_name='posts', null=True, blank=True)
+    last_editor = models.ForeignKey(User, help_text="The last editor of the post", on_delete=models.CASCADE,
+                                    related_name='last_edited_posts', null=True, blank=True)
+    last_editor_display_name = models.CharField(help_text="The last editor display name", max_length=255, null=True,
+                                                blank=True)
     creation_date = models.DateTimeField(help_text="The post creation date", auto_now_add=True)
     last_edit_date = models.DateTimeField(help_text="The post last edit date", null=True, blank=True, auto_now=True)
     last_activity_date = models.DateTimeField(help_text="The post last activity date")
+    community_owned_date = models.DateTimeField(help_text="The post community owned date", null=True, blank=True)
+    closed_date = models.DateTimeField(help_text="The post closed date", null=True, blank=True)
     score = models.IntegerField(help_text="The post score")
     view_count = models.PositiveIntegerField(help_text="The post view count", null=True, blank=True)
     answer_count = models.PositiveIntegerField(help_text="The post answer count", null=True, blank=True)
@@ -113,16 +127,8 @@ class Post(models.Model):
     content_license = models.CharField(
         help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in enums.ContentLicense],
         default=enums.ContentLicense.CC_BY_SA_4_0.name)
-    owner = models.ForeignKey(User, help_text="The owner of the post", on_delete=models.CASCADE,
-                              related_name='owner_posts', null=True, blank=True)
-    last_editor = models.ForeignKey(User, help_text="The last editor of the post", on_delete=models.CASCADE,
-                                    related_name='last_editor_posts', null=True, blank=True)
-    parent = models.ForeignKey('Post', help_text="The parent post", on_delete=models.CASCADE, null=True, blank=True,
-                               related_name='children')
-    accepted_answer = models.ForeignKey('Post', help_text="The accepted answer", on_delete=models.CASCADE, null=True,
-                                        blank=True, related_name='accepted_answers')
-    title_search = search.SearchVectorField(null=True, help_text="The title search vector")
     tags = models.ManyToManyField('Tag', related_name='posts', through='PostTag')
+    title_search = search.SearchVectorField(null=True, help_text="The title search vector")
 
     class Meta:
         db_table = 'posts'
@@ -143,7 +149,7 @@ class Comment(models.Model):
         help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in enums.ContentLicense],
         default=enums.ContentLicense.CC_BY_SA_4_0.name)
     user = models.ForeignKey(User, help_text="The user for the comment", on_delete=models.CASCADE,
-                             related_name='user_comments', null=True, blank=True)
+                             related_name='comments', null=True, blank=True)
 
     class Meta:
         db_table = 'comments'
@@ -160,21 +166,21 @@ class Comment(models.Model):
 class PostHistory(models.Model):
     """The post history model
     """
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
     type = models.PositiveSmallIntegerField(
         help_text="The post history type", choices=((pht.value, pht.description) for pht in enums.PostHistoryType))
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
     revision_guid = models.CharField(help_text="The GUID of the action that created this history record", max_length=36)
     creation_date = models.DateTimeField(help_text="The date that this history record was created", auto_now_add=True)
+    user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
+                             related_name="post_history", null=True, blank=True)
     user_display_name = models.CharField(
         help_text="The display name of the user that created this record, if the user has been removed and no longer "
                   "referenced by id", max_length=255, null=True, blank=True)
     comment = models.TextField(help_text="The comment of the user that has edited this post", null=True, blank=True)
-    text = models.TextField(help_text="The new value for a given revision", null=True, blank=True)
+    text = models.TextField(help_text="A raw version of the new value for a given revision", null=True, blank=True)
     content_license = models.CharField(
         help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in enums.ContentLicense],
         default=enums.ContentLicense.CC_BY_SA_4_0.name, null=True, blank=True)
-    user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
-                             related_name='user_post_history', null=True, blank=True)
 
     class Meta:
         db_table = 'post_history'
@@ -192,9 +198,9 @@ class PostLink(models.Model):
         (TYPE_DUPLICATE, 'Duplicate'),
     )
 
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_links")
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="links")
     related_post = models.ForeignKey(Post, help_text="The related post", on_delete=models.CASCADE,
-                                     related_name="related_post_links")
+                                     related_name="related_links")
     type = models.PositiveSmallIntegerField(help_text="The post link type", choices=TYPE_CHOICES)
 
     class Meta:
@@ -205,11 +211,15 @@ class PostVote(models.Model):
     """The post vote model
     """
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_votes")
-    type = models.SmallIntegerField(
+    type = models.PositiveSmallIntegerField(
         help_text="The post vote type", choices=((pvt.value, pvt.description) for pvt in enums.PostVoteType))
-    user = models.ForeignKey(User, help_text="The user for the vote", on_delete=models.CASCADE,
-                             related_name='user_votes', null=True, blank=True)
     creation_date = models.DateTimeField(help_text="The date that this vote was created", auto_now_add=True)
+    user = models.ForeignKey(
+        User, help_text="The user for the post vote, if the post vote type is FAVORITE or BOUNTY_START",
+        on_delete=models.CASCADE, related_name='user_favorites', null=True, blank=True)
+    bounty_amount = models.PositiveSmallIntegerField(
+        help_text="The post bounty amount, if the post vote type is BOUNTY_START or BOUNTY_CLOSE", null=True,
+        blank=True)
 
     class Meta:
         db_table = 'post_votes'
@@ -221,8 +231,8 @@ class Tag(models.Model):
     name = CICharField(help_text="The tag name", max_length=255, unique=True)
     count = models.IntegerField(help_text="The tag count")
     excerpt = models.ForeignKey(Post, help_text="The tag excerpt", on_delete=models.CASCADE,
-                                related_name='tag_excerpts', null=True, blank=True)
-    wiki = models.ForeignKey(Post, help_text="The tag wiki", on_delete=models.CASCADE, related_name='tag_wikis',
+                                related_name="excerpts", null=True, blank=True)
+    wiki = models.ForeignKey(Post, help_text="The tag wiki", on_delete=models.CASCADE, related_name="wikis",
                              null=True, blank=True)
 
     class Meta:

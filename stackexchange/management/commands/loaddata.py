@@ -211,16 +211,16 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
                     row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
-                    row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
-                    row.get('AboutMe', '<NULL>'), row['CreationDate'], row['Reputation'], row['Views'], row['UpVotes'],
-                    row['DownVotes'], True, row['Id'] == '-1', password
+                    True, row['Id'] == '-1', password,  row['Reputation'], row['CreationDate'], row['DisplayName'],
+                    row['LastAccessDate'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
+                    row.get('AboutMe', '<NULL>'), row['Views'], row['UpVotes'], row['DownVotes'],
                 ])
         with (self.temp_dir / 'users.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE users CASCADE")
                 cursor.copy_from(f, table='users', columns=(
-                    'id', 'username', 'email', 'display_name', 'website_url', 'location', 'about', 'creation_date',
-                    'reputation', 'views', 'up_votes', 'down_votes', 'is_active', 'is_employee', 'password'
+                    'id', 'username', 'email', 'is_active', 'is_employee', 'password', 'reputation', 'creation_date',
+                    'display_name', 'last_login', 'website_url', 'location', 'about', 'views', 'up_votes', 'down_votes'
                 ), sep=',', null='<NULL>')
         self.output.write("Users loaded")
 
@@ -278,21 +278,24 @@ class Importer:
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE):
                 csv_writer.writerow([
-                    row['Id'], row.get('Title', '<NULL>'), row['Body'], row['PostTypeId'], row['CreationDate'],
-                    row.get('LastEditDate', '<NULL>'), row['LastActivityDate'], row['Score'],
-                    row.get('ViewCount', '<NULL>'), row.get('AnswerCount', '<NULL>'), row.get('CommentCount', '<NULL>'),
-                    row.get('FavoriteCount', '<NULL>'), row.get('OwnerUserId', '<NULL>'),
-                    row.get('LastEditorUserId', '<NULL>'), row.get('ParentId', '<NULL>'),
+                    row['Id'], row['PostTypeId'], row.get('ParentId', '<NULL>'),
                     row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in post_ids else '<NULL>',
+                    row['CreationDate'], row['Score'], row.get('ViewCount', '<NULL>'), row['Body'],
+                    row.get('OwnerUserId', '<NULL>'), row.get('LastEditorUserId', '<NULL>'),
+                    row.get('LastEditorDisplayName', '<NULL>'), row.get('LastEditDate', '<NULL>'),
+                    row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
+                    row.get('Title', '<NULL>'), row.get('AnswerCount', '<NULL>'), row.get('CommentCount', '<NULL>'),
+                    row.get('FavoriteCount', '<NULL>'),
                     row['ContentLicense']
                 ])
         with (self.temp_dir / 'posts.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE posts CASCADE")
                 cursor.copy_from(f, table='posts', columns=(
-                    'id', 'title', 'body', 'type', 'creation_date', 'last_edit_date', 'last_activity_date', 'score',
-                    'view_count', 'answer_count', 'comment_count', 'favorite_count', 'owner_id', 'last_editor_id',
-                    'parent_id', 'accepted_answer_id', 'content_license'
+                    'id', 'type', 'question_id', 'accepted_answer_id', 'creation_date', 'score', 'view_count', 'body',
+                    'owner_id', 'last_editor_id', 'last_editor_display_name', 'last_edit_date', 'last_activity_date',
+                    'community_owned_date', 'closed_date', 'title', 'answer_count', 'comment_count', 'favorite_count',
+                    'content_license'
                 ), sep=',', null='<NULL>')
         self.output.write(f"Posts loaded")
 
@@ -325,7 +328,7 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.POST_HISTORY_FILE):
                 if row['PostId'] in post_ids:
                     csv_writer.writerow([
-                        row['Id'], row['PostId'], row['PostHistoryTypeId'], row['RevisionGUID'], row['CreationDate'],
+                        row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
                         row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
                         row.get('Text', '<NULL>'), row.get('ContentLicense', '<NULL>')
                     ])
@@ -333,7 +336,7 @@ class Importer:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE post_history CASCADE")
                 cursor.copy_from(f, table='post_history', columns=(
-                    'id', 'post_id', 'type', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
+                    'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
                     'comment', 'text', 'content_license'
                 ), sep=',', null='<NULL>')
         self.output.write(f"Post history loaded")
@@ -368,13 +371,14 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.VOTES_FILE):
                 if row['PostId'] in post_ids:
                     csv_writer.writerow([
-                        row['Id'], row['PostId'], row['VoteTypeId'], row.get('UserId', '<NULL>'), row['CreationDate']
+                        row['Id'], row['PostId'], row['VoteTypeId'], row['CreationDate'], row.get('UserId', '<NULL>'),
+                        row.get('BountyAmount', '<NULL>')
                     ])
         with (self.temp_dir / 'post_votes.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE post_votes CASCADE")
                 cursor.copy_from(f, table='post_votes', columns=(
-                    'id', 'post_id', 'type', 'user_id', 'creation_date'
+                    'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
                 ), sep=',', null='<NULL>')
         self.output.write(f"Post votes loaded")
 

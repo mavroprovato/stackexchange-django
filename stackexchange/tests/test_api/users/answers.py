@@ -25,7 +25,7 @@ class UserAnswerTests(APITestCase):
         # Post some answers to the questions
         for question in questions:
             user = random.choice(users)
-            factories.AnswersFactory.create_batch(size=random.randint(0, 3), parent=question, owner=user)
+            factories.AnswersFactory.create_batch(size=random.randint(0, 3), question=question, owner=user)
 
     def test(self):
         """Test user answers endpoint
@@ -44,7 +44,7 @@ class UserAnswerTests(APITestCase):
             self.assertEqual(row['score'], answer.score)
             self.assertEqual(dateutil.parser.parse(row['last_activity_date']), answer.last_activity_date)
             self.assertEqual(dateutil.parser.parse(row['creation_date']), answer.creation_date)
-            self.assertEqual(row['question_id'], answer.parent.pk)
+            self.assertEqual(row['question_id'], answer.question.pk)
             self.assertEqual(row['content_license'], enums.ContentLicense[answer.content_license].name)
 
     def test_sort_by_activity(self):
