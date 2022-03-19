@@ -10,7 +10,7 @@ from stackexchange import models
 from stackexchange.tests import factories
 
 
-class CommentTests(APITestCase):
+class CommentRetrieveTests(APITestCase):
     """Comment view set retrieve tests
     """
     @classmethod

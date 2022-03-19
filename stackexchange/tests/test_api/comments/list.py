@@ -10,7 +10,7 @@ from stackexchange import enums, models
 from stackexchange.tests import factories
 
 
-class CommentTests(APITestCase):
+class CommentListTests(APITestCase):
     """Comment view set list tests
     """
     @classmethod

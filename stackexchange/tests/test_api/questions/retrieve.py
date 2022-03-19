@@ -8,7 +8,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from stackexchange import enums, models
-from .. import factories
+from stackexchange.tests import factories
 
 
 class QuestionTests(APITestCase):
