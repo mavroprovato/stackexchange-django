@@ -3,7 +3,7 @@
 from rest_framework import fields, serializers
 
 from stackexchange import enums, models
-from .base import BaseSerializer
+from .users import BaseUserSerializer
 
 
 class BadgeSerializer(serializers.ModelSerializer):
@@ -37,17 +37,31 @@ class BadgeSerializer(serializers.ModelSerializer):
         return enums.BadgeClass(badge.badge_class).name.lower()
 
 
-class BadgeCountSerializer(BaseSerializer):
-    """The badge count serializer.
+class UserBadgeSerializer(serializers.ModelSerializer):
+    """The user badge serializer
     """
-    def get_fields(self) -> dict:
-        """Return the fields for the serializer. Returns one field for each field class.
+    user = BaseUserSerializer(help_text="The user")
+    name = fields.CharField(source='badge.name', help_text="The badge name")
+    badge_type = fields.SerializerMethodField(source='badge.badge_type', help_text="The badge type")
+    rank = fields.SerializerMethodField(source='badge.rank', help_text="The badge rank")
+    badge_id = fields.IntegerField(source='badge.pk', help_text="The badge identifier")
 
-        :return: The fields for the serializer.
+    class Meta:
+        model = models.UserBadge
+        fields = ('user', 'badge_type', 'rank', 'badge_id', 'name')
+
+    @staticmethod
+    def get_badge_type(user_badge: models.UserBadge) -> str:
+        """Get the user badge type.
+        :param user_badge: The badges.
+        :return: The badge type.
         """
-        serializer_fields = super().get_fields()
-        for badge_class in enums.BadgeClass:
-            serializer_fields[badge_class.name.lower()] = fields.IntegerField(
-                source=f"{badge_class.name.lower()}_count", help_text=f"The {badge_class.name.lower()} badge count")
+        return enums.BadgeType(user_badge.badge.badge_type).name.lower()
 
-        return serializer_fields
+    @staticmethod
+    def get_rank(user_badge: models.UserBadge) -> str:
+        """Get the user badge rank.
+        :param user_badge: The badges.
+        :return: The badge type.
+        """
+        return enums.BadgeClass(user_badge.badge.badge_class).name.lower()

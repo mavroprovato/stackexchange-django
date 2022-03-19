@@ -4,7 +4,7 @@ import datetime
 import typing
 
 from django.contrib.staticfiles import finders
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F, Count, Min
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -102,7 +102,9 @@ class UserViewSet(BaseViewSet):
         if self.action == 'answers':
             return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner', 'question')
         if self.action == 'badges':
-            return models.UserBadge.objects.select_related('user', 'badge')
+            return models.UserBadge.objects.values(
+                'user', 'badge', 'badge__badge_class', 'badge__name', 'badge__badge_type'
+            ).annotate(award_count=Count('*'), date_awarded=Min('date_awarded'))
         if self.action == 'comments':
             return models.Comment.objects.select_related('post', 'user')
         if self.action == 'posts':
@@ -122,7 +124,7 @@ class UserViewSet(BaseViewSet):
         if self.action == 'answers':
             return serializers.AnswerSerializer
         if self.action == 'badges':
-            return serializers.UserBadgeSerializer
+            return serializers.UserBadgeDetailSerializer
         if self.action == 'comments':
             return serializers.CommentSerializer
         if self.action == 'posts':
@@ -164,6 +166,13 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
                 filters.OrderingField('votes', 'score', type=int),
             )
+
+        return None
+
+    @property
+    def stable_ordering(self) -> typing.Optional[typing.Sequence[str]]:
+        if self.action == 'badges':
+            return 'user', 'badge'
 
         return None
 

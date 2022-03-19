@@ -1,9 +1,10 @@
 """The user serializers
 """
+import functools
+
 from rest_framework import fields, serializers
 
 from stackexchange import enums, models
-from .badges import BadgeCountSerializer
 from .base import BaseSerializer
 
 
@@ -17,10 +18,26 @@ class BaseUserSerializer(serializers.ModelSerializer):
         fields = ('reputation', 'user_id', 'display_name')
 
 
+class UserBadgeCountSerializer(BaseSerializer):
+    """The badge count serializer.
+    """
+    def get_fields(self) -> dict:
+        """Return the fields for the serializer. Returns one field for each field class.
+
+        :return: The fields for the serializer.
+        """
+        serializer_fields = super().get_fields()
+        for badge_class in enums.BadgeClass:
+            serializer_fields[badge_class.name.lower()] = fields.IntegerField(
+                source=f"{badge_class.name.lower()}_count", help_text=f"The {badge_class.name.lower()} badge count")
+
+        return serializer_fields
+
+
 class UserSerializer(serializers.ModelSerializer):
     """The user serializer.
     """
-    badge_counts = BadgeCountSerializer(source="*", help_text="The user badge counts")
+    badge_counts = UserBadgeCountSerializer(source="*", help_text="The user badge counts")
     user_id = fields.IntegerField(source="pk", help_text="The user identifier")
 
     class Meta:
@@ -31,36 +48,50 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class UserBadgeSerializer(serializers.ModelSerializer):
-    """The user badge serializer
+class UserBadgeDetailSerializer(BaseSerializer):
+    """The user badge detail serializer
     """
-    user = BaseUserSerializer(help_text="The user")
-    name = fields.CharField(source='badge.name', help_text="The badge name")
-    badge_type = fields.SerializerMethodField(source='badge.badge_type', help_text="The badge type")
-    rank = fields.SerializerMethodField(source='badge.rank', help_text="The badge rank")
-    badge_id = fields.IntegerField(source='badge.pk', help_text="The badge identifier")
+    user = fields.SerializerMethodField()
+    badge_type = fields.SerializerMethodField(help_text="The badge type")
+    award_count = fields.IntegerField(help_text="The number of times the user has been awarded the badge")
+    rank = fields.SerializerMethodField(help_text="The badge rank")
+    badge_id = fields.IntegerField(source='badge', help_text="The badge identifier")
+    name = fields.CharField(source='badge__name', help_text="The badge name")
 
-    class Meta:
-        model = models.UserBadge
-        fields = ('user', 'badge_type', 'rank', 'badge_id', 'name')
+    def get_user(self, user_badge: dict) -> dict:
+        """Get the user.
+
+        :param user_badge: The user badge info.
+        :return: The user.
+        """
+        return BaseUserSerializer(self.get_user_by_id(user_badge['user'])).data
+
+    @functools.lru_cache(maxsize=None)
+    def get_user_by_id(self, user_id: int) -> models.User:
+        """Get a user by id. The result of this method is cached.
+
+        :param user_id: The user id.
+        :return: The user.
+        """
+        return models.User.objects.get(pk=user_id)
 
     @staticmethod
-    def get_badge_type(user_badge: models.UserBadge) -> str:
+    def get_badge_type(user_badge: dict) -> str:
         """Get the user badge type.
 
-        :param user_badge: The badges.
+        :param user_badge: The user badge info.
         :return: The badge type.
         """
-        return enums.BadgeType(user_badge.badge.badge_type).name.lower()
+        return enums.BadgeType(user_badge['badge__badge_type']).name.lower()
 
     @staticmethod
-    def get_rank(user_badge: models.UserBadge) -> str:
+    def get_rank(user_badge: dict) -> str:
         """Get the user badge rank.
 
-        :param user_badge: The badges.
+        :param user_badge: The user badge info.
         :return: The badge type.
         """
-        return enums.BadgeClass(user_badge.badge.badge_class).name.lower()
+        return enums.BadgeClass(user_badge['badge__badge_class']).name.lower()
 
 
 class UserPrivilegeSerializer(BaseSerializer):

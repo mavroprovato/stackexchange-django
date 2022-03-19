@@ -3,6 +3,7 @@
 import dataclasses
 import datetime
 import enum
+import functools
 import typing
 
 from django.db.models import QuerySet
@@ -47,56 +48,114 @@ class OrderingFilter(BaseFilterBackend):
         :param view: The view to filter.
         :return: The filtered queryset.
         """
-        ordering_fields = getattr(view, 'ordering_fields')
-
-        queryset = self.order_queryset(request, queryset, ordering_fields)
-        queryset = self.filter_queryset_by_range(request, queryset, ordering_fields)
+        queryset = self.order_queryset(request, queryset, view)
+        queryset = self.filter_queryset_by_range(request, queryset, view)
 
         return queryset
 
-    def order_queryset(self, request: Request, queryset: QuerySet,
-                       ordering_fields: typing.Sequence[OrderingField] = None) -> QuerySet:
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
+    def get_ordering_fields(view: View) -> typing.Sequence[OrderingField]:
+        """Get the ordering fields from the view.
+
+        :param view: The view.
+        :return: The sequence of ordering fields.
+        """
+        ordering_fields = getattr(view, 'ordering_fields', [])
+
+        if ordering_fields is None:
+            return []
+
+        for ordering_field in ordering_fields:
+            if not isinstance(ordering_field, OrderingField):
+                raise ValueError("The ordering fields must be an instance of the OrderingField class")
+
+        return ordering_fields
+
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
+    def get_stable_ordering(view: View) -> typing.Sequence[str]:
+        """Get the ordering fields from the view.
+
+        :param view: The view.
+        :return: The sequence of ordering fields.
+        """
+        stable_ordering_fields = getattr(view, 'stable_ordering', None)
+
+        if stable_ordering_fields is None:
+            return ['pk']
+
+        return list(stable_ordering_fields)
+
+    def get_ordering_from_request(
+            self, request: Request, view: View
+    ) -> typing.Optional[typing.Tuple[OrderingField, enums.OrderingDirection]]:
+        """Get the ordering field and direction from the request.
+
+        :param request: The request.
+        :param view: The view ordering fields.
+        :return: The ordering field and the direction as a tuple, if it exists in the request.
+        """
+        ordering_fields = self.get_ordering_fields(view)
+
+        # Get the ordering field parameter from the request
+        ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
+        ordering_field = None
+        if ordering_name:
+            for of in ordering_fields:
+                if of.name == ordering_name:
+                    ordering_field = of
+                    break
+        # If not provided in the request, use the first ordering field if it exists
+        if ordering_field is None and len(ordering_fields) > 1:
+            ordering_field = ordering_fields[0]
+
+        # Get the ordering direction from the request
+        if ordering_field:
+            # Customize the sort order if it exists in the request and is valid.
+            ordering_direction = ordering_field.direction
+            direction_value = request.query_params.get(self.ordering_sort_param, '').strip()
+            if direction_value:
+                try:
+                    ordering_direction = enums.OrderingDirection(direction_value)
+                except ValueError:
+                    pass
+
+            return ordering_field, ordering_direction
+
+        return None
+
+    def order_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Order the queryset based on the ordering parameters from the request.
 
         :param request: The request.
         :param queryset: The queryset to order.
-        :param ordering_fields: The view ordering fields.
+        :param view: The view.
         :return: The ordered queryset.
         """
-        ordering_field = self.get_ordering_field(request, ordering_fields)
-        if ordering_field:
-            # Customize the sort order if it exists in the request and is valid.
-            direction = ordering_field.direction
-            direction_value = request.query_params.get(self.ordering_sort_param, '').strip()
-            if direction_value:
-                try:
-                    direction = enums.OrderingDirection(direction_value)
-                except ValueError:
-                    pass
+        order_by = list(self.get_stable_ordering(view))
+        ordering = self.get_ordering_from_request(request, view)
+        if ordering:
+            order_by.insert(0, f"{'-' if ordering[1] == enums.OrderingDirection.DESC else ''}{ordering[0].field}")
 
-            return queryset.order_by(
-                f"{'-' if direction == enums.OrderingDirection.DESC else ''}{ordering_field.field}", 'pk'
-            )
+        return queryset.order_by(*order_by)
 
-        return queryset.order_by('pk')
-
-    def filter_queryset_by_range(self, request: Request, queryset: QuerySet,
-                                 ordering_fields: typing.Sequence[OrderingField] = None) -> QuerySet:
+    def filter_queryset_by_range(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Filter the queryset based on the min and max parameters from the request.
 
         :param request: The request.
         :param queryset: The queryset to order.
-        :param ordering_fields: The view ordering fields.
+        :param view: The view.
         :return: The filtered queryset.
         """
-        ordering_field = self.get_ordering_field(request, ordering_fields)
-        if ordering_field:
-            min_value = self.get_range_value(request, self.min_param, ordering_field)
+        ordering = self.get_ordering_from_request(request, view)
+        if ordering:
+            min_value = self.get_range_value(request, self.min_param, ordering[0])
             if min_value:
-                queryset = queryset.filter(**{f'{ordering_field.field}__gte': min_value})
-            max_value = self.get_range_value(request, self.max_param, ordering_field)
+                queryset = queryset.filter(**{f'{ordering[0].field}__gte': min_value})
+            max_value = self.get_range_value(request, self.max_param, ordering[0])
             if max_value:
-                queryset = queryset.filter(**{f'{ordering_field.field}__lte': max_value})
+                queryset = queryset.filter(**{f'{ordering[0].field}__lte': max_value})
 
         return queryset
 
@@ -134,40 +193,13 @@ class OrderingFilter(BaseFilterBackend):
 
         return None
 
-    def get_ordering_field(self, request: Request, ordering_fields: typing.Sequence[OrderingField]
-                           ) -> typing.Optional[OrderingField]:
-        """Get the ordering field from the request.
-
-        :param request: The request.
-        :param ordering_fields: The view ordering fields.
-        :return:
-        """
-        # Validate that the ordering fields is a sequence of OrderingField instances
-        if ordering_fields:
-            for ordering_field in ordering_fields:
-                if not isinstance(ordering_field, OrderingField):
-                    raise ValueError("The ordering fields must be an instance of the OrderingField class")
-            # Get the ordering field from the request, or the first available if it cannot be found
-            ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
-            ordering = None
-            if ordering_name:
-                for ordering_field in ordering_fields:
-                    if ordering_field.name == ordering_name:
-                        ordering = ordering_field
-            if ordering is None and len(ordering_fields) > 1:
-                ordering = ordering_fields[0]
-
-            return ordering
-
-        return None
-
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
         """Get the schema operation parameters.
 
         :param view: The view to get the parameters for.
         :return: The parameters.
         """
-        ordering_fields = getattr(view, 'ordering_fields')
+        ordering_fields = self.get_ordering_fields(view)
         if not ordering_fields:
             return []
 
