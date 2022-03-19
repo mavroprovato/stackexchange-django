@@ -1,5 +1,6 @@
 """Users API list testing
 """
+import datetime
 import unittest
 
 import dateutil.parser
@@ -74,6 +75,46 @@ class UserListTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         display_names = [row['display_name'] for row in response.json()['items']]
         self.assertListEqual(display_names, sorted(display_names, reverse=True))
+
+    def test_range_by_reputation(self):
+        """Test the user list range by reputation.
+        """
+        min_value = 10
+        response = self.client.get(reverse('user-list'), data={'sort': 'reputation', 'min': min_value})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['reputation'] >= min_value for row in response.json()['items']))
+
+        max_value = 1000
+        response = self.client.get(reverse('user-list'), data={'sort': 'reputation', 'max': max_value})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['reputation'] <= max_value for row in response.json()['items']))
+
+    def test_range_by_creation_date(self):
+        """Test the user list range by user creation date.
+        """
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'min': min_value.isoformat()})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['creation_date'] >= min_value.isoformat() for row in response.json()['items']))
+
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'max': max_value.isoformat()})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['creation_date'] <= max_value.isoformat() for row in response.json()['items']))
+
+    @unittest.skip("Postgres and python sorting algorithms differ")
+    def test_range_by_display_name(self):
+        """Test the user list sorted by user display name.
+        """
+        min_value = 'b'
+        response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'min': min_value})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['display_name'] >= min_value for row in response.json()['items']))
+
+        max_value = 'x'
+        response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'max': max_value})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['display_name'] <= max_value for row in response.json()['items']))
 
     def test_in_name(self):
         """Test the in name filter for users.
