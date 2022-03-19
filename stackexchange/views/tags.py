@@ -74,7 +74,7 @@ class TagViewSet(BaseListViewSet):
 
         :return: The fields used to filter detail actions.
         """
-        if self.action == 'wikis':
+        if self.action in ('info', 'wikis'):
             return 'name'
 
         return super().detail_field
@@ -89,6 +89,15 @@ class TagViewSet(BaseListViewSet):
             return 'name'
 
         return None
+
+    @action(detail=True, url_path='info')
+    def info(self, request: Request, *args, **kwargs) -> Response:
+        """Gets the wikis for tags identified by ids.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
 
     @action(detail=True, url_path='wikis')
     def wikis(self, request: Request, *args, **kwargs) -> Response:
