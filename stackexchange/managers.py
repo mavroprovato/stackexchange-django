@@ -3,7 +3,7 @@
 
 from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
-from django.db.models import OuterRef, Count, Subquery, QuerySet
+from django.db.models import OuterRef, Count, Subquery, QuerySet, Min
 from django.db.models.functions import Coalesce
 
 from stackexchange import enums
@@ -67,3 +67,17 @@ class BadgeQuerySet(QuerySet):
                 ).values('badge').annotate(count=Count('pk')).values('count')
             ), 0)
         )
+
+
+class UserBadgeQuerySet(QuerySet):
+    """The user badge queryset
+    """
+    def per_user_and_badge(self) -> dict:
+        """Returns a distinct queryset per user and badge. The queryset is annotated with the award count and the first
+        date that the badge was awarded to the user.
+
+        :return: The aggregated queryset.
+        """
+        return self.values(
+            'user', 'badge', 'badge__badge_class', 'badge__name', 'badge__badge_type'
+        ).annotate(award_count=Count('*'), date_awarded=Min('date_awarded'))

@@ -90,6 +90,8 @@ class UserBadge(models.Model):
     badge = models.ForeignKey(Badge, help_text="The badge", on_delete=models.CASCADE, related_name='users')
     date_awarded = models.DateTimeField(help_text="The date awarded", auto_now_add=True)
 
+    objects = managers.UserBadgeQuerySet().as_manager()
+
     class Meta:
         db_table = 'user_badges'
         indexes = (models.Index(fields=('-date_awarded', 'id')),)

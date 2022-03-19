@@ -102,9 +102,7 @@ class UserViewSet(BaseViewSet):
         if self.action == 'answers':
             return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner', 'question')
         if self.action == 'badges':
-            return models.UserBadge.objects.values(
-                'user', 'badge', 'badge__badge_class', 'badge__name', 'badge__badge_type'
-            ).annotate(award_count=Count('*'), date_awarded=Min('date_awarded'))
+            return models.UserBadge.objects.per_user_and_badge()
         if self.action == 'comments':
             return models.Comment.objects.select_related('post', 'user')
         if self.action == 'posts':
