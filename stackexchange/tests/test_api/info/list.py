@@ -6,10 +6,10 @@ from rest_framework.test import APITestCase
 
 
 class InfoTests(APITestCase):
-    """Badges view set tests
+    """Info view set list tests
     """
-    def test_list(self):
-        """Test badges list endpoint
+    def test(self):
+        """Test info list endpoint
         """
         response = self.client.get(reverse('info-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
