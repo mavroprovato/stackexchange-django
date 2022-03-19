@@ -3,6 +3,7 @@
 import random
 import unittest
 
+from django.db.models import Min
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -89,7 +90,7 @@ class UserBadgeTests(APITestCase):
         badge_types = [row['badge_type'] for row in response.json()['items']]
         self.assertListEqual(badge_types, sorted(badge_types, reverse=True))
 
-    def test_badges_sort_by_awarded(self):
+    def test_sort_by_awarded(self):
         """Test the user badges list sorted by date awarded.
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
@@ -97,8 +98,9 @@ class UserBadgeTests(APITestCase):
             reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'awarded', 'order': 'asc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         awarded_dates = [
-            models.UserBadge.objects.get(badge_id=row['badge_id'], user=user).date_awarded
-            for row in response.json()['items']
+            models.UserBadge.objects.filter(
+                badge_id=row['badge_id'], user=user
+            ).aggregate(date_awarded=Min('date_awarded'))['date_awarded'] for row in response.json()['items']
         ]
         self.assertListEqual(awarded_dates, sorted(awarded_dates))
 
@@ -106,7 +108,8 @@ class UserBadgeTests(APITestCase):
             reverse('user-badges', kwargs={'pk': user.pk}), data={'sort': 'awarded', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         awarded_dates = [
-            models.UserBadge.objects.get(badge_id=row['badge_id'], user=user).date_awarded
-            for row in response.json()['items']
+            models.UserBadge.objects.filter(
+                badge_id=row['badge_id'], user=user
+            ).aggregate(date_awarded=Min('date_awarded'))['date_awarded'] for row in response.json()['items']
         ]
         self.assertListEqual(awarded_dates, sorted(awarded_dates, reverse=True))
