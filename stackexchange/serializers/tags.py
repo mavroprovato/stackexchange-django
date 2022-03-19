@@ -8,6 +8,8 @@ from stackexchange import models
 class TagSerializer(serializers.ModelSerializer):
     """The tag serializer
     """
+    count = fields.IntegerField(source='award_count', help_text="The tag award count")
+
     class Meta:
         model = models.Tag
         fields = ('count', 'name')

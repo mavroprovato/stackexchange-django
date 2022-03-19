@@ -6,9 +6,9 @@ from rest_framework.test import APITestCase
 
 
 class SearchTests(APITestCase):
-    """Post view set tests
+    """Search view set tests
     """
-    def test_list(self):
+    def test(self):
         """Test search list endpoint
         """
         response = self.client.get(reverse('search-list'))

@@ -397,7 +397,7 @@ class Importer:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE tags CASCADE")
                 cursor.copy_from(f, table='tags', columns=(
-                    'id', 'name', 'count', 'excerpt_id', 'wiki_id'
+                    'id', 'name', 'award_count', 'excerpt_id', 'wiki_id'
                 ), sep=',', null='<NULL>')
 
         with connection.cursor() as cursor:

@@ -8,7 +8,7 @@ from stackexchange import enums, models
 from stackexchange.tests import factories
 
 
-class BadgeTests(APITestCase):
+class BadgeListTests(APITestCase):
     """Badges view set list tests
     """
     @classmethod

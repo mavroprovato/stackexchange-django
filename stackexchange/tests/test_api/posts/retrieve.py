@@ -27,7 +27,7 @@ class PostRetrieveTests(APITestCase):
         response = self.client.get(reverse('post-detail', kwargs={'pk': post.pk}))
         self.assertEqual(response.json()['items'][0]['post_id'], post.pk)
 
-    def test__multiple(self):
+    def test_multiple(self):
         """Test the post detail endpoint for multiple ids.
         """
         # Test getting multiple posts

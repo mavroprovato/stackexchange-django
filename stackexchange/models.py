@@ -231,7 +231,7 @@ class Tag(models.Model):
     """The tag model
     """
     name = CICharField(help_text="The tag name", max_length=255, unique=True)
-    count = models.IntegerField(help_text="The tag count")
+    award_count = models.IntegerField(help_text="The tag award count")
     excerpt = models.ForeignKey(Post, help_text="The tag excerpt", on_delete=models.CASCADE,
                                 related_name="excerpts", null=True, blank=True)
     wiki = models.ForeignKey(Post, help_text="The tag wiki", on_delete=models.CASCADE, related_name="wikis",

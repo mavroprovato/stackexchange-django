@@ -18,7 +18,7 @@ class QuestionListTests(APITestCase):
         """
         factories.QuestionFactory.create_batch(size=1000)
 
-    def test_list(self):
+    def test(self):
         """Test question list endpoint
         """
         response = self.client.get(reverse('question-list'))

@@ -13,7 +13,7 @@ class TagListTests(APITestCase):
     """
     @classmethod
     def setUpTestData(cls):
-        factories.UserFactory.create_batch(size=10)
+        factories.TagFactory.create_batch(size=10)
 
     def test(self):
         """Test tag list endpoint
@@ -25,4 +25,4 @@ class TagListTests(APITestCase):
         # Check that the tag information returned is correct
         for row in response.json()['items']:
             tag = models.Tag.objects.get(name=row['name'])
-            self.assertEqual(row['award_count'], tag.count)
+            self.assertEqual(row['count'], tag.award_count)

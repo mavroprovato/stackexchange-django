@@ -10,7 +10,7 @@ from stackexchange import enums, models
 from stackexchange.tests import factories
 
 
-class AnswerTests(APITestCase):
+class AnswerRetrieveTests(APITestCase):
     """Answer view set retrieve tests
     """
     @classmethod
