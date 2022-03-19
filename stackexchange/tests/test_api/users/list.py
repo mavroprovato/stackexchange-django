@@ -50,7 +50,7 @@ class UserListTests(APITestCase):
         self.assertListEqual(reputations, sorted(reputations, reverse=True))
 
     def test_sort_by_creation_date(self):
-        """Test the user list sorted by user creation date.
+        """Test the user list endpoint sorted by user creation date.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'order': 'asc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -59,12 +59,12 @@ class UserListTests(APITestCase):
 
         response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'order': 'desc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputation = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(reputation, sorted(reputation, reverse=True))
+        creation_dates = [row['creation_date'] for row in response.json()['items']]
+        self.assertListEqual(creation_dates, sorted(creation_dates, reverse=True))
 
     @unittest.skip("Postgres and python sorting algorithms differ")
     def test_sort_by_display_name(self):
-        """Test the user list sorted by user display name.
+        """Test the user list endpoint sorted by user display name.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'name', 'order': 'asc'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -77,7 +77,7 @@ class UserListTests(APITestCase):
         self.assertListEqual(display_names, sorted(display_names, reverse=True))
 
     def test_range_by_reputation(self):
-        """Test the user list range by reputation.
+        """Test the user list endpoint range by reputation.
         """
         min_value = 10
         response = self.client.get(reverse('user-list'), data={'sort': 'reputation', 'min': min_value})
@@ -90,7 +90,7 @@ class UserListTests(APITestCase):
         self.assertTrue(all(row['reputation'] <= max_value for row in response.json()['items']))
 
     def test_range_by_creation_date(self):
-        """Test the user list range by user creation date.
+        """Test the user list endpoint range by user creation date.
         """
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'min': min_value.isoformat()})
@@ -104,7 +104,7 @@ class UserListTests(APITestCase):
 
     @unittest.skip("Postgres and python sorting algorithms differ")
     def test_range_by_display_name(self):
-        """Test the user list sorted by user display name.
+        """Test the user list endpoint range by user display name.
         """
         min_value = 'b'
         response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'min': min_value})
