@@ -145,6 +145,7 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('reputation', type=int),
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
                 filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
+                filters.OrderingField('modified', 'last_modified_date'),
             )
         if self.action in ('answers', 'posts', 'questions'):
             return (
