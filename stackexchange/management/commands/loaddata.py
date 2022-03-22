@@ -211,16 +211,18 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
                     row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
-                    True, row['Id'] == '-1', password,  row['Reputation'], row['CreationDate'], row['DisplayName'],
-                    row['LastAccessDate'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
-                    row.get('AboutMe', '<NULL>'), row['Views'], row['UpVotes'], row['DownVotes'],
+                    True, row['Id'] == '-1', password,  row['Reputation'], row['CreationDate'],
+                    row['LastAccessDate'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
+                    row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['Views'], row['UpVotes'],
+                    row['DownVotes'],
                 ])
         with (self.temp_dir / 'users.csv').open('rt') as f:
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE users CASCADE")
                 cursor.copy_from(f, table='users', columns=(
                     'id', 'username', 'email', 'is_active', 'is_employee', 'password', 'reputation', 'creation_date',
-                    'display_name', 'last_login', 'website_url', 'location', 'about', 'views', 'up_votes', 'down_votes'
+                    'last_access_date', 'display_name', 'website_url', 'location', 'about', 'views', 'up_votes',
+                    'down_votes'
                 ), sep=',', null='<NULL>')
         self.output.write("Users loaded")
 

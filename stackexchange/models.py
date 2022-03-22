@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.fields import CIEmailField, CICharField
 from django.contrib.postgres import indexes, search
 from django.db import models
+from django.utils import timezone
 
 from stackexchange import enums, managers
 
@@ -21,6 +22,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
     about = models.TextField(help_text="The user about information", null=True, blank=True)
     creation_date = models.DateTimeField(help_text="The user creation date", auto_now_add=True)
+    last_modified_date = models.DateTimeField(help_text="The user creation date", auto_now=True, null=True)
+    last_access_date = models.DateTimeField(help_text="The user last access date", default=timezone.now)
     reputation = models.PositiveIntegerField(help_text="The user reputation", default=0)
     views = models.PositiveIntegerField(help_text="The user profile views", default=0)
     up_votes = models.PositiveIntegerField(help_text="The user up votes", default=0)
@@ -34,7 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_table = 'users'
         indexes = (
             models.Index(fields=('-reputation', 'id')), models.Index(fields=('-creation_date', 'id')),
-            models.Index(fields=('display_name', 'id'))
+            models.Index(fields=('display_name', 'id')), models.Index(fields=('-last_modified_date', 'id'))
         )
 
     def __str__(self) -> str:
