@@ -32,6 +32,7 @@ class UserListTests(APITestCase):
             self.assertEqual(row['is_employee'], user.is_employee)
             self.assertEqual(row['reputation'], user.reputation)
             self.assertEqual(dateutil.parser.parse(row['creation_date']), user.creation_date)
+            self.assertEqual(dateutil.parser.parse(row['last_modified_date']), user.last_modified_date)
             self.assertEqual(row['location'], user.location)
             self.assertEqual(row['website_url'], user.website_url)
             self.assertEqual(row['display_name'], user.display_name)
@@ -76,6 +77,19 @@ class UserListTests(APITestCase):
         display_names = [row['display_name'] for row in response.json()['items']]
         self.assertListEqual(display_names, sorted(display_names, reverse=True))
 
+    def test_sort_by_modification_date(self):
+        """Test the user list endpoint sorted by user modification date.
+        """
+        response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'order': 'asc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        modification_dates = [row['last_modified_date'] for row in response.json()['items']]
+        self.assertListEqual(modification_dates, sorted(modification_dates))
+
+        response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'order': 'desc'})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        modification_dates = [row['last_modified_date'] for row in response.json()['items']]
+        self.assertListEqual(modification_dates, sorted(modification_dates, reverse=True))
+
     def test_range_by_reputation(self):
         """Test the user list endpoint range by reputation.
         """
@@ -107,14 +121,27 @@ class UserListTests(APITestCase):
         """Test the user list endpoint range by user display name.
         """
         min_value = 'b'
-        response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'min': min_value})
+        response = self.client.get(reverse('user-list'), data={'sort': 'name', 'min': min_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(all(row['display_name'] >= min_value for row in response.json()['items']))
 
         max_value = 'x'
-        response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'max': max_value})
+        response = self.client.get(reverse('user-list'), data={'sort': 'name', 'max': max_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(all(row['display_name'] <= max_value for row in response.json()['items']))
+
+    def test_range_by_modification_date(self):
+        """Test the user list endpoint range by user modified date.
+        """
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'min': min_value.isoformat()})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['last_modified_date'] >= min_value.isoformat() for row in response.json()['items']))
+
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'max': max_value.isoformat()})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(row['last_modified_date'] <= max_value.isoformat() for row in response.json()['items']))
 
     def test_in_name(self):
         """Test the in name filter for users.

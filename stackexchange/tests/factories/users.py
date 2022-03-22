@@ -21,6 +21,7 @@ class UserFactory(BaseModelFactory):
     location = factory.Faker('city')
     about = factory.Faker('sentence')
     creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
+    last_modified_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
     reputation = factory.Faker('pyint')
     views = factory.Faker('pyint')
     up_votes = factory.Faker('pyint')
