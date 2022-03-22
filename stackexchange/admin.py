@@ -28,8 +28,9 @@ class UserAdmin(UserAdminBase):
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('display_name', 'website_url', 'location', 'about')}),
-        ('Important dates', {'fields': ('last_login', 'creation_date')}),
+        ('Personal info', {'fields': ('email', 'display_name', 'website_url', 'location', 'about')}),
+        ('Important dates', {'fields': ('creation_date', 'last_modified_date', 'last_access_date')}),
+        ('Statistics', {'fields': ('views', 'up_votes', 'down_votes')}),
     )
     add_fieldsets = (
         (None, {
@@ -37,7 +38,7 @@ class UserAdmin(UserAdminBase):
             'fields': ('username', 'password1', 'password2'),
         }),
     )
-    readonly_fields = ('last_login', 'creation_date')
+    readonly_fields = ('creation_date', 'last_modified_date', 'last_access_date', 'views', 'up_votes', 'down_votes')
 
 
 @admin.register(models.Tag)
