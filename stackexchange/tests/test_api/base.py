@@ -37,19 +37,26 @@ class BaseTestCase(APITestCase):
         attribute_values = [transform(row[attr]) if transform else row[attr] for row in response.json()['items']]
         self.assertListEqual(attribute_values, sorted(attribute_values, reverse=reverse))
 
-    def assert_range(self, response, attr: str, min_value=None, max_value=None):
+    def assert_range(self, response, attr: str, transform=None, min_value=None, max_value=None):
         """Assert that the response is falls within a range.
 
         :param response: The response.
         :param attr: The attribute to check for range.
+        :param transform: Function used to transform the values.
         :param min_value: The minimum value.
         :param max_value: The maximum value.
         """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         if min_value:
-            self.assertTrue(all(row[attr] >= min_value for row in response.json()['items']))
+            self.assertTrue(
+                all(transform(row[attr]) if transform else row[attr] >= min_value)
+                for row in response.json()['items']
+            )
         if max_value:
-            self.assertTrue(all(row[attr] <= max_value for row in response.json()['items']))
+            self.assertTrue(
+                all(transform(row[attr]) if transform else row[attr] <= max_value)
+                for row in response.json()['items']
+            )
 
     def assert_in_string(self, response, attr: str, query: str):
         """Assert that the response contains the string in the provided attribute.

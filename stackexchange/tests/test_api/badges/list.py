@@ -49,3 +49,44 @@ class BadgeListTests(BaseBadgeTestCase):
 
         response = self.client.get(reverse('badge-list'), data={'sort': 'type', 'order': 'desc'})
         self.assert_sorted(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value, reverse=True)
+
+    def test_range_by_rank(self):
+        """Test the badges list endpoint range by badge rank.
+        """
+        min_value = enums.BadgeClass.SILVER
+        response = self.client.get(reverse('badge-list'), data={
+            'sort': 'rank', 'min': min_value.name.lower()
+        })
+        self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
+                          min_value=min_value.value)
+        max_value = enums.BadgeClass.SILVER
+        response = self.client.get(reverse('badge-list'), data={
+            'sort': 'rank', 'max': max_value.name.lower()
+        })
+        self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
+                          max_value=max_value.value)
+
+    @unittest.skip("Postgres and python sorting algorithms differ")
+    def test_range_by_name(self):
+        """Test the badges list range by badge name.
+        """
+        min_value = 'b'
+        max_value = 'x'
+        response = self.client.get(reverse('badge-list'), data={'sort': 'name', 'min': min_value, 'max': max_value})
+        self.assert_range(response, 'name', min_value, max_value)
+
+    def test_range_by_type(self):
+        """Test the badges list endpoint range by badge type.
+        """
+        min_value = enums.BadgeType.TAG_BASED
+        response = self.client.get(reverse('badge-list'), data={
+            'sort': 'type', 'min': min_value.name.lower()
+        })
+        self.assert_range(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value,
+                          min_value=min_value.value)
+        max_value = enums.BadgeType.NAMED
+        response = self.client.get(reverse('badge-list'), data={
+            'sort': 'type', 'max': max_value.name.lower()
+        })
+        self.assert_range(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value,
+                          max_value=max_value.value)
