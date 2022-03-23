@@ -26,10 +26,10 @@ class BadgeListTests(BaseBadgeTestCase):
         """Test the badges list sorted by badge rank.
         """
         response = self.client.get(reverse('badge-list'), data={'sort': 'rank', 'order': 'asc'})
-        self.assert_sorted(response, 'rank')
+        self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value)
 
         response = self.client.get(reverse('badge-list'), data={'sort': 'rank', 'order': 'desc'})
-        self.assert_sorted(response, 'rank', reverse=True)
+        self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value, reverse=True)
 
     @unittest.skip("Postgres and python sorting algorithms differ")
     def test_sort_by_name(self):
