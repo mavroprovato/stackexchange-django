@@ -16,7 +16,6 @@ class BaseTestCase(APITestCase):
         :param attributes: A dictionary with the items to check.
         """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         for row in response.json()['items']:
             obj = model_class.objects.get(pk=row[pk_attr])
             for attribute, value in attributes.items():
@@ -25,3 +24,14 @@ class BaseTestCase(APITestCase):
                 else:
                     expected_value = getattr(obj, attribute)
                 self.assertEqual(row[attribute], expected_value)
+
+    def assert_sorted(self, response, attr: str, reverse=False):
+        """Check if the response is sorted.
+
+        :param response: The response.
+        :param attr: The attribute to check for sorting.
+        :param reverse: True if the response should be reverse sorted, false otherwise.
+        """
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        attribute_values = [row[attr] for row in response.json()['items']]
+        self.assertListEqual(attribute_values, sorted(attribute_values, reverse=reverse))

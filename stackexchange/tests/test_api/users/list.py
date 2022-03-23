@@ -28,54 +28,38 @@ class UserListTests(BaseUserTestCase):
         """Test the user list sorted by user reputation.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'reputation', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['reputation'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'reputation')
 
         response = self.client.get(reverse('user-list'), data={'sort': 'reputation', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['reputation'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'reputation', reverse=True)
 
     def test_sort_by_creation_date(self):
         """Test the user list endpoint sorted by user creation date.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates))
+        self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates, reverse=True))
+        self.assert_sorted(response, 'creation_date', reverse=True)
 
     @unittest.skip("Postgres and python sorting algorithms differ")
     def test_sort_by_display_name(self):
         """Test the user list endpoint sorted by user display name.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'name', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        display_names = [row['display_name'] for row in response.json()['items']]
-        self.assertListEqual(display_names, sorted(display_names))
+        self.assert_sorted(response, 'display_name')
 
         response = self.client.get(reverse('user-list'), data={'sort': 'name', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        display_names = [row['display_name'] for row in response.json()['items']]
-        self.assertListEqual(display_names, sorted(display_names, reverse=True))
+        self.assert_sorted(response, 'display_name', reverse=True)
 
     def test_sort_by_modification_date(self):
         """Test the user list endpoint sorted by user modification date.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        modification_dates = [row['last_modified_date'] for row in response.json()['items']]
-        self.assertListEqual(modification_dates, sorted(modification_dates))
+        self.assert_sorted(response, 'last_modified_date')
 
         response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        modification_dates = [row['last_modified_date'] for row in response.json()['items']]
-        self.assertListEqual(modification_dates, sorted(modification_dates, reverse=True))
+        self.assert_sorted(response, 'last_modified_date', reverse=True)
 
     def test_range_by_reputation(self):
         """Test the user list endpoint range by reputation.
