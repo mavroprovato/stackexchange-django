@@ -40,7 +40,7 @@ class BaseTestCase(APITestCase):
         """Assert that the response is falls within a range.
 
         :param response: The response.
-        :param attr: The attribute to check for sorting.
+        :param attr: The attribute to check for range.
         :param min_value: The minimum value.
         :param max_value: The maximum value.
         """
@@ -49,3 +49,13 @@ class BaseTestCase(APITestCase):
             self.assertTrue(all(row[attr] >= min_value for row in response.json()['items']))
         if max_value:
             self.assertTrue(all(row[attr] <= max_value for row in response.json()['items']))
+
+    def assert_in_string(self, response, attr: str, query: str):
+        """Assert that the response contains the string in the provided attribute.
+
+        :param response: The response.
+        :param attr: The attribute to check that contains the string.
+        :param query: The string to check.
+        """
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(all(query in row[attr] for row in response.json()['items']))

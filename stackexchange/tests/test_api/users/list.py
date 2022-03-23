@@ -4,7 +4,6 @@ import datetime
 import unittest
 
 from django.urls import reverse
-from rest_framework import status
 
 from stackexchange.tests import factories
 from .base import BaseUserTestCase
@@ -107,9 +106,7 @@ class UserListTests(BaseUserTestCase):
         """
         # Create a user that will surely be returned
         user = factories.UserFactory.create(display_name='John Doe')
-        response = self.client.get(reverse('user-list'), data={'inname': 'oh'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Assert that all users contain the string in their display name
-        self.assertTrue(all('oh' in row['display_name'] for row in response.json()['items']))
-        # Assert that the user was returned
+        query = 'oh'
+        response = self.client.get(reverse('user-list'), data={'inname': query})
+        self.assert_in_string(response, 'display_name', query=query)
         self.assertIn(user.id, [int(row['user_id']) for row in response.json()['items']])
