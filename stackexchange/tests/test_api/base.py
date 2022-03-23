@@ -20,9 +20,9 @@ class BaseTestCase(APITestCase):
             obj = model_class.objects.get(pk=row[pk_attr])
             for attribute, value in attributes.items():
                 if callable(value):
-                    expected_value = value(getattr(obj, attribute))
+                    expected_value = value(obj)
                 else:
-                    expected_value = getattr(obj, attribute)
+                    expected_value = getattr(obj, value)
                 self.assertEqual(row[attribute], expected_value)
 
     def assert_sorted(self, response, attr: str, reverse=False):

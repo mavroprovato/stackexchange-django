@@ -2,13 +2,13 @@
 """
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
 
-from stackexchange import enums, models
+from stackexchange import enums
 from stackexchange.tests import factories
+from .base import BaseBadgeTestCase
 
 
-class BadgeListTests(APITestCase):
+class BadgeListTests(BaseBadgeTestCase):
     """Badges view set list tests
     """
     @classmethod
@@ -19,14 +19,7 @@ class BadgeListTests(APITestCase):
         """Test badges list endpoint
         """
         response = self.client.get(reverse('badge-list'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Check that the badge information returned is correct
-        for row in response.json()['items']:
-            badge = models.Badge.objects.get(pk=row['badge_id'])
-            self.assertEqual(row['badge_type'], enums.BadgeType(badge.badge_type).name.lower())
-            self.assertEqual(row['rank'], enums.BadgeClass(badge.badge_class).name.lower())
-            self.assertEqual(row['name'], badge.name)
+        self.assert_items_equal(response)
 
     def test_sort_by_rank(self):
         """Test the badges list sorted by badge rank.
