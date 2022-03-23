@@ -25,15 +25,16 @@ class BaseTestCase(APITestCase):
                     expected_value = getattr(obj, value)
                 self.assertEqual(row[attribute], expected_value)
 
-    def assert_sorted(self, response, attr: str, reverse=False):
+    def assert_sorted(self, response, attr: str, transform=None, reverse=False):
         """Assert that the response is sorted.
 
         :param response: The response.
         :param attr: The attribute to check for sorting.
+        :param transform: Function used to transform the values.
         :param reverse: True if the response should be reverse sorted, false otherwise.
         """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        attribute_values = [row[attr] for row in response.json()['items']]
+        attribute_values = [transform(row[attr]) if transform else row[attr] for row in response.json()['items']]
         self.assertListEqual(attribute_values, sorted(attribute_values, reverse=reverse))
 
     def assert_range(self, response, attr: str, min_value=None, max_value=None):
