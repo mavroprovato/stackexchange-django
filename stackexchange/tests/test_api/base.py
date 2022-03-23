@@ -1,5 +1,6 @@
 """Base test classes
 """
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 
@@ -14,6 +15,8 @@ class BaseTestCase(APITestCase):
         :param pk_attr: The primary key attribute in the response.
         :param attributes: A dictionary with the items to check.
         """
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
         for row in response.json()['items']:
             obj = model_class.objects.get(pk=row[pk_attr])
             for attribute, value in attributes.items():
