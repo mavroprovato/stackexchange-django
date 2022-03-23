@@ -3,16 +3,15 @@
 import datetime
 import unittest
 
-import dateutil.parser
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
 
 from stackexchange import models
 from stackexchange.tests import factories
+from stackexchange.tests.test_api import BaseTestCase
 
 
-class UserListTests(APITestCase):
+class UserListTests(BaseTestCase):
     """User view set list tests
     """
     @classmethod
@@ -27,15 +26,17 @@ class UserListTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Check that the user information returned is correct
-        for row in response.json()['items']:
-            user = models.User.objects.get(pk=row['user_id'])
-            self.assertEqual(row['is_employee'], user.is_employee)
-            self.assertEqual(row['reputation'], user.reputation)
-            self.assertEqual(dateutil.parser.parse(row['creation_date']), user.creation_date)
-            self.assertEqual(dateutil.parser.parse(row['last_modified_date']), user.last_modified_date)
-            self.assertEqual(row['location'], user.location)
-            self.assertEqual(row['website_url'], user.website_url)
-            self.assertEqual(row['display_name'], user.display_name)
+        self.assert_items_equal(
+            response, models.User, 'user_id', attributes={
+                'is_employee': 'is_employee',
+                'reputation': 'reputation',
+                'creation_date': lambda x: x.isoformat().replace('+00:00', 'Z'),
+                'last_modified_date': lambda x: x.isoformat().replace('+00:00', 'Z'),
+                'location': 'location',
+                'website_url': 'website_url',
+                'display_name': 'display_name',
+            }
+        )
 
     def test_sort_by_reputation(self):
         """Test the user list sorted by user reputation.
