@@ -19,8 +19,8 @@ class UserListTests(BaseUserTestCase):
     def test(self):
         """Test users list endpoint
         """
-        response = self.client.get(reverse('user-list'))
         # Test that the list endpoint returns successfully
+        response = self.client.get(reverse('user-list'))
         self.assert_items_equal(response)
 
     def test_sort_by_reputation(self):
@@ -51,7 +51,7 @@ class UserListTests(BaseUserTestCase):
         response = self.client.get(reverse('user-list'), data={'sort': 'name', 'order': 'desc'})
         self.assert_sorted(response, 'display_name', reverse=True)
 
-    def test_sort_by_modification_date(self):
+    def test_sort_by_modified_date(self):
         """Test the user list endpoint sorted by user modification date.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'order': 'asc'})
