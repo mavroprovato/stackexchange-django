@@ -22,7 +22,6 @@ class UserRetrieveTests(BaseUserTestCase):
     def test_detail(self):
         """Test the user detail endpoint.
         """
-        # Test getting one user
         user = random.sample(list(models.User.objects.all()), 1)[0]
         response = self.client.get(reverse('user-detail', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
@@ -30,7 +29,6 @@ class UserRetrieveTests(BaseUserTestCase):
     def test_detail_multiple(self):
         """Test the user detail endpoint for multiple ids.
         """
-        # Test getting multiple users
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(reverse('user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
         self.assert_items_equal(response)
