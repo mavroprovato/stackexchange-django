@@ -1,73 +1,83 @@
 """Posts view set list testing
 """
-import dateutil.parser
+import datetime
+
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
 
-from stackexchange import enums, models
 from stackexchange.tests import factories
+from .base import BasePostTestCase
 
 
-class PostListTests(APITestCase):
+class PostListTests(BasePostTestCase):
     """Post view set list tests
     """
     @classmethod
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.QuestionAnswerFactory.create_batch(size=1000)
+        users = factories.UserFactory.create_batch(size=100)
+        for user in users:
+            factories.QuestionAnswerFactory.create(owner=user)
 
     def test(self):
-        """Test post list endpoint
+        """Test the post list endpoint
         """
         response = self.client.get(reverse('post-list'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Check that the post information returned is correct
-        for row in response.json()['items']:
-            post = models.Post.objects.get(pk=row['post_id'])
-            self.assertEqual(row['score'], post.score)
-            self.assertEqual(dateutil.parser.parse(row['last_activity_date']), post.last_activity_date)
-            self.assertEqual(dateutil.parser.parse(row['creation_date']), post.creation_date)
-            self.assertEqual(row['post_type'], enums.PostType(post.type).name.lower())
-            self.assertEqual(row['content_license'], enums.ContentLicense[post.content_license].name)
+        self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
-        """Test the post list sorted by activity date.
+        """Test the post list endpoint sorted by activity date.
         """
         response = self.client.get(reverse('post-list'), data={'sort': 'activity', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'last_activity_date')
 
         response = self.client.get(reverse('post-list'), data={'sort': 'activity', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'last_activity_date', reverse=True)
 
-    def test_sort_by_creation(self):
-        """Test the post list sorted by creation date.
+    def test_sort_by_creation_date(self):
+        """Test the post list endpoint sorted by creation date.
         """
         response = self.client.get(reverse('post-list'), data={'sort': 'creation', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(reverse('post-list'), data={'sort': 'creation', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
-        """Test the post list sorted by votes.
+        """Test the post list endpoint sorted by votes.
         """
         response = self.client.get(reverse('post-list'), data={'sort': 'votes', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'score')
 
         response = self.client.get(reverse('post-list'), data={'sort': 'votes', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'score', reverse=True)
+
+    def test_range_by_activity(self):
+        """Test the post list endpoint range by activity.
+        """
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('user-list'), data={
+            'sort': 'name', 'min': min_value, 'max': max_value
+        })
+        self.assert_range(response, 'last_activity_date', min_value, max_value)
+
+    def test_range_by_creation_date(self):
+        """Test the post list endpoint range by user creation date.
+        """
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('post-list'), data={
+            'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
+        })
+        self.assert_range(response, 'creation_date', min_value, max_value)
+
+    def test_range_by_votes(self):
+        """Test the post list endpoint range by votes.
+        """
+        min_value = 10
+        max_value = 1000
+        response = self.client.get(reverse('user-list'), data={
+            'sort': 'votes', 'min': min_value, 'max': max_value
+        })
+        self.assert_range(response, 'score', min_value, max_value)
