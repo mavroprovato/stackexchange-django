@@ -23,7 +23,7 @@ class BadgeListTests(BaseBadgeTestCase):
         self.assert_items_equal(response)
 
     def test_sort_by_rank(self):
-        """Test the badges list sorted by badge rank.
+        """Test the badges list endpoint sorted by badge rank.
         """
         response = self.client.get(reverse('badge-list'), data={'sort': 'rank', 'order': 'asc'})
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value)
@@ -33,7 +33,7 @@ class BadgeListTests(BaseBadgeTestCase):
 
     @unittest.skip("Postgres and python sorting algorithms differ")
     def test_sort_by_name(self):
-        """Test the badges list sorted by badge name.
+        """Test the badges list endpoint sorted by badge name.
         """
         response = self.client.get(reverse('badge-list'), data={'sort': 'name', 'order': 'asc'})
         self.assert_sorted(response, 'name')
@@ -42,7 +42,7 @@ class BadgeListTests(BaseBadgeTestCase):
         self.assert_sorted(response, 'name', reverse=True)
 
     def test_sort_by_type(self):
-        """Test the badges list sorted by badge type.
+        """Test the badges list endpoint sorted by badge type.
         """
         response = self.client.get(reverse('badge-list'), data={'sort': 'type', 'order': 'asc'})
         self.assert_sorted(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value)
@@ -68,7 +68,7 @@ class BadgeListTests(BaseBadgeTestCase):
 
     @unittest.skip("Postgres and python sorting algorithms differ")
     def test_range_by_name(self):
-        """Test the badges list range by badge name.
+        """Test the badges list endpoint range by badge name.
         """
         min_value = 'b'
         max_value = 'x'

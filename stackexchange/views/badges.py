@@ -120,11 +120,16 @@ class BadgeViewSet(BaseViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action in ('list', 'retrieve', 'named', 'tags'):
+        if self.action in ('list', 'retrieve'):
             return (
                 filters.OrderingField('rank', 'badge_class', type=enums.BadgeClass),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
                 filters.OrderingField('type', 'badge_type', type=enums.BadgeType)
+            )
+        if self.action in ('named', 'tags'):
+            return (
+                filters.OrderingField('rank', 'badge_class', type=enums.BadgeClass),
+                filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
             )
 
         return None
