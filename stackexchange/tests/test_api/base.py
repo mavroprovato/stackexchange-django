@@ -7,7 +7,7 @@ from rest_framework.test import APITestCase
 class BaseTestCase(APITestCase):
     """Base API test case
     """
-    def assert_items_equal(self, response, model_class, pk_attr: str, attributes: dict):
+    def assert_items_equal(self, response, model_class, pk_attr, attributes: dict):
         """Assert that the items returned by the response are the same as the database items.
 
         :param response: The response.
@@ -17,7 +17,12 @@ class BaseTestCase(APITestCase):
         """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for row in response.json()['items']:
-            obj = model_class.objects.get(pk=row[pk_attr])
+            if isinstance(pk_attr, str):
+                obj = model_class.objects.get(pk=row[pk_attr])
+            elif isinstance(pk_attr, dict):
+                obj = model_class.objects.get(**{name: row[value] for name, value in pk_attr.items()})
+            else:
+                raise ValueError(f"pk attr is of unsupported class: {type(pk_attr)}")
             for attribute, value in attributes.items():
                 if callable(value):
                     expected_value = value(obj)

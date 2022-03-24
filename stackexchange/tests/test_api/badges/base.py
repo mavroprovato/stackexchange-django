@@ -5,7 +5,7 @@ from ..base import BaseTestCase
 
 
 class BaseBadgeTestCase(BaseTestCase):
-    """Base API test case
+    """Base API badge test case
     """
     def assert_items_equal(self, response, **kwargs):
         """Assert that the items returned by the response are the same as the database items.
