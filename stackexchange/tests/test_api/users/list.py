@@ -102,7 +102,7 @@ class UserListTests(BaseUserTestCase):
         self.assert_range(response, 'last_modified_date', min_value, max_value)
 
     def test_in_name(self):
-        """Test the in name filter for users.
+        """Test the in name filter for the user list endpoint.
         """
         # Create a user that will surely be returned
         user = factories.UserFactory.create(display_name='John Doe')

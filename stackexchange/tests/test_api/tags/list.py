@@ -2,6 +2,7 @@
 """
 from django.urls import reverse
 
+from stackexchange import models
 from stackexchange.tests import factories
 from .base import BaseTagTestCase
 
@@ -55,3 +56,13 @@ class TagListTests(BaseTagTestCase):
             'sort': 'name', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'name', min_value, max_value)
+
+    def test_in_name(self):
+        """Test the in name filter for the tag list endpoint.
+        """
+        # Create a user that will surely be returned
+        tag = factories.TagFactory.create(name='es')
+        query = 'es'
+        response = self.client.get(reverse('tag-list'), data={'inname': query})
+        self.assert_in_string(response, 'name', query=query)
+        self.assertIn(tag.id, [models.Tag.objects.get(name=row['name']).pk for row in response.json()['items']])
