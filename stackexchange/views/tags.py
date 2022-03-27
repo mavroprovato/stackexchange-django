@@ -18,6 +18,16 @@ from .base import BaseListViewSet
         summary='Get all tags on the site',
         description=open(finders.find('stackexchange/doc/tags/list.md')).read()
     ),
+    info=extend_schema(
+        summary='Get tags on the site by their names',
+        description=open(finders.find('stackexchange/doc/tags/info.md')).read(),
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated tag names'
+            )
+        ]
+    ),
     wikis=extend_schema(
         summary='Get the wiki entries for a set of tags',
         description=open(finders.find('stackexchange/doc/tags/wikis.md')).read(),
