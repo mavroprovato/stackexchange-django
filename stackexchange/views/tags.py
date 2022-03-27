@@ -60,7 +60,7 @@ class TagViewSet(BaseListViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action == 'list':
+        if self.action in ('list', 'info'):
             return (
                 filters.OrderingField('popular', 'award_count', type=int),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC)
