@@ -32,7 +32,7 @@ class UserListTests(BaseUserTestCase):
         response = self.client.get(reverse('user-list'), data={'sort': 'reputation', 'order': 'desc'})
         self.assert_sorted(response, 'reputation', reverse=True)
 
-    def test_sort_by_creation_date(self):
+    def test_sort_by_creation(self):
         """Test the user list endpoint sorted by user creation date.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'creation', 'order': 'asc'})
@@ -51,7 +51,7 @@ class UserListTests(BaseUserTestCase):
         response = self.client.get(reverse('user-list'), data={'sort': 'name', 'order': 'desc'})
         self.assert_sorted(response, 'display_name', reverse=True)
 
-    def test_sort_by_modified_date(self):
+    def test_sort_by_modified(self):
         """Test the user list endpoint sorted by user modification date.
         """
         response = self.client.get(reverse('user-list'), data={'sort': 'modified', 'order': 'asc'})
@@ -70,7 +70,7 @@ class UserListTests(BaseUserTestCase):
         })
         self.assert_range(response, 'reputation', min_value, max_value)
 
-    def test_range_by_creation_date(self):
+    def test_range_by_creation(self):
         """Test the user list endpoint range by user creation date.
         """
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
@@ -91,7 +91,7 @@ class UserListTests(BaseUserTestCase):
         })
         self.assert_range(response, 'display_name', min_value, max_value)
 
-    def test_range_by_modification_date(self):
+    def test_range_by_modified(self):
         """Test the user list endpoint range by user modified date.
         """
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()

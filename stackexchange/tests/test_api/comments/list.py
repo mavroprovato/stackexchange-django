@@ -1,63 +1,70 @@
 """Comments view set testing
 """
-import dateutil.parser
+import datetime
+import random
 
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
 
-from stackexchange import enums, models
 from stackexchange.tests import factories
+from .base import BaseCommentTestCase
 
 
-class CommentListTests(APITestCase):
+class CommentListTests(BaseCommentTestCase):
     """Comment view set list tests
     """
     @classmethod
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.CommentFactory.create_batch(size=100)
+        users = factories.UserFactory.create_batch(size=100)
+        posts = []
+        for user in users:
+            for _ in range(3):
+                posts.append(factories.QuestionAnswerFactory.create(owner=user))
+        for _ in range(1000):
+            for _ in range(3):
+                factories.CommentFactory.create(post=random.choice(posts), user=random.choice(users))
 
     def test(self):
         """Test comment list endpoint
         """
         response = self.client.get(reverse('comment-list'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_items_equal(response)
 
-        # Check that the user information returned is correct
-        for row in response.json()['items']:
-            comment = models.Comment.objects.get(pk=row['comment_id'])
-            self.assertEqual(row['owner']['reputation'], comment.user.reputation)
-            self.assertEqual(row['owner']['user_id'], comment.user.pk)
-            self.assertEqual(row['owner']['display_name'], comment.user.display_name)
-            self.assertEqual(row['score'], comment.score)
-            self.assertEqual(dateutil.parser.parse(row['creation_date']), comment.creation_date)
-            self.assertEqual(row['post_id'], comment.post.pk)
-            self.assertEqual(row['content_license'], enums.ContentLicense[comment.content_license].name)
-
-    def test_sort_by_creation_date(self):
+    def test_sort_by_creation(self):
         """Test the comment list sorted by comment creation date.
         """
         response = self.client.get(reverse('comment-list'), data={'sort': 'creation', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates))
+        self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(reverse('comment-list'), data={'sort': 'creation', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputation = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(reputation, sorted(reputation, reverse=True))
+        self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
         """Test the comment list sorted by comment votes.
         """
         response = self.client.get(reverse('comment-list'), data={'sort': 'votes', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'score')
 
         response = self.client.get(reverse('comment-list'), data={'sort': 'votes', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'score', reverse=True)
+
+    def test_range_by_creation(self):
+        """Test the comments list endpoint range by creation date.
+        """
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('comment-list'), data={
+            'sort': 'creation', 'min': min_value, 'max': max_value
+        })
+        self.assert_range(response, 'reputation', min_value, max_value)
+
+    def test_range_by_votes(self):
+        """Test the user list endpoint range by comment score.
+        """
+        min_value = 10
+        max_value = 1000
+        response = self.client.get(reverse('comment-list'), data={
+            'sort': 'votes', 'min': min_value, 'max': max_value
+        })
+        self.assert_range(response, 'score', min_value, max_value)
