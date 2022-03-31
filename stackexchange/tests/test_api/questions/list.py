@@ -1,75 +1,83 @@
 """Questions view set list testing
 """
-import dateutil.parser
+import datetime
+
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
 
-from stackexchange import enums, models
 from stackexchange.tests import factories
+from .base import BaseQuestionTestCase
 
 
-class QuestionListTests(APITestCase):
+class QuestionListTests(BaseQuestionTestCase):
     """Question view set list tests
     """
     @classmethod
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.QuestionFactory.create_batch(size=1000)
+        users = factories.UserFactory.create_batch(size=100)
+        for user in users:
+            factories.QuestionFactory.create_batch(size=3, owner=user)
 
     def test(self):
         """Test question list endpoint
         """
         response = self.client.get(reverse('question-list'))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        for row in response.json()['items']:
-            question = models.Post.objects.get(pk=row['question_id'])
-            self.assertEqual(row['view_count'], question.view_count)
-            self.assertEqual(row['answer_count'], question.answer_count)
-            self.assertEqual(row['score'], question.score)
-            self.assertEqual(dateutil.parser.parse(row['last_activity_date']), question.last_activity_date)
-            self.assertEqual(dateutil.parser.parse(row['creation_date']), question.creation_date)
-            self.assertEqual(dateutil.parser.parse(row['last_edit_date']), question.last_edit_date)
-            self.assertEqual(row['content_license'], enums.ContentLicense[question.content_license].name)
-            self.assertEqual(row['title'], question.title)
+        self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
-        """Test the question list sorted by activity date.
+        """Test the question list endpoint sorted by activity date.
         """
         response = self.client.get(reverse('question-list'), data={'sort': 'activity', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'last_activity_date')
 
         response = self.client.get(reverse('question-list'), data={'sort': 'activity', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'last_activity_date', reverse=True)
 
-    def test_sort_by_creation(self):
-        """Test the question list sorted by creation date.
+    def test_sort_by_creation_date(self):
+        """Test the question list endpoint sorted by creation date.
         """
         response = self.client.get(reverse('question-list'), data={'sort': 'creation', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(reverse('question-list'), data={'sort': 'creation', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
-        """Test the question list sorted by votes.
+        """Test the question list endpoint sorted by votes.
         """
         response = self.client.get(reverse('question-list'), data={'sort': 'votes', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations))
+        self.assert_sorted(response, 'score')
 
         response = self.client.get(reverse('question-list'), data={'sort': 'votes', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputations = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(reputations, sorted(reputations, reverse=True))
+        self.assert_sorted(response, 'score', reverse=True)
+
+    def test_range_by_activity(self):
+        """Test the question list endpoint range by activity.
+        """
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('question-list'), data={
+            'sort': 'name', 'min': min_value, 'max': max_value
+        })
+        self.assert_range(response, 'last_activity_date', min_value, max_value)
+
+    def test_range_by_creation_date(self):
+        """Test the question list endpoint range by user creation date.
+        """
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('question-list'), data={
+            'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
+        })
+        self.assert_range(response, 'creation_date', min_value, max_value)
+
+    def test_range_by_votes(self):
+        """Test the question list endpoint range by votes.
+        """
+        min_value = 10
+        max_value = 1000
+        response = self.client.get(reverse('question-list'), data={
+            'sort': 'votes', 'min': min_value, 'max': max_value
+        })
+        self.assert_range(response, 'score', min_value, max_value)

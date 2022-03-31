@@ -77,7 +77,7 @@ class PostListTests(BasePostTestCase):
         """
         min_value = 10
         max_value = 1000
-        response = self.client.get(reverse('user-list'), data={
+        response = self.client.get(reverse('post-list'), data={
             'sort': 'votes', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'score', min_value, max_value)
