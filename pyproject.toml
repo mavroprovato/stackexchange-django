@@ -6,12 +6,14 @@ authors = ["Kostas Kokkoros"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+celery = "*"
 Django = "*"
-psycopg2 = "*"
+redis = "*"
 defusedxml = "*"
 django-environ = "*"
 djangorestframework = "*"
 drf-spectacular = "*"
+psycopg2 = "*"
 py7zr = "*"
 requests = "*"
 tqdm = "*"

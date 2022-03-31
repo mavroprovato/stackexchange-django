@@ -15,15 +15,24 @@ def get_site_info() -> dict:
 
     :return: The site information, as a dictionary.
     """
-    return cache.get_or_set(key='site_info', default=calculate_site_info, timeout=None)
+    return cache.get_or_set(key='site_info', default=_calculate_site_info, timeout=None)
 
 
-def calculate_site_info() -> dict:
+def set_site_info() -> dict:
+    """Set the site information, overriding any cache values.
+
+    :return: The site information, as a dictionary.
+    """
+    return cache.set(key='site_info', value=_calculate_site_info(), timeout=None)
+
+
+def _calculate_site_info() -> dict:
     """Calculate the site information.
 
     :return: The site information.
     """
-    logger.error('Calculating site info')
+    print('Calculating site info')
+    logger.info('Calculating site info')
     site_info = {
         **models.UserBadge.objects.aggregate(
             total_badges=Count('*'), first_badge_date=Min('date_awarded'), last_badge_date=Max('date_awarded')

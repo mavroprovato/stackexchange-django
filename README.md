@@ -4,13 +4,15 @@ This project implements an API for a StackExchange-like site. The API tries to b
 [official stackexchange API](https://api.stackexchange.com/docs).
 
 The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) 3.8+ and
-[Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used for
-storing the application data.
+[Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used as the
+project database. [RabbitMQ](https://www.rabbitmq.com/) is used for background application tasks, and
+[Redis](https://redis.io/) is used for caching.
 
 ## Installation
 
 Before running these installation instructions, make sure you have [Python](https://www.python.org/downloads/),
-[Poetry](https://python-poetry.org/docs/#installation) and [PostgreSQL](https://www.postgresql.org/download/) installed.
+[Poetry](https://python-poetry.org/docs/#installation), [PostgreSQL](https://www.postgresql.org/download/),
+[RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/) installed.
 
 To install all dependencies needed for the application run:
 
