@@ -1,8 +1,13 @@
 """Services module
 """
+import logging
+
+from django.core.cache import cache
 from django.db.models import Count, Max, Min, Q
 
 from stackexchange import enums, models
+
+logger = logging.getLogger(__name__)
 
 
 def get_site_info() -> dict:
@@ -10,7 +15,16 @@ def get_site_info() -> dict:
 
     :return: The site information, as a dictionary.
     """
-    info = {
+    return cache.get_or_set(key='site_info', default=calculate_site_info, timeout=None)
+
+
+def calculate_site_info() -> dict:
+    """Calculate the site information.
+
+    :return: The site information.
+    """
+    logger.error('Calculating site info')
+    site_info = {
         **models.UserBadge.objects.aggregate(
             total_badges=Count('*'), first_badge_date=Min('date_awarded'), last_badge_date=Max('date_awarded')
         ),
@@ -22,22 +36,25 @@ def get_site_info() -> dict:
             total_answers=Count('*'), first_answer_date=Min('creation_date'), last_answer_date=Max('creation_date')
         ),
         **{
-            "total_users": models.User.objects.count(),
-            "total_votes": models.PostVote.objects.count(),
-            "total_comments": models.Comment.objects.count(),
+            'total_users': models.User.objects.count(),
+            'total_votes': models.PostVote.objects.count(),
+            'total_comments': models.Comment.objects.count(),
         }
     }
-    if info.get('total_badges') and info.get('first_badge_date') and info.get('last_badge_date'):
-        info['badges_per_minute'] = info['total_badges'] / (
-            (info['last_badge_date'] - info['first_badge_date']).total_seconds() / 60
+    if site_info.get('total_badges') and site_info.get('first_badge_date') and site_info.get('last_badge_date'):
+        site_info['badges_per_minute'] = site_info['total_badges'] / (
+                (site_info['last_badge_date'] - site_info['first_badge_date']).total_seconds() / 60
         )
-    if info.get('total_questions') and info.get('first_question_date') and info.get('last_question_date'):
-        info['questions_per_minute'] = info['total_questions'] / (
-            (info['last_question_date'] - info['first_question_date']).total_seconds() / 60
+    if (
+            site_info.get('total_questions') and site_info.get('first_question_date') and
+            site_info.get('last_question_date')
+    ):
+        site_info['questions_per_minute'] = site_info['total_questions'] / (
+                (site_info['last_question_date'] - site_info['first_question_date']).total_seconds() / 60
         )
-    if info.get('total_answers') and info.get('first_answer_date') and info.get('last_answer_date'):
-        info['answers_per_minute'] = info['total_answers'] / (
-            (info['last_answer_date'] - info['first_answer_date']).total_seconds() / 60
+    if site_info.get('total_answers') and site_info.get('first_answer_date') and site_info.get('last_answer_date'):
+        site_info['answers_per_minute'] = site_info['total_answers'] / (
+                (site_info['last_answer_date'] - site_info['first_answer_date']).total_seconds() / 60
         )
 
-    return info
+    return site_info

@@ -117,7 +117,7 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "click"
-version = "8.1.1"
+version = "8.1.2"
 description = "Composable command line interface toolkit"
 category = "dev"
 optional = false
@@ -760,11 +760,11 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "werkzeug"
-version = "2.1.0"
+version = "2.0.3"
 description = "The comprehensive WSGI web application library."
 category = "dev"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.6"
 
 [package.extras]
 watchdog = ["watchdog"]
@@ -800,7 +800,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "508a4ca8516d4a2e59e9ee9e2448729df65004f92607cee718d73620ace94b3c"
+content-hash = "b7242f8963d529a9f4699634b2b15ec33d1eea093b46d3d7687e13c39f9f1487"
 
 [metadata.files]
 asgiref = [
@@ -979,8 +979,8 @@ charset-normalizer = [
     {file = "charset_normalizer-2.0.12-py3-none-any.whl", hash = "sha256:6881edbebdb17b39b4eaaa821b438bf6eddffb4468cf344f09f89def34a8b1df"},
 ]
 click = [
-    {file = "click-8.1.1-py3-none-any.whl", hash = "sha256:5e0d195c2067da3136efb897449ec1e9e6c98282fbf30d7f9e164af9be901a6b"},
-    {file = "click-8.1.1.tar.gz", hash = "sha256:7ab900e38149c9872376e8f9b5986ddcaf68c0f413cf73678a0bca5547e6f976"},
+    {file = "click-8.1.2-py3-none-any.whl", hash = "sha256:24e1a4a9ec5bf6299411369b208c1df2188d9eb8d916302fe6bf03faed227f1e"},
+    {file = "click-8.1.2.tar.gz", hash = "sha256:479707fe14d9ec9a0757618b7a100a0ae4c4e236fac5b7f80ca68028141a1a72"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
@@ -1549,8 +1549,8 @@ urllib3 = [
     {file = "urllib3-1.26.9.tar.gz", hash = "sha256:aabaf16477806a5e1dd19aa41f8c2b7950dd3c746362d7e3223dbe6de6ac448e"},
 ]
 werkzeug = [
-    {file = "Werkzeug-2.1.0-py3-none-any.whl", hash = "sha256:094ecfc981948f228b30ee09dbfe250e474823b69b9b1292658301b5894bbf08"},
-    {file = "Werkzeug-2.1.0.tar.gz", hash = "sha256:9b55466a3e99e13b1f0686a66117d39bda85a992166e0a79aedfcf3586328f7a"},
+    {file = "Werkzeug-2.0.3-py3-none-any.whl", hash = "sha256:1421ebfc7648a39a5c58c601b154165d05cf47a3cd0ccb70857cbdacf6c8f2b8"},
+    {file = "Werkzeug-2.0.3.tar.gz", hash = "sha256:b863f8ff057c522164b6067c9e28b041161b4be5ba4d0daceeaa50a163822d3c"},
 ]
 wrapt = [
     {file = "wrapt-1.14.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:5a9a1889cc01ed2ed5f34574c90745fab1dd06ec2eee663e8ebeefe363e8efd7"},
