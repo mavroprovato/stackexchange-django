@@ -1,96 +1,121 @@
 """Users API answers testing
 """
+import datetime
 import random
 
-import dateutil.parser
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
 
-from stackexchange import enums, models
+from stackexchange import models
 from stackexchange.tests import factories
+from ..answers.base import BaseAnswerTestCase
 
 
-class UserAnswerTests(APITestCase):
+class UserAnswerTests(BaseAnswerTestCase):
     """Users view set answer tests
     """
     @classmethod
     def setUpTestData(cls):
-        # Create some users
-        users = factories.UserFactory.create_batch(size=10)
-        # Create some questions from the users
+        users = factories.UserFactory.create_batch(size=100)
         questions = []
         for user in users:
-            questions += factories.QuestionFactory.create_batch(size=random.randint(0, 3), owner=user)
-        # Post some answers to the questions
+            questions += factories.QuestionFactory.create_batch(size=2, owner=user)
         for question in questions:
-            user = random.choice(users)
-            factories.AnswerFactory.create_batch(size=random.randint(0, 3), question=question, owner=user)
+            factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
 
-    def test(self):
-        """Test user answers endpoint
+    def test_detail(self):
+        """Test the user answer list endpoint
         """
-        # Test that the list endpoint returns successfully
         user = random.sample(list(models.User.objects.all()), 1)[0]
         response = self.client.get(reverse('user-answers', kwargs={'pk': user.pk}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_items_equal(response)
 
-        # Check that the user information returned is correct
-        for row in response.json()['items']:
-            answer = models.Post.objects.get(pk=row['answer_id'])
-            self.assertEqual(row['owner']['reputation'], answer.owner.reputation)
-            self.assertEqual(row['owner']['user_id'], answer.owner.pk)
-            self.assertEqual(row['owner']['display_name'], answer.owner.display_name)
-            self.assertEqual(row['score'], answer.score)
-            self.assertEqual(dateutil.parser.parse(row['last_activity_date']), answer.last_activity_date)
-            self.assertEqual(dateutil.parser.parse(row['creation_date']), answer.creation_date)
-            self.assertEqual(row['question_id'], answer.question.pk)
-            self.assertEqual(row['content_license'], enums.ContentLicense[answer.content_license].name)
+    def test_detail_multiple(self):
+        """Test the user answer endpoint for multiple ids.
+        """
+        users = random.sample(list(models.User.objects.all()), 3)
+        response = self.client.get(reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
+        self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
-        """Test the user answer list sorted by question activity date.
+        """Test the answer list endpoint sorted by activity date.
         """
-        user = random.sample(list(models.User.objects.all()), 1)[0]
+        users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        activity_dates = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(activity_dates, sorted(activity_dates))
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'activity', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'last_activity_date')
 
         response = self.client.get(
-            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'activity', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        activity_dates = [row['last_activity_date'] for row in response.json()['items']]
-        self.assertListEqual(activity_dates, sorted(activity_dates, reverse=True))
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'activity', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'last_activity_date', reverse=True)
 
     def test_sort_by_creation_date(self):
-        """Test the user answer list sorted by user creation date.
+        """Test the answer list endpoint sorted by creation date.
         """
-        user = random.sample(list(models.User.objects.all()), 1)[0]
+        users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'creation', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates))
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'creation', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'creation', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        reputation = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(reputation, sorted(reputation, reverse=True))
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'creation', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
-        """Test the user answer list sorted by votes.
+        """Test the answer list endpoint sorted by votes.
         """
-        user = random.sample(list(models.User.objects.all()), 1)[0]
+        users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        votes = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(votes, sorted(votes))
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'votes', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('user-answers', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        votes = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(votes, sorted(votes, reverse=True))
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'votes', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'score', reverse=True)
+
+    def test_range_by_activity(self):
+        """Test the answer list endpoint range by activity.
+        """
+        users = random.sample(list(models.User.objects.all()), 3)
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'name', 'min': min_value, 'max': max_value}
+        )
+        self.assert_range(response, 'last_activity_date', min_value, max_value)
+
+    def test_range_by_creation_date(self):
+        """Test the answer list endpoint range by user creation date.
+        """
+        users = random.sample(list(models.User.objects.all()), 3)
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
+        )
+        self.assert_range(response, 'creation_date', min_value, max_value)
+
+    def test_range_by_votes(self):
+        """Test the answer list endpoint range by votes.
+        """
+        users = random.sample(list(models.User.objects.all()), 3)
+        min_value = 10
+        max_value = 1000
+        response = self.client.get(
+            reverse('user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'votes', 'min': min_value, 'max': max_value}
+        )
+        self.assert_range(response, 'score', min_value, max_value)
