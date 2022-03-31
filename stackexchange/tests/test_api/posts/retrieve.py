@@ -5,7 +5,7 @@ import random
 
 from django.urls import reverse
 
-from stackexchange import models
+from stackexchange import enums, models
 from stackexchange.tests import factories
 from .base import BasePostTestCase
 
@@ -24,21 +24,24 @@ class PostRetrieveTests(BasePostTestCase):
     def test_detail(self):
         """Test the post detail endpoint
         """
-        post = random.sample(list(models.Post.objects.all()), 1)[0]
+        post = random.sample(
+            list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 1)[0]
         response = self.client.get(reverse('post-detail', kwargs={'pk': post.pk}))
         self.assert_items_equal(response)
 
     def test_detail_multiple(self):
         """Test the post detail endpoint for multiple ids.
         """
-        posts = random.sample(list(models.Post.objects.all()), 3)
+        posts = random.sample(
+            list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         response = self.client.get(reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
         self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
         """Test the post detail endpoint sorted by activity date.
         """
-        posts = random.sample(list(models.Post.objects.all()), 3)
+        posts = random.sample(
+            list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         response = self.client.get(
             reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'activity', 'order': 'asc'}
@@ -54,7 +57,8 @@ class PostRetrieveTests(BasePostTestCase):
     def test_sort_by_creation_date(self):
         """Test the post detail endpoint sorted by creation date.
         """
-        posts = random.sample(list(models.Post.objects.all()), 3)
+        posts = random.sample(
+            list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         response = self.client.get(
             reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'creation', 'order': 'asc'}
@@ -70,7 +74,8 @@ class PostRetrieveTests(BasePostTestCase):
     def test_sort_by_votes(self):
         """Test the post detail endpoint sorted by votes.
         """
-        posts = random.sample(list(models.Post.objects.all()), 3)
+        posts = random.sample(
+            list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         response = self.client.get(
             reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'votes', 'order': 'asc'}
@@ -86,7 +91,8 @@ class PostRetrieveTests(BasePostTestCase):
     def test_range_by_activity(self):
         """Test the post detail endpoint range by activity.
         """
-        posts = random.sample(list(models.Post.objects.all()), 3)
+        posts = random.sample(
+            list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
@@ -98,7 +104,8 @@ class PostRetrieveTests(BasePostTestCase):
     def test_range_by_creation_date(self):
         """Test the post detail endpoint range by user creation date.
         """
-        posts = random.sample(list(models.Post.objects.all()), 3)
+        posts = random.sample(
+            list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
