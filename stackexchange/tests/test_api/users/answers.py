@@ -22,14 +22,14 @@ class UserAnswerTests(BaseAnswerTestCase):
         for question in questions:
             factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
 
-    def test_detail(self):
+    def test(self):
         """Test the user answer list endpoint
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
         response = self.client.get(reverse('user-answers', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
 
-    def test_detail_multiple(self):
+    def test_multiple(self):
         """Test the user answer endpoint for multiple ids.
         """
         users = random.sample(list(models.User.objects.all()), 3)

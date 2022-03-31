@@ -21,14 +21,14 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         for user in users:
             factories.QuestionFactory.create_batch(size=2, owner=user)
 
-    def test_detail(self):
+    def test(self):
         """Test the question detail endpoint
         """
         question = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 1)[0]
         response = self.client.get(reverse('question-detail', kwargs={'pk': question.pk}))
         self.assert_items_equal(response)
 
-    def test_detail_multiple(self):
+    def test_multiple(self):
         """Test the question detail endpoint for multiple ids.
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)

@@ -21,7 +21,7 @@ class PostRetrieveTests(BasePostTestCase):
         for user in users:
             factories.QuestionAnswerFactory.create(owner=user)
 
-    def test_detail(self):
+    def test(self):
         """Test the post detail endpoint
         """
         post = random.sample(
@@ -29,7 +29,7 @@ class PostRetrieveTests(BasePostTestCase):
         response = self.client.get(reverse('post-detail', kwargs={'pk': post.pk}))
         self.assert_items_equal(response)
 
-    def test_detail_multiple(self):
+    def test_multiple(self):
         """Test the post detail endpoint for multiple ids.
         """
         posts = random.sample(

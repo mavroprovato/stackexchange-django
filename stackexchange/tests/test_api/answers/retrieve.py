@@ -24,14 +24,14 @@ class AnswerRetrieveTests(BaseAnswerTestCase):
         for question in questions:
             factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
 
-    def test_detail(self):
+    def test(self):
         """Test the question detail endpoint
         """
         answer = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 1)[0]
         response = self.client.get(reverse('answer-detail', kwargs={'pk': answer.pk}))
         self.assert_items_equal(response)
 
-    def test_detail_multiple(self):
+    def test_multiple(self):
         """Test the question detail endpoint for multiple ids.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)

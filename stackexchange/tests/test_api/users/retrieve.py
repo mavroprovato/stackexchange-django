@@ -19,14 +19,14 @@ class UserRetrieveTests(BaseUserTestCase):
     def setUpTestData(cls):
         factories.UserFactory.create_batch(size=10)
 
-    def test_detail(self):
+    def test(self):
         """Test the user detail endpoint.
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
         response = self.client.get(reverse('user-detail', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
 
-    def test_detail_multiple(self):
+    def test_multiple(self):
         """Test the user detail endpoint for multiple ids.
         """
         users = random.sample(list(models.User.objects.all()), 3)
