@@ -1,4 +1,4 @@
-"""Badges view set testing
+"""Info view set testing
 """
 from django.urls import reverse
 from rest_framework import status
