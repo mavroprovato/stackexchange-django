@@ -3,28 +3,15 @@
 from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
-from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView
-from rest_framework import routers
+from drf_spectacular import views
 
-from stackexchange import views
-
-router = routers.DefaultRouter()
-router.register('answers', views.AnswerViewSet, basename='answer')
-router.register('badges', views.BadgeViewSet, basename='badge')
-router.register('comments', views.CommentViewSet, basename='comment')
-router.register('info', views.InfoViewSet, basename='info')
-router.register('posts', views.PostViewSet, basename='post')
-router.register('privileges', views.PrivilegesViewSet, basename='privileges')
-router.register('questions', views.QuestionViewSet, basename='question')
-router.register('search', views.SearchViewSet, basename='search')
-router.register('tags', views.TagViewSet, basename='tag')
-router.register('users', views.UserViewSet, basename='user')
+from stackexchange import urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
+    path('api/', include(urls.api.router.urls)),
     path('api/auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api/doc/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/doc/', views.SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/', views.SpectacularAPIView.as_view(), name='schema'),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
