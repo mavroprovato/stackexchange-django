@@ -6,7 +6,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, serializers
-from stackexchange.views import BaseListViewSet
+from .base import BaseListViewSet
 
 
 @extend_schema_view(
