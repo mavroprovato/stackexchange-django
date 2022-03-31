@@ -102,9 +102,9 @@ class OrderingFilter(BaseFilterBackend):
         ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
         ordering_field = None
         if ordering_name:
-            for of in ordering_fields:
-                if of.name == ordering_name:
-                    ordering_field = of
+            for field in ordering_fields:
+                if field.name == ordering_name:
+                    ordering_field = field
                     break
         # If not provided in the request, use the first ordering field if it exists
         if ordering_field is None and len(ordering_fields) > 1:

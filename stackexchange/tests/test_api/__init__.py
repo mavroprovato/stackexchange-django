@@ -1,3 +1,5 @@
+"""API tests
+"""
 from .answers import *
 from .badges import *
 from .comments import *

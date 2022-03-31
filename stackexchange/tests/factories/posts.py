@@ -3,8 +3,8 @@
 import factory
 import pytz
 
-from .users import UserFactory
 from stackexchange import enums, models
+from .users import UserFactory
 
 
 class PostFactory(factory.django.DjangoModelFactory):

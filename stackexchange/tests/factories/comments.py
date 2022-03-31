@@ -2,9 +2,9 @@
 """
 import factory
 
+from stackexchange import models
 from .posts import QuestionAnswerFactory
 from .users import UserFactory
-from stackexchange import models
 
 
 class CommentFactory(factory.django.DjangoModelFactory):

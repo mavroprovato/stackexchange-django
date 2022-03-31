@@ -1,3 +1,5 @@
+"""Test API badges
+"""
 from .list import *
 from .name import *
 from .recipients import *

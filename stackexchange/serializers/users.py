@@ -66,8 +66,9 @@ class UserBadgeDetailSerializer(BaseSerializer):
         """
         return BaseUserSerializer(self.get_user_by_id(user_badge['user'])).data
 
+    @staticmethod
     @functools.lru_cache(maxsize=None)
-    def get_user_by_id(self, user_id: int) -> models.User:
+    def get_user_by_id(user_id: int) -> models.User:
         """Get a user by id. The result of this method is cached.
 
         :param user_id: The user id.

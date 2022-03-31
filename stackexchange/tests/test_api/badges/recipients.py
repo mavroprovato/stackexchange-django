@@ -3,7 +3,6 @@
 import random
 
 from django.urls import reverse
-from rest_framework import status
 
 from stackexchange.tests import factories
 from .base import BaseBadgeTestCase

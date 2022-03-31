@@ -170,6 +170,10 @@ class UserViewSet(BaseViewSet):
 
     @property
     def stable_ordering(self) -> typing.Optional[typing.Sequence[str]]:
+        """Get the stable ordering for the view.
+
+        :return: An iterable of strings that define the stable ordering.
+        """
         if self.action == 'badges':
             return 'user', 'badge'
 

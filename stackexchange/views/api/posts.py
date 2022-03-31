@@ -3,7 +3,6 @@
 import datetime
 import typing
 
-from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter

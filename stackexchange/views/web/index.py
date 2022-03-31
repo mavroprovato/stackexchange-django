@@ -1,3 +1,5 @@
+"""Web index views
+"""
 from django.views.generic import TemplateView
 
 
