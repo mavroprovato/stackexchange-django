@@ -1,20 +1,24 @@
 """Badges API named testing
 """
+import random
 import unittest
 
 from django.urls import reverse
 
 from stackexchange import enums
 from stackexchange.tests import factories
-from .base import BaseBadgeTestCase
+from .base import BaseBadgeWithAwardCountTestCase
 
 
-class BadgeNamedTests(BaseBadgeTestCase):
+class BadgeNamedTests(BaseBadgeWithAwardCountTestCase):
     """Badges named tests
     """
     @classmethod
     def setUpTestData(cls):
-        factories.BadgeFactory.create_batch(size=100)
+        users = factories.UserFactory.create_batch(size=10)
+        badges = factories.BadgeFactory.create_batch(size=100)
+        for _ in range(1000):
+            factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
 
     def test(self):
         """Test badges named endpoint

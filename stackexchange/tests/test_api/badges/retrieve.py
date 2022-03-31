@@ -7,15 +7,18 @@ from django.urls import reverse
 
 from stackexchange import enums, models
 from stackexchange.tests import factories
-from .base import BaseBadgeTestCase
+from .base import BaseBadgeWithAwardCountTestCase
 
 
-class BadgeRetrieveTests(BaseBadgeTestCase):
+class BadgeRetrieveTests(BaseBadgeWithAwardCountTestCase):
     """Badges retrieve tests
     """
     @classmethod
     def setUpTestData(cls):
-        factories.BadgeFactory.create_batch(size=100)
+        users = factories.UserFactory.create_batch(size=10)
+        badges = factories.BadgeFactory.create_batch(size=100)
+        for _ in range(1000):
+            factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
 
     def test(self):
         """Test the badges retrieve endpoint.
