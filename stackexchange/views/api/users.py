@@ -3,8 +3,8 @@
 import datetime
 import typing
 
-from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -18,12 +18,12 @@ from .base import BaseViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all users on the site',
-        description=open(finders.find('stackexchange/doc/users/list.md')).read()
+        description=render_to_string('doc/users/list.md'),
     ),
     retrieve=extend_schema(
         summary='Gets the user identified by id',
         operation_id='users_retrieve',
-        description=open(finders.find('stackexchange/doc/users/retrieve.md')).read(),
+        description=render_to_string('doc/users/retrieve.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -33,7 +33,7 @@ from .base import BaseViewSet
     ),
     answers=extend_schema(
         summary='Get the answers posted by the user identified by id',
-        description=open(finders.find('stackexchange/doc/users/answers.md')).read(),
+        description=render_to_string('doc/users/answers.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -43,7 +43,7 @@ from .base import BaseViewSet
     ),
     badges=extend_schema(
         summary='Get the badges earned by the user identified by id',
-        description=open(finders.find('stackexchange/doc/users/badges.md')).read(),
+        description=render_to_string('doc/users/badges.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -53,7 +53,7 @@ from .base import BaseViewSet
     ),
     comments=extend_schema(
         summary='Get the comments posted by the user identified by id',
-        description=open(finders.find('stackexchange/doc/users/comments.md')).read(),
+        description=render_to_string('doc/users/comments.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -63,7 +63,7 @@ from .base import BaseViewSet
     ),
     posts=extend_schema(
         summary='Get all posts (questions and answers) owned by a user',
-        description=open(finders.find('stackexchange/doc/users/posts.md')).read(),
+        description=render_to_string('doc/users/posts.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -73,14 +73,14 @@ from .base import BaseViewSet
     ),
     privileges=extend_schema(
         summary='Returns the privileges a user has',
-        description=open(finders.find('stackexchange/doc/users/privileges.md')).read(),
+        description=render_to_string('doc/users/privileges.md'),
         parameters=[
             OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
         ]
     ),
     questions=extend_schema(
         summary='Get the questions posted by the user identified by id',
-        description=open(finders.find('stackexchange/doc/users/questions.md')).read(),
+        description=render_to_string('doc/users/questions.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,

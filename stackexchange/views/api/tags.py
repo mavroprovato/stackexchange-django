@@ -2,8 +2,8 @@
 """
 import typing
 
-from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -16,11 +16,11 @@ from .base import BaseListViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all tags on the site',
-        description=open(finders.find('stackexchange/doc/tags/list.md')).read()
+        description=render_to_string('doc/tags/list.md'),
     ),
     info=extend_schema(
         summary='Get tags on the site by their names',
-        description=open(finders.find('stackexchange/doc/tags/info.md')).read(),
+        description=render_to_string('doc/tags/info.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -30,7 +30,7 @@ from .base import BaseListViewSet
     ),
     wikis=extend_schema(
         summary='Get the wiki entries for a set of tags',
-        description=open(finders.find('stackexchange/doc/tags/wikis.md')).read(),
+        description=render_to_string('doc/tags/wikis.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,

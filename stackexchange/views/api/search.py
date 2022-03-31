@@ -2,8 +2,8 @@
 """
 import datetime
 
-from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 from stackexchange import enums, filters, models, serializers
@@ -13,7 +13,7 @@ from .base import BaseListViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all questions on the site',
-        description=open(finders.find('stackexchange/doc/search/list.md')).read()
+        description=render_to_string('doc/search/list.md'),
     ),
 )
 class SearchViewSet(BaseListViewSet):

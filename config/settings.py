@@ -151,7 +151,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Stack Exchange API',
-    'DESCRIPTION': open(BASE_DIR / 'stackexchange/static/stackexchange/doc/description.md').read(),
+    'DESCRIPTION': open(BASE_DIR / 'stackexchange/templates/doc/description.md').read(),
     'VERSION': '2.3',
 }
 

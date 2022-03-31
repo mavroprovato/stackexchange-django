@@ -2,7 +2,7 @@
 """
 import datetime
 
-from django.contrib.staticfiles import finders
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema
 
 from stackexchange import filters, models, serializers
@@ -12,11 +12,11 @@ from .base import BaseViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all comments on the site',
-        description=open(finders.find('stackexchange/doc/comments/list.md')).read(),
+        description=render_to_string('doc/comments/list.md'),
     ),
     retrieve=extend_schema(
         summary='Gets the comment identified by id',
-        description=open(finders.find('stackexchange/doc/comments/retrieve.md')).read(),
+        description=render_to_string('doc/comments/retrieve.md'),
         operation_id='comments_retrieve',
     ),
 )

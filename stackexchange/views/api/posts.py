@@ -5,6 +5,7 @@ import typing
 
 from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -17,12 +18,12 @@ from .base import BaseViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all posts (questions and answers) in the system',
-        description=open(finders.find('stackexchange/doc/posts/list.md')).read(),
+        description=render_to_string('doc/posts/list.md'),
     ),
     retrieve=extend_schema(
         summary='Get all posts identified by a set of ids. Useful for when the type of post (question or answer) is '
                 'not known',
-        description=open(finders.find('stackexchange/doc/posts/retrieve.md')).read(),
+        description=render_to_string('doc/posts/retrieve.md'),
         operation_id='posts_retrieve',
         parameters=[
             OpenApiParameter(
@@ -33,7 +34,7 @@ from .base import BaseViewSet
     ),
     comments=extend_schema(
         summary='Get comments on the posts (question or answer) identified by a set of ids',
-        description=open(finders.find('stackexchange/doc/posts/comments.md')).read(),
+        description=render_to_string('doc/posts/comments.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -43,7 +44,7 @@ from .base import BaseViewSet
     ),
     revisions=extend_schema(
         summary='Get revisions on the set of posts in ids',
-        description=open(finders.find('stackexchange/doc/posts/revisions.md')).read(),
+        description=render_to_string('doc/posts/revisions.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,

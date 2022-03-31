@@ -3,8 +3,8 @@
 import datetime
 import typing
 
-from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -17,11 +17,11 @@ from .base import BaseViewSet
 @extend_schema_view(
     list=extend_schema(
         summary='Get all questions on the site',
-        description=open(finders.find('stackexchange/doc/questions/list.md')).read(),
+        description=render_to_string('doc/questions/list.md'),
     ),
     retrieve=extend_schema(
         summary='Get the questions identified by a set of ids',
-        description=open(finders.find('stackexchange/doc/questions/retrieve.md')).read(),
+        description=render_to_string('doc/questions/retrieve.md'),
         operation_id='questions_retrieve',
         parameters=[
             OpenApiParameter(
@@ -32,7 +32,7 @@ from .base import BaseViewSet
     ),
     answers=extend_schema(
         summary='Get the answers to the questions identified by a set of ids',
-        description=open(finders.find('stackexchange/doc/questions/answers.md')).read(),
+        description=render_to_string('doc/questions/answers.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -42,7 +42,7 @@ from .base import BaseViewSet
     ),
     comments=extend_schema(
         summary='Get the comments on the questions identified by a set of ids',
-        description=open(finders.find('stackexchange/doc/questions/comments.md')).read(),
+        description=render_to_string('doc/questions/comments.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -52,7 +52,7 @@ from .base import BaseViewSet
     ),
     linked=extend_schema(
         summary='Get the questions that link to the questions identified by a set of ids',
-        description=open(finders.find('stackexchange/doc/questions/linked.md')).read(),
+        description=render_to_string('doc/questions/linked.md'),
         parameters=[
             OpenApiParameter(
                 name='id', type=str, location=OpenApiParameter.PATH,
@@ -62,7 +62,7 @@ from .base import BaseViewSet
     ),
     no_answers=extend_schema(
         summary='Get all questions on the site with no answers',
-        description=open(finders.find('stackexchange/doc/questions/no_answers.md')).read()
+        description=render_to_string('doc/questions/no_answers.md'),
     ),
 )
 class QuestionViewSet(BaseViewSet):

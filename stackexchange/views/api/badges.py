@@ -2,8 +2,8 @@
 """
 import typing
 
-from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -15,11 +15,11 @@ from .base import BaseViewSet
 
 @extend_schema_view(
     list=extend_schema(
-        summary='Get all badges on the site', description=open(finders.find('stackexchange/doc/badges/list.md')).read(),
+        summary='Get all badges on the site', description=render_to_string('doc/badges/list.md'),
     ),
     retrieve=extend_schema(
         summary='Get the badges identified by ids',
-        description=open(finders.find('stackexchange/doc/badges/retrieve.md')).read(),
+        description=render_to_string('doc/badges/retrieve.md'),
         operation_id='badges_retrieve',
         parameters=[
             OpenApiParameter(
@@ -30,15 +30,15 @@ from .base import BaseViewSet
     ),
     named=extend_schema(
         summary='Get all non-tagged-based badges',
-        description=open(finders.find('stackexchange/doc/badges/named.md')).read(),
+        description=render_to_string('doc/badges/named.md'),
     ),
     recipients=extend_schema(
         summary='Get badges recently awarded on the site',
-        description=open(finders.find('stackexchange/doc/badges/recipients.md')).read(),
+        description=render_to_string('doc/badges/recipients.md'),
     ),
     recipients_detail=extend_schema(
         summary='Get the recent recipients of the given badges',
-        description=open(finders.find('stackexchange/doc/badges/recipients-detail.md')).read(),
+        description=render_to_string('doc/badges/recipients-detail.md'),
         operation_id='badges_recipients_retrieve',
         parameters=[
             OpenApiParameter(
@@ -49,7 +49,7 @@ from .base import BaseViewSet
     ),
     tags=extend_schema(
         summary='Get all tagged-based badges',
-        description=open(finders.find('stackexchange/doc/badges/tags.md')).read(),
+        description=render_to_string('doc/badges/tags.md'),
     ),
 )
 class BadgeViewSet(BaseViewSet):

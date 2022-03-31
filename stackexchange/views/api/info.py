@@ -1,6 +1,6 @@
 """The info view set
 """
-from django.contrib.staticfiles import finders
+from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -12,7 +12,7 @@ from stackexchange import serializers, services
 @extend_schema_view(
     list=extend_schema(
         summary='Returns a collection of statistics about the site',
-        description=open(finders.find('stackexchange/doc/info/list.md')).read()
+        description=render_to_string('doc/info/list.md'),
     )
 )
 class InfoViewSet(BaseListViewSet):
