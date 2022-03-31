@@ -6,7 +6,7 @@ authors = ["Kostas Kokkoros"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-Django = "^3.2"
+Django = "*"
 psycopg2 = "*"
 defusedxml = "*"
 django-environ = "*"
@@ -15,14 +15,13 @@ drf-spectacular = "*"
 py7zr = "*"
 requests = "*"
 tqdm = "*"
-pylint-django = "^2.5.2"
-factory-boy = "^3.2.1"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
 coverage = "*"
 django-debug-toolbar = "*"
 django-extensions = "*"
+factory-boy = "*"
 pylint = "*"
 pylint-django = "*"
 safety = "*"
