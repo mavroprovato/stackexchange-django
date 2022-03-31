@@ -4,7 +4,7 @@ from stackexchange import enums
 from .posts import PostFactory
 
 
-class AnswersFactory(PostFactory):
-    """The answers factory
+class AnswerFactory(PostFactory):
+    """The answer factory
     """
     type = enums.PostType.ANSWER.value

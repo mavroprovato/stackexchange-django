@@ -25,7 +25,7 @@ class UserAnswerTests(APITestCase):
         # Post some answers to the questions
         for question in questions:
             user = random.choice(users)
-            factories.AnswersFactory.create_batch(size=random.randint(0, 3), question=question, owner=user)
+            factories.AnswerFactory.create_batch(size=random.randint(0, 3), question=question, owner=user)
 
     def test(self):
         """Test user answers endpoint

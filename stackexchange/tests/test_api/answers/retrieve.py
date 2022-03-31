@@ -1,38 +1,124 @@
-"""Answers view set testing
+"""Answers view set retrieve testing
 """
+import datetime
 import random
 
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
 
 from stackexchange import enums, models
 from stackexchange.tests import factories
+from .base import BaseAnswerTestCase
 
 
-class AnswerRetrieveTests(APITestCase):
+class AnswerRetrieveTests(BaseAnswerTestCase):
     """Answer view set retrieve tests
     """
     @classmethod
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.AnswersFactory.create_batch(size=100)
+        users = factories.UserFactory.create_batch(size=10)
+        questions = []
+        for user in users:
+            questions += factories.QuestionFactory.create_batch(size=2, owner=user)
+        for question in questions:
+            factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
 
     def test_detail(self):
-        """Test the answer detail endpoint.
+        """Test the question detail endpoint
         """
-        # Test getting one answer
-        answer = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER.value)), 1)[0]
+        answer = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 1)[0]
         response = self.client.get(reverse('answer-detail', kwargs={'pk': answer.pk}))
-        self.assertEqual(response.json()['items'][0]['answer_id'], answer.pk)
+        self.assert_items_equal(response)
 
     def test_detail_multiple(self):
-        """Test the answer detail endpoint for multiple ids.
+        """Test the question detail endpoint for multiple ids.
         """
-        # Test getting multiple answers
-        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER.value)), 3)
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         response = self.client.get(
             reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertSetEqual({row['answer_id'] for row in response.json()['items']}, {answer.pk for answer in answers})
+        self.assert_items_equal(response)
+
+    def test_sort_by_activity(self):
+        """Test the question detail endpoint sorted by activity date.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'activity', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'last_activity_date')
+
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'activity', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'last_activity_date', reverse=True)
+
+    def test_sort_by_creation_date(self):
+        """Test the question detail endpoint sorted by creation date.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'creation', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'creation_date')
+
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'creation', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'creation_date', reverse=True)
+
+    def test_sort_by_votes(self):
+        """Test the question detail endpoint sorted by votes.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'votes', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'score')
+
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'votes', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'score', reverse=True)
+
+    def test_range_by_activity(self):
+        """Test the question detail endpoint range by activity.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'name', 'min': min_value, 'max': max_value}
+        )
+        self.assert_range(response, 'last_activity_date', min_value, max_value)
+
+    def test_range_by_creation_date(self):
+        """Test the question detail endpoint range by user creation date.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
+        )
+        self.assert_range(response, 'creation_date', min_value, max_value)
+
+    def test_range_by_votes(self):
+        """Test the question detail endpoint range by votes.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        min_value = 10
+        max_value = 1000
+        response = self.client.get(
+            reverse('answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'votes', 'min': min_value, 'max': max_value}
+        )
+        self.assert_range(response, 'score', min_value, max_value)
