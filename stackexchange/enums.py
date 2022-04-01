@@ -19,7 +19,7 @@ class BaseEnum(enum.IntEnum):
 
         :return: the description for the enum value.
         """
-        return self.name[0] + self.name[1:].lower()
+        return ' '.join(word.lower() for word in self.name.split('_')).capitalize()
 
 
 class BadgeClass(BaseEnum):
@@ -81,8 +81,19 @@ class PostHistoryType(BaseEnum):
     QUESTION_MERGED = 18
     QUESTION_PROTECTED = 19
     QUESTION_UNPROTECTED = 20
-    POST_DISASSOCIATED = 21
     QUESTION_UNMERGED = 22
+    SUGGESTED_EDIT_APPLIED = 24
+    POST_TWEETED = 25
+    DISCUSSION_MOVED_TO_CHAT = 31
+    POST_NOTICE_ADDED = 33
+    POST_NOTICE_REMOVED = 34
+    POST_MIGRATED_AWAY = 35
+    POST_MIGRATED_HERE = 36
+    POST_MERGE_SOURCE = 37
+    POST_MERGE_DESTINATION = 38
+    COMMUNITY_BUMP = 52
+    SELECTED_HOT_QUESTION = 52
+    REMOVED_HOT_QUESTION = 53
 
 
 class PostVoteType(BaseEnum):
