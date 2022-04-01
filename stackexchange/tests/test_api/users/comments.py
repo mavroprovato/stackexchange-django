@@ -25,21 +25,21 @@ class UserCommentTests(BaseCommentTestCase):
                 factories.CommentFactory.create(post=random.choice(posts), user=random.choice(users))
 
     def test(self):
-        """Test user comments endpoint
+        """Test the user comments endpoint
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
         response = self.client.get(reverse('user-comments', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
-        """Test user comments endpoint for multiple users
+        """Test the user comments endpoint for multiple users
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
         self.assert_items_equal(response)
 
     def test_sort_by_creation(self):
-        """Test the comment list sorted by comment creation date.
+        """Test the user comment list sorted by comment creation date.
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
@@ -55,7 +55,7 @@ class UserCommentTests(BaseCommentTestCase):
         self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
-        """Test the comment list sorted by comment votes.
+        """Test the user comment list sorted by comment votes.
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
@@ -71,7 +71,7 @@ class UserCommentTests(BaseCommentTestCase):
         self.assert_sorted(response, 'score', reverse=True)
 
     def test_range_by_creation(self):
-        """Test the comments list endpoint range by creation date.
+        """Test the user comments list endpoint range by creation date.
         """
         users = random.sample(list(models.User.objects.all()), 3)
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
@@ -83,7 +83,7 @@ class UserCommentTests(BaseCommentTestCase):
         self.assert_range(response, 'reputation', min_value, max_value)
 
     def test_range_by_votes(self):
-        """Test the user list endpoint range by comment score.
+        """Test the user comments list endpoint range by comment score.
         """
         users = random.sample(list(models.User.objects.all()), 3)
         min_value = 10
