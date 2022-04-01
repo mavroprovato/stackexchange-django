@@ -142,6 +142,13 @@ class Post(models.Model):
             models.Index(fields=('-score', 'id')), indexes.GinIndex(fields=('title_search',)),
         )
 
+    def __str__(self) -> str:
+        """Return the string representation of the post
+
+        :return: The post title
+        """
+        return str(self.title)
+
 
 class Comment(models.Model):
     """The comment model

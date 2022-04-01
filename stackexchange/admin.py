@@ -87,6 +87,17 @@ class PostAdmin(admin.ModelAdmin):
     inlines = (PostTagInline, PostHistoryInline)
 
 
+@admin.register(models.PostVote)
+class PostVoteAdmin(admin.ModelAdmin):
+    """Admin for posts
+    """
+    list_display = ('post', 'type', 'creation_date', 'user')
+    list_filter = ('type',)
+    search_fields = ('post__title',)
+    autocomplete_fields = ('post', 'user')
+    ordering = ('-creation_date', )
+
+
 @admin.register(models.Comment)
 class CommentAdmin(admin.ModelAdmin):
     """Admin for comments
