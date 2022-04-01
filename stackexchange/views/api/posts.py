@@ -68,9 +68,8 @@ class PostViewSet(BaseViewSet):
             return models.PostHistory.objects.filter(user__isnull=False).select_related('post', 'user').order_by(
                 '-creation_date')
 
-        return models.Post.objects.filter(
-            type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)
-        ).select_related('owner')
+        return models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related(
+            'owner')
 
     def get_serializer_class(self):
         """Get the serializer class for the action.

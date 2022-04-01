@@ -44,4 +44,4 @@ class PostHistorySerializer(serializers.ModelSerializer):
         :param post_history: The post history.
         :return: The post type.
         """
-        return enums.PostHistoryType(post_history.type).name.lower()
+        return enums.PostType(post_history.post.type).name.lower()
