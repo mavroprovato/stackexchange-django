@@ -11,7 +11,7 @@ class BaseAnswerTestCase(BaseTestCase):
         """Assert that the items returned by the response are the same as the database items.
         """
         return super().assert_items_equal(response, models.Post, 'answer_id', attributes={
-            # 'is_accepted': 'is_accepted',
+            'is_accepted': lambda x: bool(x.accepted_answer_id),
             'score': 'score',
             'last_activity_date': lambda x: x.last_activity_date.isoformat().replace('+00:00', 'Z'),
             'creation_date': lambda x: x.creation_date.isoformat().replace('+00:00', 'Z'),
