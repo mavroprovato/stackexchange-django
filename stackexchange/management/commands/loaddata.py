@@ -17,7 +17,7 @@ import requests
 import py7zr
 import tqdm
 
-from stackexchange import enums
+from stackexchange import enums, services
 
 
 class Downloader:
@@ -154,6 +154,7 @@ class Importer:
             self.load_tags()
         self.recreate_indexes()
         self.analyze()
+        self.clear_caches()
 
     @staticmethod
     def _get_indexes() -> dict:
@@ -194,19 +195,26 @@ class Importer:
         self.output.write("Indexes created")
 
     def analyze(self):
-        """Vacuum full and analyze the tables.
+        """Analyze the tables.
         """
         self.output.write("Analyzing")
         with connection.cursor() as cursor:
             cursor.execute("ANALYZE")
         self.output.write("Analyze completed")
 
+    def clear_caches(self):
+        """Clear the caches
+        """
+        self.output.write("Clearing caches")
+        services.clear_cache()
+        self.output.write("Caches cleared")
+
     def load_users(self):
         """Load the users.
         """
-        self.output.write(f"Loading users")
         password = make_password("password")
         with (self.temp_dir / 'users.csv').open('wt') as f:
+            self.output.write(f"Extracting users")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
@@ -217,6 +225,7 @@ class Importer:
                     row['DownVotes'],
                 ])
         with (self.temp_dir / 'users.csv').open('rt') as f:
+            self.output.write(f"Loading users")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE users CASCADE")
                 cursor.copy_from(f, table='users', columns=(
@@ -229,7 +238,6 @@ class Importer:
     def load_badges(self):
         """Load the badges.
         """
-        self.output.write(f"Loading badges")
         badges = {
             row['Name']: {
                 'Name': row['Name'], 'Class': row['Class'],
@@ -239,12 +247,14 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE)
         }
         with (self.temp_dir / 'badges.csv').open('wt') as f:
+            self.output.write(f"Extracting badges")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in badges.values():
                 csv_writer.writerow([
                     row['Name'], row['Class'], row['TagBased']
                 ])
         with (self.temp_dir / 'badges.csv').open('rt') as f:
+            self.output.write(f"Loading badges")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE badges CASCADE")
                 cursor.copy_from(f, table='badges', columns=('name', 'badge_class', 'badge_type'), sep=',')
@@ -253,19 +263,19 @@ class Importer:
     def load_user_badges(self):
         """Load the user badges.
         """
-        self.output.write(f"Loading user badges")
-
         with connection.cursor() as cursor:
             cursor.execute("SELECT id, name FROM badges")
             badges = {row[1]: row[0] for row in cursor.fetchall()}
 
         user_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.USERS_FILE)}
         with (self.temp_dir / 'user_badges.csv').open('wt') as f:
+            self.output.write(f"Extracting user badges")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.BADGES_FILE):
                 if row['UserId'] in user_ids:
                     csv_writer.writerow([badges[row['Name']], row['UserId'], row['Date']])
         with (self.temp_dir / 'user_badges.csv').open('rt') as f:
+            self.output.write(f"Loading user badges")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE user_badges CASCADE")
                 cursor.copy_from(f, table='user_badges', columns=('badge_id', 'user_id', 'date_awarded'), sep=',')
@@ -274,9 +284,9 @@ class Importer:
     def load_posts(self):
         """Load the posts.
         """
-        self.output.write(f"Loading posts")
         post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
         with (self.temp_dir / 'posts.csv').open('wt') as f:
+            self.output.write(f"Extracting posts")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE):
                 csv_writer.writerow([
@@ -291,6 +301,7 @@ class Importer:
                     row['ContentLicense']
                 ])
         with (self.temp_dir / 'posts.csv').open('rt') as f:
+            self.output.write(f"Loading posts")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE posts CASCADE")
                 cursor.copy_from(f, table='posts', columns=(
@@ -304,8 +315,8 @@ class Importer:
     def load_comments(self):
         """Load the comments.
         """
-        self.output.write(f"Loading comments")
         with (self.temp_dir / 'comments.csv').open('wt') as f:
+            self.output.write(f"Extracting comments")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.COMMENTS_FILE):
                 csv_writer.writerow([
@@ -313,6 +324,7 @@ class Importer:
                     row.get('UserId', '<NULL>')
                 ])
         with (self.temp_dir / 'comments.csv').open('rt') as f:
+            self.output.write(f"Loading comments")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE comments CASCADE")
                 cursor.copy_from(f, table='comments', columns=(
@@ -323,9 +335,9 @@ class Importer:
     def load_post_history(self):
         """Load the post history.
         """
-        self.output.write(f"Loading post history")
         post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
         with (self.temp_dir / 'post_history.csv').open('wt') as f:
+            self.output.write(f"Extracting post history")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.POST_HISTORY_FILE):
                 if row['PostId'] in post_ids:
@@ -335,6 +347,7 @@ class Importer:
                         row.get('Text', '<NULL>'), row.get('ContentLicense', '<NULL>')
                     ])
         with (self.temp_dir / 'post_history.csv').open('rt') as f:
+            self.output.write(f"Loading post history")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE post_history CASCADE")
                 cursor.copy_from(f, table='post_history', columns=(
@@ -346,9 +359,9 @@ class Importer:
     def load_post_links(self):
         """Load the post links.
         """
-        self.output.write(f"Loading post links")
         post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
         with (self.temp_dir / 'post_links.csv').open('wt') as f:
+            self.output.write(f"Extracting post links")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.POST_LINKS_FILE):
                 if row['PostId'] in post_ids and row['RelatedPostId'] in post_ids:
@@ -356,6 +369,7 @@ class Importer:
                         row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
                     ])
         with (self.temp_dir / 'post_links.csv').open('rt') as f:
+            self.output.write(f"Loading post links")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE post_links CASCADE")
                 cursor.copy_from(f, table='post_links', columns=(
@@ -366,9 +380,9 @@ class Importer:
     def load_post_votes(self):
         """Load the post votes.
         """
-        self.output.write(f"Loading post votes")
         post_ids = {row['Id'] for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE)}
         with (self.temp_dir / 'post_votes.csv').open('wt') as f:
+            self.output.write(f"Extracting post votes")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.VOTES_FILE):
                 if row['PostId'] in post_ids:
@@ -377,6 +391,7 @@ class Importer:
                         row.get('BountyAmount', '<NULL>')
                     ])
         with (self.temp_dir / 'post_votes.csv').open('rt') as f:
+            self.output.write(f"Loading post votes")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE post_votes CASCADE")
                 cursor.copy_from(f, table='post_votes', columns=(
@@ -387,8 +402,8 @@ class Importer:
     def load_tags(self):
         """Load the tags.
         """
-        self.output.write(f"Loading tags")
         with (self.temp_dir / 'tags.csv').open('wt') as f:
+            self.output.write(f"Extracting tags")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.TAGS_FILE):
                 csv_writer.writerow([
@@ -396,6 +411,7 @@ class Importer:
                     row.get('WikiPostId', '<NULL>')
                 ])
         with (self.temp_dir / 'tags.csv').open('rt') as f:
+            self.output.write(f"Loading tags")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE tags CASCADE")
                 cursor.copy_from(f, table='tags', columns=(
@@ -406,11 +422,13 @@ class Importer:
             cursor.execute("SELECT id, name FROM tags")
             tags = {row[1]: row[0] for row in cursor.fetchall()}
         with (self.temp_dir / 'post_tags.csv').open('wt') as f:
+            self.output.write(f"Extracting post tags")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.POSTS_FILE):
                 for match in re.finditer(r'<(.*?)>', row.get('Tags', '')):
                     csv_writer.writerow([row['Id'], tags[match.group(1)]])
         with (self.temp_dir / 'post_tags.csv').open('rt') as f:
+            self.output.write(f"Loading post tags")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE post_tags CASCADE")
                 cursor.copy_from(f, table='post_tags', columns=('post_id', 'tag_id'), sep=',', null='<NULL>')

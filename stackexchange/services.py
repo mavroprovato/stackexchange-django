@@ -29,6 +29,12 @@ def set_site_info() -> dict:
     return site_info
 
 
+def clear_cache():
+    """Clear the site info cache.
+    """
+    cache.delete(key='site_info')
+
+
 def _calculate_site_info() -> dict:
     """Calculate the site information.
 
