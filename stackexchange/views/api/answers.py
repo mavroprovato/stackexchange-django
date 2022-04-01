@@ -64,7 +64,8 @@ class AnswerViewSet(BaseViewSet):
         if self.action == 'comments':
             return models.Comment.objects.select_related('user')
         if self.action == 'questions':
-            return models.Post.objects.select_related('owner').prefetch_related('tags')
+            return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
+                'tags')
 
         return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related(
             'owner', 'question').prefetch_related('tags')
@@ -110,7 +111,7 @@ class AnswerViewSet(BaseViewSet):
         if self.action == 'comments':
             return 'post'
         if self.action == 'questions':
-            return 'children'
+            return 'answers'
 
         return super().detail_field
 

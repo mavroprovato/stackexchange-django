@@ -1,4 +1,4 @@
-"""Comments view set testing
+"""Answer comments view set testing
 """
 import datetime
 import random
