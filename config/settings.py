@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'rest_framework',
+    'django_celery_results',
     'drf_spectacular',
     'debug_toolbar',
     'django_extensions'
@@ -155,6 +156,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'stackexchange.pagination.Pagination',
     'DEFAULT_SCHEMA_CLASS': 'stackexchange.openapi.AutoSchema',
 }
+
+# Celery configuration
+
+CELERY_RESULT_BACKEND = 'django-db'
+
 
 # DRF Spectacular configuration
 

@@ -23,7 +23,10 @@ def set_site_info() -> dict:
 
     :return: The site information, as a dictionary.
     """
-    return cache.set(key='site_info', value=_calculate_site_info(), timeout=None)
+    site_info = _calculate_site_info()
+    cache.set(key='site_info', value=site_info, timeout=None)
+
+    return site_info
 
 
 def _calculate_site_info() -> dict:
