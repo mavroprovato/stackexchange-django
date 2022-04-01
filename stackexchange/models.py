@@ -130,8 +130,8 @@ class Post(models.Model):
     comment_count = models.PositiveIntegerField(help_text="The post comment count", null=True, blank=True)
     favorite_count = models.PositiveIntegerField(help_text="The post favorite count", null=True, blank=True)
     content_license = models.CharField(
-        help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in enums.ContentLicense],
-        default=enums.ContentLicense.CC_BY_SA_4_0.name)
+        help_text="The content license", max_length=max([len(cl.name) for cl in enums.ContentLicense]),
+        choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name)
     tags = models.ManyToManyField('Tag', related_name='posts', through='PostTag')
     title_search = search.SearchVectorField(null=True, help_text="The title search vector")
 
@@ -151,8 +151,8 @@ class Comment(models.Model):
     text = models.TextField(help_text="The comment text")
     creation_date = models.DateTimeField(help_text="The date that the comment was created", auto_now_add=True)
     content_license = models.CharField(
-        help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in enums.ContentLicense],
-        default=enums.ContentLicense.CC_BY_SA_4_0.name)
+        help_text="The content license", max_length=max([len(cl.name) for cl in enums.ContentLicense]),
+        choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name)
     user = models.ForeignKey(User, help_text="The user for the comment", on_delete=models.CASCADE,
                              related_name='comments', null=True, blank=True)
 
@@ -184,8 +184,9 @@ class PostHistory(models.Model):
     comment = models.TextField(help_text="The comment of the user that has edited this post", null=True, blank=True)
     text = models.TextField(help_text="A raw version of the new value for a given revision", null=True, blank=True)
     content_license = models.CharField(
-        help_text="The content license", max_length=12, choices=[(cl.name, cl.value) for cl in enums.ContentLicense],
-        default=enums.ContentLicense.CC_BY_SA_4_0.name, null=True, blank=True)
+        help_text="The content license", max_length=max([len(cl.name) for cl in enums.ContentLicense]),
+        choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name,
+        null=True, blank=True)
 
     class Meta:
         db_table = 'post_history'
