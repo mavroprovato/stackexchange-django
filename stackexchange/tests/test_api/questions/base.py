@@ -11,6 +11,9 @@ class BaseQuestionTestCase(BaseTestCase):
         """Assert that the items returned by the response are the same as the database items.
         """
         return super().assert_items_equal(response, models.Post, 'question_id', attributes={
+            'owner.reputation': lambda x: x.owner.reputation,
+            'owner.user_id': lambda x: x.owner.pk,
+            'owner.display_name': lambda x: x.owner.display_name,
             'is_answered': lambda x: x.answer_count and x.answer_count > 1,
             'view_count': 'view_count',
             'accepted_answer_id': 'accepted_answer_id',

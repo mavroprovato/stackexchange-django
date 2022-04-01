@@ -11,6 +11,9 @@ class BaseCommentTestCase(BaseTestCase):
         """Assert that the items returned by the response are the same as the database items.
         """
         return super().assert_items_equal(response, models.Comment, 'comment_id', attributes={
+            'owner.reputation': lambda x: x.user.reputation,
+            'owner.user_id': lambda x: x.user.pk,
+            'owner.display_name': lambda x: x.user.display_name,
             'score': 'score',
             'creation_date': lambda x: x.creation_date.isoformat().replace('+00:00', 'Z'),
             'post_id': lambda x: x.post_id,

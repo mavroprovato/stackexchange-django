@@ -28,7 +28,11 @@ class BaseTestCase(APITestCase):
                     expected_value = value(obj)
                 else:
                     expected_value = getattr(obj, value)
-                self.assertEqual(row[attribute], expected_value)
+                attribute_path = attribute.split('.')
+                source_value = row[attribute_path[0]]
+                for attr in attribute_path[1:]:
+                    source_value = source_value[attr]
+                self.assertEqual(source_value, expected_value)
 
     def assert_sorted(self, response, attr: str, transform=None, reverse=False):
         """Assert that the response is sorted.
