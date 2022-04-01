@@ -1,69 +1,95 @@
 """Users API comments testing
 """
+import datetime
 import random
 
-import dateutil.parser
 from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APITestCase
 
-from stackexchange import enums, models
+from stackexchange import models
 from stackexchange.tests import factories
+from ..comments.base import BaseCommentTestCase
 
 
-class UserCommentTests(APITestCase):
+class UserCommentTests(BaseCommentTestCase):
     """Users view set comments tests
     """
     @classmethod
     def setUpTestData(cls):
-        factories.CommentFactory.create_batch(size=100)
+        users = factories.UserFactory.create_batch(size=10)
+        posts = []
+        for user in users:
+            for _ in range(3):
+                posts.append(factories.QuestionAnswerFactory.create(owner=user))
+        for _ in range(100):
+            for _ in range(3):
+                factories.CommentFactory.create(post=random.choice(posts), user=random.choice(users))
 
     def test(self):
         """Test user comments endpoint
         """
-        # Test that the list endpoint returns successfully
         user = random.sample(list(models.User.objects.all()), 1)[0]
         response = self.client.get(reverse('user-comments', kwargs={'pk': user.pk}))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_items_equal(response)
 
-        # Check that the user information returned is correct
-        for row in response.json()['items']:
-            comment = models.Comment.objects.get(pk=row['comment_id'])
-            self.assertEqual(row['owner']['reputation'], comment.user.reputation)
-            self.assertEqual(row['owner']['user_id'], comment.user.pk)
-            self.assertEqual(row['owner']['display_name'], comment.user.display_name)
-            self.assertEqual(row['score'], comment.score)
-            self.assertEqual(dateutil.parser.parse(row['creation_date']), comment.creation_date)
-            self.assertEqual(row['content_license'], enums.ContentLicense[comment.content_license].name)
+    def test_multiple(self):
+        """Test user comments endpoint for multiple users
+        """
+        users = random.sample(list(models.User.objects.all()), 3)
+        response = self.client.get(reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
+        self.assert_items_equal(response)
 
     def test_sort_by_creation(self):
-        """Test the user comments list sorted by creation date.
+        """Test the comment list sorted by comment creation date.
         """
-        user = random.sample(list(models.User.objects.all()), 1)[0]
+        users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': user.pk}), data={'creation': 'rank', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates))
+            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'creation', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': user.pk}), data={'sort': 'creation', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        creation_dates = [row['creation_date'] for row in response.json()['items']]
-        self.assertListEqual(creation_dates, sorted(creation_dates, reverse=True))
+            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'creation', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
-        """Test the user comments list sorted by name.
+        """Test the comment list sorted by comment votes.
         """
-        user = random.sample(list(models.User.objects.all()), 1)[0]
+        users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'asc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        scores = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(scores, sorted(scores))
+            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'votes', 'order': 'asc'}
+        )
+        self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': user.pk}), data={'sort': 'votes', 'order': 'desc'})
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        scores = [row['score'] for row in response.json()['items']]
-        self.assertListEqual(scores, sorted(scores, reverse=True))
+            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'votes', 'order': 'desc'}
+        )
+        self.assert_sorted(response, 'score', reverse=True)
+
+    def test_range_by_creation(self):
+        """Test the comments list endpoint range by creation date.
+        """
+        users = random.sample(list(models.User.objects.all()), 3)
+        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'creation', 'min': min_value, 'max': max_value}
+        )
+        self.assert_range(response, 'reputation', min_value, max_value)
+
+    def test_range_by_votes(self):
+        """Test the user list endpoint range by comment score.
+        """
+        users = random.sample(list(models.User.objects.all()), 3)
+        min_value = 10
+        max_value = 1000
+        response = self.client.get(
+            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'votes', 'min': min_value, 'max': max_value}
+        )
+        self.assert_range(response, 'score', min_value, max_value)

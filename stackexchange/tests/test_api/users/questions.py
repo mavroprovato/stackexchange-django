@@ -22,7 +22,6 @@ class UserQuestionTests(BaseQuestionTestCase):
     def test(self):
         """Test user questions endpoint
         """
-        # Test that the list endpoint returns successfully
         user = random.sample(list(models.User.objects.all()), 1)[0]
         response = self.client.get(reverse('user-questions', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
