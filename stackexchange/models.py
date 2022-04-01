@@ -174,7 +174,7 @@ class PostHistory(models.Model):
     type = models.PositiveSmallIntegerField(
         help_text="The post history type", choices=((pht.value, pht.description) for pht in enums.PostHistoryType))
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
-    revision_guid = models.CharField(help_text="The GUID of the action that created this history record", max_length=36)
+    revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
     creation_date = models.DateTimeField(help_text="The date that this history record was created", auto_now_add=True)
     user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
                              related_name="post_history", null=True, blank=True)
