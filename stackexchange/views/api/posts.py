@@ -3,6 +3,7 @@
 import datetime
 import typing
 
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
@@ -65,8 +66,11 @@ class PostViewSet(BaseViewSet):
         if self.action == 'comments':
             return models.Comment.objects.select_related('post', 'user')
         if self.action == 'revisions':
-            return models.PostHistory.objects.filter(user__isnull=False).select_related('post', 'user').order_by(
-                '-creation_date')
+            return models.PostHistory.objects.values(
+                'creation_date', 'post_id', 'post__type', 'content_license', 'user_id', 'comment', 'revision_guid'
+            ).annotate(
+                types=ArrayAgg('type')
+            ).order_by('-creation_date')
 
         return models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related(
             'owner')
@@ -121,6 +125,17 @@ class PostViewSet(BaseViewSet):
         :return: The field used for date filtering.
         """
         return 'creation_date'
+
+    @property
+    def stable_ordering(self) -> typing.Optional[typing.Sequence[str]]:
+        """Get the stable ordering for the view.
+
+        :return: An iterable of strings that define the stable ordering.
+        """
+        if self.action == 'revisions':
+            return '-creation_date',
+
+        return None
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:
