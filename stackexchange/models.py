@@ -236,6 +236,7 @@ class PostVote(models.Model):
 
     class Meta:
         db_table = 'post_votes'
+        indexes = (models.Index(fields=('-creation_date', '-id')),)
 
 
 class Tag(models.Model):
