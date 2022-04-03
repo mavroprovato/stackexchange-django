@@ -1,6 +1,6 @@
 """Base user test case.
 """
-from stackexchange import models
+from stackexchange import enums, models
 from ..base import BaseTestCase
 
 
@@ -11,6 +11,15 @@ class BaseUserTestCase(BaseTestCase):
         """Assert that the items returned by the response are the same as the database items.
         """
         return super().assert_items_equal(response, models.User, 'user_id', attributes={
+            'badge_counts.bronze': lambda x: models.UserBadge.objects.filter(
+                user=x, badge__badge_class=enums.BadgeClass.BRONZE.value
+            ).count(),
+            'badge_counts.silver': lambda x: models.UserBadge.objects.filter(
+                user=x, badge__badge_class=enums.BadgeClass.SILVER.value
+            ).count(),
+            'badge_counts.gold': lambda x: models.UserBadge.objects.filter(
+                user=x, badge__badge_class=enums.BadgeClass.GOLD.value
+            ).count(),
             'is_employee': 'is_employee',
             'reputation': 'reputation',
             'creation_date': lambda x: x.creation_date.isoformat().replace('+00:00', 'Z'),

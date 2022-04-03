@@ -1,6 +1,7 @@
 """Users API list testing
 """
 import datetime
+import random
 import unittest
 
 from django.urls import reverse
@@ -14,7 +15,10 @@ class UserListTests(BaseUserTestCase):
     """
     @classmethod
     def setUpTestData(cls):
-        factories.UserFactory.create_batch(size=10)
+        users = factories.UserFactory.create_batch(size=10)
+        badges = factories.BadgeFactory.create_batch(size=50)
+        for _ in range(100):
+            factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
 
     def test(self):
         """Test users list endpoint
