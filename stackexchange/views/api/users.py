@@ -105,6 +105,10 @@ class UserViewSet(BaseViewSet):
             return models.UserBadge.objects.per_user_and_badge()
         if self.action == 'comments':
             return models.Comment.objects.select_related('post', 'user')
+        if self.action == 'favorites':
+            return models.Post.objects.filter(
+                type=enums.PostType.QUESTION, post_votes__type=enums.PostVoteType.FAVORITE
+            ).select_related('owner').prefetch_related('tags')
         if self.action == 'posts':
             return models.Post.objects.filter(
                 type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
@@ -129,7 +133,7 @@ class UserViewSet(BaseViewSet):
             return serializers.PostSerializer
         if self.action == 'privileges':
             return serializers.UserPrivilegeSerializer
-        if self.action == 'questions':
+        if self.action in ('favorites', 'questions'):
             return serializers.QuestionSerializer
 
         return serializers.UserSerializer
@@ -147,7 +151,7 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
                 filters.OrderingField('modified', 'last_modified_date', type=datetime.date),
             )
-        if self.action in ('answers', 'posts', 'questions'):
+        if self.action in ('answers', 'favorites', 'posts', 'questions'):
             return (
                 filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
@@ -189,6 +193,8 @@ class UserViewSet(BaseViewSet):
             return 'owner'
         if self.action in ('badges', 'comments'):
             return 'user'
+        if self.action == 'favorites':
+            return 'post_votes__user'
 
         return super().detail_field
 
@@ -235,6 +241,15 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:
         """Get the comments for a user.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='favorites')
+    def favorites(self, request: Request, *args, **kwargs) -> Response:
+        """Get the bookmarked questions for a user.
 
         :param request: The request.
         :return: The response.
