@@ -91,9 +91,21 @@ class PostHistoryType(BaseEnum):
     POST_MIGRATED_HERE = 36
     POST_MERGE_SOURCE = 37
     POST_MERGE_DESTINATION = 38
-    COMMUNITY_BUMP = 52
+    COMMUNITY_BUMP = 50
     SELECTED_HOT_QUESTION = 52
     REMOVED_HOT_QUESTION = 53
+
+    def vote_based(self) -> bool:
+        """Return true if the post history type is vote based.
+
+        :return: True if the post history type is vote based.
+        """
+        return self in (
+            self.POST_CLOSED, self.POST_REOPENED, self.POST_DELETED, self.POST_UNDELETED, self.POST_LOCKED,
+            self.POST_LOCKED, self.POST_UNLOCKED, self.POST_TWEETED, self.POST_NOTICE_ADDED, self.POST_NOTICE_REMOVED,
+            self.POST_MERGE_SOURCE, self.POST_MIGRATED_AWAY, self.POST_MIGRATED_HERE, self.POST_MERGE_SOURCE,
+            self.POST_MERGE_DESTINATION, self.COMMUNITY_BUMP, self.SELECTED_HOT_QUESTION, self.REMOVED_HOT_QUESTION
+        )
 
 
 class PostVoteType(BaseEnum):
