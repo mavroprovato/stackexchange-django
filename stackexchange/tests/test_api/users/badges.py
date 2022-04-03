@@ -7,16 +7,16 @@ from django.urls import reverse
 
 from stackexchange import enums, models
 from stackexchange.tests import factories
-from ..badges.base import BaseBadgeTestCase
+from ..badges.base import UserBadgeTestCase
 
 
-class UserBadgeTests(BaseBadgeTestCase):
+class UserBadgeTests(UserBadgeTestCase):
     """Users view set badges tests
     """
     @classmethod
     def setUpTestData(cls):
         users = factories.UserFactory.create_batch(size=10)
-        badges = factories.BadgeFactory.create_batch(size=100)
+        badges = factories.BadgeFactory.create_batch(size=50)
         for _ in range(1000):
             factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
 

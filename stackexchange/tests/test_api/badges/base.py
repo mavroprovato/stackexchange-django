@@ -25,15 +25,28 @@ class BaseBadgeTestCase(BaseTestCase):
         self.assertTrue(all(row['badge_type'] == badge_type.name.lower() for row in response.json()['items']))
 
 
-class BaseBadgeWithAwardCountTestCase(BaseBadgeTestCase):
+class BadgeWithAwardCountTestCase(BaseBadgeTestCase):
     """Base API badge test case
     """
     def assert_items_equal(self, response, **kwargs):
         """Assert that the items returned by the response are the same as the database items.
         """
-        return super().assert_items_equal(response, models.Badge, 'badge_id', attributes={
+        return super(BaseBadgeTestCase, self).assert_items_equal(response, models.Badge, 'badge_id', attributes={
             'badge_type': lambda x: enums.BadgeType(x.badge_type).name.lower(),
             'award_count': lambda x: models.UserBadge.objects.filter(badge=x).count(),
             'rank': lambda x: enums.BadgeClass(x.badge_class).name.lower(),
             'name': 'name',
         })
+
+
+class UserBadgeTestCase(BaseBadgeTestCase):
+    def assert_items_equal(self, response, *args, **kwargs):
+        """Assert that the items returned by the response are the same as the database items.
+        """
+        return super(BaseBadgeTestCase, self).assert_items_equal(
+            response, models.UserBadge, {'user': 'user.user_id', 'badge__name': 'name'}, multiple=True, attributes={
+                'badge_type': lambda x: enums.BadgeType(x.badge.badge_type).name.lower(),
+                'rank': lambda x: enums.BadgeClass(x.badge.badge_class).name.lower(),
+                'name': lambda x: x.badge.name,
+            }
+        )

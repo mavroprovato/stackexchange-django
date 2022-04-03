@@ -7,31 +7,35 @@ from rest_framework.test import APITestCase
 class BaseTestCase(APITestCase):
     """Base API test case
     """
-    def assert_items_equal(self, response, model_class, pk_attr, attributes: dict):
+    def assert_items_equal(self, response, model_class, obj_filter, attributes: dict, multiple=False):
         """Assert that the items returned by the response are the same as the database items.
 
         :param response: The response.
         :param model_class: The model class.
-        :param pk_attr: The primary key attribute in the response.
+        :param obj_filter: The filter expression used to get the database object from the response.
+        :param multiple: Try to get a unique item from the database if False, else get the first one.
         :param attributes: A dictionary with the items to check.
         """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for row in response.json()['items']:
-            if isinstance(pk_attr, str):
-                obj = model_class.objects.get(pk=row[pk_attr])
-            elif isinstance(pk_attr, dict):
-                obj = model_class.objects.get(**{name: row[value] for name, value in pk_attr.items()})
+            # Get the database object
+            if isinstance(obj_filter, str):
+                obj = model_class.objects.filter(pk=row[obj_filter])
+            elif isinstance(obj_filter, dict):
+                obj = model_class.objects.filter(**{
+                    name: get_attribute(row, value) for name, value in obj_filter.items()
+                })
             else:
-                raise ValueError(f"pk attr is of unsupported class: {type(pk_attr)}")
+                raise ValueError(f"Object filter is of unsupported class: {type(obj_filter)}")
+            obj = obj.first() if multiple else obj.get()
+
+            # Assert that the returned values are the same as the database values
             for attribute, value in attributes.items():
                 if callable(value):
                     expected_value = value(obj)
                 else:
                     expected_value = getattr(obj, value)
-                attribute_path = attribute.split('.')
-                source_value = row[attribute_path[0]]
-                for attr in attribute_path[1:]:
-                    source_value = source_value[attr]
+                source_value = get_attribute(row, attribute)
                 self.assertEqual(source_value, expected_value)
 
     def assert_sorted(self, response, attr: str, transform=None, reverse=False):
@@ -76,3 +80,12 @@ class BaseTestCase(APITestCase):
         """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(all(query in row[attr] for row in response.json()['items']))
+
+
+def get_attribute(row: dict, attribute: str):
+    attribute_path = attribute.split('.')
+    value = row[attribute_path[0]]
+    for attr in attribute_path[1:]:
+        value = value[attr]
+
+    return value

@@ -7,10 +7,10 @@ from django.urls import reverse
 
 from stackexchange import enums
 from stackexchange.tests import factories
-from .base import BaseBadgeWithAwardCountTestCase
+from .base import BadgeWithAwardCountTestCase
 
 
-class BadgeTagsTests(BaseBadgeWithAwardCountTestCase):
+class BadgeTagsTests(BadgeWithAwardCountTestCase):
     """Badges tags tests
     """
     @classmethod
