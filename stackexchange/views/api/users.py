@@ -17,11 +17,11 @@ from .base import BaseViewSet
 
 @extend_schema_view(
     list=extend_schema(
-        summary='Get all users on the site',
+        summary='Get all users on the site.',
         description=render_to_string('doc/users/list.md'),
     ),
     retrieve=extend_schema(
-        summary='Gets the user identified by id',
+        summary='Get the users identified by a set of ids.',
         operation_id='users_retrieve',
         description=render_to_string('doc/users/retrieve.md'),
         parameters=[
@@ -32,7 +32,7 @@ from .base import BaseViewSet
         ]
     ),
     answers=extend_schema(
-        summary='Get the answers posted by the user identified by id',
+        summary='Get the answers posted by the users identified by a set of ids.',
         description=render_to_string('doc/users/answers.md'),
         parameters=[
             OpenApiParameter(
@@ -42,7 +42,7 @@ from .base import BaseViewSet
         ]
     ),
     badges=extend_schema(
-        summary='Get the badges earned by the user identified by id',
+        summary=' Get the badges earned by the users identified by a set of ids.',
         description=render_to_string('doc/users/badges.md'),
         parameters=[
             OpenApiParameter(
@@ -52,7 +52,7 @@ from .base import BaseViewSet
         ]
     ),
     comments=extend_schema(
-        summary='Get the comments posted by the user identified by id',
+        summary='Get the comments posted by the users identified by a set of ids.',
         description=render_to_string('doc/users/comments.md'),
         parameters=[
             OpenApiParameter(
@@ -61,8 +61,18 @@ from .base import BaseViewSet
             )
         ]
     ),
+    favorites=extend_schema(
+        summary='Get the questions bookmarked (previously known as "favorited") by users identified by a set of ids',
+        description=render_to_string('doc/users/favorites.md'),
+        parameters=[
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated user identifiers'
+            )
+        ]
+    ),
     posts=extend_schema(
-        summary='Get all posts (questions and answers) owned by a user',
+        summary='Get all posts (questions and answers) owned by a set of users.',
         description=render_to_string('doc/users/posts.md'),
         parameters=[
             OpenApiParameter(
@@ -72,14 +82,14 @@ from .base import BaseViewSet
         ]
     ),
     privileges=extend_schema(
-        summary='Returns the privileges a user has',
+        summary='Get the privileges the given user has on the site.',
         description=render_to_string('doc/users/privileges.md'),
         parameters=[
             OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
         ]
     ),
     questions=extend_schema(
-        summary='Get the questions posted by the user identified by id',
+        summary='Get the questions asked by the users identified by a set of ids.',
         description=render_to_string('doc/users/questions.md'),
         parameters=[
             OpenApiParameter(
