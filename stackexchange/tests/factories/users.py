@@ -4,10 +4,9 @@ import factory
 import pytz
 
 from stackexchange import models
-from .base import BaseModelFactory
 
 
-class UserFactory(BaseModelFactory):
+class UserFactory(factory.django.DjangoModelFactory):
     """The users factory
     """
     class Meta:
