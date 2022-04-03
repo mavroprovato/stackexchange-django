@@ -28,6 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     up_votes = models.PositiveIntegerField(help_text="The user up votes", default=0)
     down_votes = models.PositiveIntegerField(help_text="The user down votes", default=0)
     is_active = models.BooleanField(help_text="If the user is active", default=True)
+    is_moderator = models.BooleanField(help_text="If the user is a moderator", default=False)
     is_employee = models.BooleanField(help_text="If the user is an employee", default=False)
 
     objects = managers.UserManager()

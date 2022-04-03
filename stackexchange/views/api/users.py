@@ -62,7 +62,7 @@ from .base import BaseViewSet
         ]
     ),
     favorites=extend_schema(
-        summary='Get the questions bookmarked (previously known as "favorited") by users identified by a set of ids',
+        summary='Get the questions bookmarked (previously known as "favorited") by users identified by a set of ids.',
         description=render_to_string('doc/users/favorites.md'),
         parameters=[
             OpenApiParameter(
@@ -70,6 +70,10 @@ from .base import BaseViewSet
                 description='A list of semicolon separated user identifiers'
             )
         ]
+    ),
+    moderators=extend_schema(
+        summary='Get the users who have moderation powers on the site. ',
+        description=render_to_string('doc/users/moderators.md'),
     ),
     posts=extend_schema(
         summary='Get all posts (questions and answers) owned by a set of users.',
@@ -119,6 +123,8 @@ class UserViewSet(BaseViewSet):
             return models.Post.objects.filter(
                 type=enums.PostType.QUESTION, post_votes__type=enums.PostVoteType.FAVORITE
             ).select_related('owner').prefetch_related('tags')
+        if self.action == 'moderators':
+            return models.User.objects.with_badge_counts().filter(is_moderator=True)
         if self.action == 'posts':
             return models.Post.objects.filter(
                 type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
@@ -154,7 +160,7 @@ class UserViewSet(BaseViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action in ('list', 'retrieve'):
+        if self.action in ('list', 'retrieve', 'moderators'):
             return (
                 filters.OrderingField('reputation', type=int),
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
@@ -260,6 +266,15 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='favorites')
     def favorites(self, request: Request, *args, **kwargs) -> Response:
         """Get the bookmarked questions for a user.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, url_path='moderators')
+    def moderators(self, request: Request, *args, **kwargs) -> Response:
+        """Get the users who have moderation powers on the site.
 
         :param request: The request.
         :return: The response.
