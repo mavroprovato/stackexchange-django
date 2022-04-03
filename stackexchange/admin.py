@@ -20,7 +20,10 @@ class BadgeAdmin(admin.ModelAdmin):
 class UserAdmin(UserAdminBase):
     """Admin for users
     """
-    list_display = ('display_name', 'website_url', 'location', 'reputation', 'creation_date')
+    list_display = (
+        'display_name', 'reputation', 'creation_date', 'is_active', 'is_moderator', 'website_url', 'location',
+        'creation_date'
+    )
     list_filter = ()
     filter_horizontal = ()
     search_fields = ('display_name',)
@@ -30,6 +33,7 @@ class UserAdmin(UserAdminBase):
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('email', 'display_name', 'website_url', 'location', 'about')}),
         ('Important dates', {'fields': ('creation_date', 'last_modified_date', 'last_access_date')}),
+        ('Privileges', {'fields': ('is_active', 'is_moderator', 'is_employee')}),
         ('Statistics', {'fields': ('views', 'up_votes', 'down_votes')}),
     )
     add_fieldsets = (
