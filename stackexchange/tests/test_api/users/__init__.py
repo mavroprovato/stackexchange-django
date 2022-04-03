@@ -3,6 +3,7 @@
 from .answers import *
 from .badges import *
 from .comments import *
+from .favorites import *
 from .list import *
 from .privileges import *
 from .questions import *
