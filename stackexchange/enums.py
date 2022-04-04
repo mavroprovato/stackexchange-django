@@ -107,6 +107,13 @@ class PostHistoryType(BaseEnum):
             self.POST_MERGE_DESTINATION, self.COMMUNITY_BUMP, self.SELECTED_HOT_QUESTION, self.REMOVED_HOT_QUESTION
         )
 
+    def rollback(self) -> bool:
+        """Return true if the post history type is a rollback.
+
+        :return: True if the post history type is a rollback.
+        """
+        return self in (self.ROLLBACK_TITLE, self.ROLLBACK_BODY, self.ROLLBACK_TAGS)
+
 
 class PostVoteType(BaseEnum):
     """Enumeration for the post vote type.

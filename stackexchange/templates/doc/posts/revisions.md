@@ -4,4 +4,4 @@ Returns edit revisions for the posts identified in ids.
 `question_id` on [post](#model-Post), [answer](#model-Answer), and [question](#model-Question) objects
 respectively.
 
-This method returns a list of [revisions](#model-PostHistory).
+This method returns a list of [revisions](#model-PostRevision).

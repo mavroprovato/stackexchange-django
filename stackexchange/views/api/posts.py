@@ -76,7 +76,7 @@ class PostViewSet(BaseViewSet):
         if self.action == 'comments':
             return serializers.CommentSerializer
         if self.action == 'revisions':
-            return serializers.PostHistorySerializer
+            return serializers.PostRevisionSerializer
 
         return serializers.PostSerializer
 
@@ -150,4 +150,4 @@ class PostViewSet(BaseViewSet):
         post_ids = self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]
         result = models.PostHistory.objects.group_by_revision(post_ids=post_ids)
 
-        return Response(serializers.PostHistorySerializer(result, many=True).data)
+        return Response(serializers.PostRevisionSerializer(result, many=True).data)

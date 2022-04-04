@@ -103,6 +103,7 @@ class PostHistoryQuerySet(QuerySet):
             SELECT bq.post_id,
                    bq.revision_guid,
                    bq.creation_date,
+                   bq.post_types,
                    rank() OVER (PARTITION BY post_id, post_types && %s ORDER BY creation_date) revision_number
             FROM base_query bq
             ORDER BY bq.creation_date DESC
