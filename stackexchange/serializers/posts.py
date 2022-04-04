@@ -38,8 +38,10 @@ class PostRevisionSerializer(BaseSerializer):
     is_rollback = fields.SerializerMethodField(help_text="True if the history action was a rollback")
     creation_date = fields.DateTimeField(help_text="The post revision creation date")
     post_id = fields.IntegerField(help_text="The post identifier")
+    post_type = fields.SerializerMethodField(help_text="The post type")
     revision_number = fields.SerializerMethodField(help_text="The post revision number", allow_null=True)
     revision_type = fields.SerializerMethodField(help_text="The revision type")
+    comment = fields.CharField(help_text="The revision comment")
     revision_guid = fields.CharField(help_text="The revision GUID")
 
     @staticmethod
@@ -84,4 +86,13 @@ class PostRevisionSerializer(BaseSerializer):
         return 'vote_based' if (
             {pht.value for pht in enums.PostHistoryType if pht.vote_based()} & set(post_history['post_history_types'])
         ) else 'single_user'
+
+    @staticmethod
+    def get_post_type(post_history: dict) -> str:
+        """Get the post type
+
+        :param post_history: The post history.
+        :return: The post type.
+        """
+        return enums.PostType(post_history['post_type']).name.lower()
 

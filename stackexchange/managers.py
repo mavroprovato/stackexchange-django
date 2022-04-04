@@ -109,6 +109,18 @@ class PostHistoryQuerySet(QuerySet):
                    bq.revision_guid,
                    bq.creation_date,
                    bq.post_history_types,
+                   (
+                       SELECT type
+                       FROM posts p
+                       WHERE p.id = bq.post_id
+                       LIMIT 1
+                   ) AS post_type,
+                   (
+                       SELECT comment
+                       FROM post_history ph
+                       WHERE ph.revision_guid = bq.revision_guid
+                       LIMIT 1
+                   ) AS comment,
                    rank() OVER (PARTITION BY post_id, post_history_types && %s ORDER BY creation_date) revision_number
             FROM base_query bq
             ORDER BY bq.creation_date DESC
