@@ -1,8 +1,10 @@
 """The managers for the models
 """
+import typing
 
 from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
+from django.db import connection
 from django.db.models import OuterRef, Count, Subquery, QuerySet, Min
 from django.db.models.functions import Coalesce
 
@@ -81,3 +83,35 @@ class UserBadgeQuerySet(QuerySet):
         return self.values(
             'user', 'badge', 'badge__badge_class', 'badge__name', 'badge__badge_type'
         ).annotate(award_count=Count('*'), date_awarded=Min('date_awarded'))
+
+
+class PostHistoryQuerySet(QuerySet):
+    """The post history queryset
+    """
+    @staticmethod
+    def group_by_revision(post_ids: typing.Iterable):
+        sql = '''
+            WITH base_query AS (
+                SELECT ph.post_id,
+                       ph.revision_guid,
+                       MIN(ph.creation_date) AS creation_date,
+                       ARRAY_AGG(ph.type) AS post_types
+                  FROM post_history ph
+                 WHERE ph.post_id IN %s
+                 GROUP BY ph.post_id, ph.revision_guid
+            )
+            SELECT bq.post_id,
+                   bq.revision_guid,
+                   bq.creation_date,
+                   rank() OVER (PARTITION BY post_id, post_types && %s ORDER BY creation_date) revision_number
+            FROM base_query bq
+            ORDER BY bq.creation_date DESC
+        '''
+        with connection.cursor() as cursor:
+            cursor.execute(sql, (
+                tuple(post_ids),
+                '{' + ','.join(str(pht.value) for pht in enums.PostHistoryType if pht.vote_based()) + '}'
+            ))
+            columns = [col[0] for col in cursor.description]
+
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]

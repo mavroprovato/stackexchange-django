@@ -3,7 +3,6 @@
 import datetime
 import typing
 
-from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
@@ -65,12 +64,6 @@ class PostViewSet(BaseViewSet):
         """
         if self.action == 'comments':
             return models.Comment.objects.select_related('post', 'user')
-        if self.action == 'revisions':
-            return models.PostHistory.objects.values(
-                'creation_date', 'post_id', 'post__type', 'content_license', 'user_id', 'comment', 'revision_guid'
-            ).annotate(
-                types=ArrayAgg('type')
-            ).order_by('-creation_date')
 
         return models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related(
             'owner')
@@ -153,4 +146,8 @@ class PostViewSet(BaseViewSet):
         :param request: The request.
         :return: The response.
         """
-        return super().list(request, *args, **kwargs)
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        post_ids = self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]
+        result = models.PostHistory.objects.group_by_revision(post_ids=post_ids)
+
+        return Response(serializers.PostHistorySerializer(result, many=True).data)

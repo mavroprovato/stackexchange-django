@@ -195,6 +195,8 @@ class PostHistory(models.Model):
         choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name,
         null=True, blank=True)
 
+    objects = managers.PostHistoryQuerySet().as_manager()
+
     class Meta:
         db_table = 'post_history'
         verbose_name_plural = 'post history'

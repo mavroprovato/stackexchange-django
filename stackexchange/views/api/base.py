@@ -6,13 +6,13 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-# The maximum number of object to retrieve for detail actions
-MAX_RETRIEVE_OBJECTS = 100
-
 
 class BaseListViewSet(GenericViewSet):
     """Base list view set
     """
+    # The maximum number of object to retrieve for detail actions
+    MAX_RETRIEVE_OBJECTS = 100
+
     def list(self, request: Request, *args, **kwargs) -> Response:
         """Override the retrieve method in order to accept a list of semicolon separated list of object ids.
 
@@ -27,7 +27,7 @@ class BaseListViewSet(GenericViewSet):
             if self.detail_field is None:
                 raise AssertionError(f'Detail field for action {self.action} should not be None')
             queryset = queryset.filter(**{
-                f"{self.detail_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:MAX_RETRIEVE_OBJECTS]
+                f"{self.detail_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]
             })
 
         page = self.paginate_queryset(queryset)
