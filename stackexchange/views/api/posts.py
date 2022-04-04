@@ -138,5 +138,11 @@ class PostViewSet(BaseViewSet):
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         post_ids = self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]
         result = models.PostHistory.objects.group_by_revision(post_ids=post_ids)
+        page = self.paginate_queryset(result)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-        return Response(serializers.PostRevisionSerializer(result, many=True).data)
+        serializer = self.get_serializer(page, many=True)
+
+        return Response(serializer.data)

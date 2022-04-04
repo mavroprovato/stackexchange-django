@@ -136,7 +136,7 @@ class Pagination(pagination.PageNumberPagination):
             )
             raise NotFound(msg) from exception
 
-        return list(self.page)
+        return list(self.page)[:page_size]
 
     def get_paginated_response(self, data: typing.Iterable) -> Response:
         """Return the paginated response.
