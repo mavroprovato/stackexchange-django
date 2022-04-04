@@ -106,7 +106,7 @@ class PostViewSet(BaseViewSet):
 
         :return: The fields used to filter detail actions.
         """
-        if self.action in ('comments', 'revisions'):
+        if self.action == 'comments':
             return 'post'
 
         return super().detail_field
@@ -118,17 +118,6 @@ class PostViewSet(BaseViewSet):
         :return: The field used for date filtering.
         """
         return 'creation_date'
-
-    @property
-    def stable_ordering(self) -> typing.Optional[typing.Sequence[str]]:
-        """Get the stable ordering for the view.
-
-        :return: An iterable of strings that define the stable ordering.
-        """
-        if self.action == 'revisions':
-            return '-creation_date',
-
-        return None
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:

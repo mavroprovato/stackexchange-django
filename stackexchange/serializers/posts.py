@@ -49,7 +49,7 @@ class PostRevisionSerializer(BaseSerializer):
         :param post_history: The post history.
         :return: True if the history action was to set the post as community wiki.
         """
-        return enums.PostHistoryType.COMMUNITY_OWNED.value in post_history['post_types']
+        return enums.PostHistoryType.COMMUNITY_OWNED.value in post_history['post_history_types']
 
     @staticmethod
     def get_is_rollback(post_history: dict) -> bool:
@@ -58,7 +58,9 @@ class PostRevisionSerializer(BaseSerializer):
         :param post_history: The post history.
         :return: True if the history action was a rollback.
         """
-        return bool({pht.value for pht in enums.PostHistoryType if pht.rollback()} & set(post_history['post_types']))
+        return bool(
+            {pht.value for pht in enums.PostHistoryType if pht.rollback()} & set(post_history['post_history_types'])
+        )
 
     @staticmethod
     def get_revision_number(post_history: dict) -> typing.Optional[int]:
@@ -68,7 +70,7 @@ class PostRevisionSerializer(BaseSerializer):
         :return: The revision number.
         """
         return None if (
-            {pht.value for pht in enums.PostHistoryType if pht.vote_based()} & set(post_history['post_types'])
+            {pht.value for pht in enums.PostHistoryType if pht.vote_based()} & set(post_history['post_history_types'])
         ) else post_history['revision_number']
 
     @staticmethod
@@ -80,6 +82,6 @@ class PostRevisionSerializer(BaseSerializer):
         :return: True if the revision is vote based, false otherwise.
         """
         return 'vote_based' if (
-            {pht.value for pht in enums.PostHistoryType if pht.vote_based()} & set(post_history['post_types'])
+            {pht.value for pht in enums.PostHistoryType if pht.vote_based()} & set(post_history['post_history_types'])
         ) else 'single_user'
 

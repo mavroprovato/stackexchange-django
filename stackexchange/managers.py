@@ -89,13 +89,18 @@ class PostHistoryQuerySet(QuerySet):
     """The post history queryset
     """
     @staticmethod
-    def group_by_revision(post_ids: typing.Iterable):
+    def group_by_revision(post_ids: typing.Iterable) -> typing.Iterable[dict]:
+        """Group a list of post history objects by revision.
+
+        :param post_ids: The post identifiers.
+        :return: The list of revisions.
+        """
         sql = '''
             WITH base_query AS (
                 SELECT ph.post_id,
                        ph.revision_guid,
                        MIN(ph.creation_date) AS creation_date,
-                       ARRAY_AGG(ph.type) AS post_types
+                       ARRAY_AGG(ph.type) AS post_history_types
                   FROM post_history ph
                  WHERE ph.post_id IN %s
                  GROUP BY ph.post_id, ph.revision_guid
@@ -103,8 +108,8 @@ class PostHistoryQuerySet(QuerySet):
             SELECT bq.post_id,
                    bq.revision_guid,
                    bq.creation_date,
-                   bq.post_types,
-                   rank() OVER (PARTITION BY post_id, post_types && %s ORDER BY creation_date) revision_number
+                   bq.post_history_types,
+                   rank() OVER (PARTITION BY post_id, post_history_types && %s ORDER BY creation_date) revision_number
             FROM base_query bq
             ORDER BY bq.creation_date DESC
         '''
