@@ -219,11 +219,10 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
                     row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
-                    True, row['Id'] == '-1',
-                    int(row['Reputation']) >= enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation or row['Id'] == '-1',
-                    password, row['Reputation'], row['CreationDate'], row['LastAccessDate'], row['DisplayName'],
-                    row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'),
-                    row['Views'], row['UpVotes'], row['DownVotes'],
+                    True, row['Id'] == '-1', row['Id'] == '-1', password, row['Reputation'], row['CreationDate'],
+                    row['LastAccessDate'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
+                    row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['Views'], row['UpVotes'],
+                    row['DownVotes'],
                 ])
         with (self.temp_dir / 'users.csv').open('rt') as f:
             self.output.write(f"Loading users")
