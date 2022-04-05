@@ -12,10 +12,23 @@ class BaseUserSerializer(serializers.ModelSerializer):
     """The base user serializer.
     """
     user_id = fields.IntegerField(source="pk", help_text="The user identifier")
+    user_type = fields.SerializerMethodField(help_text="The user type")
 
     class Meta:
         model = models.User
-        fields = ('reputation', 'user_id', 'display_name')
+        fields = ('reputation', 'user_id', 'display_name', 'user_type')
+
+    @staticmethod
+    def get_user_type(user: models.User) -> str:
+        """Return the user type.
+
+        :param user: The user
+        :return: The user type
+        """
+        if not user:
+            return 'does_not_exist'
+
+        return 'moderator' if user.is_moderator else 'registered'
 
 
 class UserBadgeCountSerializer(BaseSerializer):
