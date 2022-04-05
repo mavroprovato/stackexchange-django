@@ -25,7 +25,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
         :param user: The user
         :return: The user type
         """
-        if not user:
+        if not user.pk:
             return 'does_not_exist'
 
         return 'moderator' if user.is_moderator else 'registered'

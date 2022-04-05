@@ -33,6 +33,7 @@ class PostSerializer(serializers.ModelSerializer):
 class PostRevisionSerializer(BaseSerializer):
     """The post history serializer
     """
+    owner = BaseUserSerializer(help_text="The post owner")
     set_community_wiki = fields.SerializerMethodField(
         help_text="True if the history action was to set the post as community wiki")
     is_rollback = fields.SerializerMethodField(help_text="True if the history action was a rollback")
