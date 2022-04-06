@@ -16,6 +16,7 @@ class PostFactory(factory.django.DjangoModelFactory):
     title = factory.Faker('sentence')
     body = factory.Faker('paragraph')
     type = factory.Faker('random_element', elements=[pt.value for pt in enums.PostType])
+    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
     last_activity_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
     score = factory.Faker('pyint')
     view_count = factory.Faker('pyint')

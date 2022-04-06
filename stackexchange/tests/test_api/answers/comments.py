@@ -94,3 +94,16 @@ class AnswerCommentsListTests(BaseCommentTestCase):
             data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'score', min_value, max_value)
+
+    def test_date_range(self):
+        """Test the answer comments list endpoint date range.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('answer-comments', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}), data={
+                'fromdate': from_value, 'todate': to_value
+            }
+        )
+        self.assert_range(response, 'creation_date', from_value, to_value)
