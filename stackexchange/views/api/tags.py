@@ -50,7 +50,7 @@ class TagViewSet(BaseListViewSet):
         :return: The queryset for the action.
         """
         if self.action == 'wikis':
-            return models.Tag.objects.all().select_related('excerpt', 'wiki').order_by('name')
+            return models.Tag.objects.all().select_related('excerpt', 'wiki')
 
         return models.Tag.objects.all()
 
@@ -75,6 +75,8 @@ class TagViewSet(BaseListViewSet):
                 filters.OrderingField('popular', 'award_count', type=int),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC)
             )
+        if self.action == 'wikis':
+            return filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
 
         return None
 

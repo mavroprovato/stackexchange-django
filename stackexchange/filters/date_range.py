@@ -34,7 +34,7 @@ class DateRangeFilter(BaseFilterBackend):
             queryset = queryset.filter(**{f'{date_field}__gte': from_date})
         to_date = self.get_date(request, self.to_date_param)
         if to_date is not None:
-            queryset = queryset.filter(**{f'{date_field}__gte': to_date})
+            queryset = queryset.filter(**{f'{date_field}__lte': to_date})
 
         return queryset
 
