@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.fields import CIEmailField, CICharField
 from django.contrib.postgres import indexes, search
 from django.db import models
+from django.utils import timezone
 
 from stackexchange import enums, managers
 
@@ -20,7 +21,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     website_url = models.URLField(help_text="The user web site URL", null=True, blank=True)
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
     about = models.TextField(help_text="The user about information", null=True, blank=True)
-    creation_date = models.DateTimeField(help_text="The user creation date", auto_now_add=True)
+    creation_date = models.DateTimeField(help_text="The user creation date", default=timezone.now)
     last_modified_date = models.DateTimeField(help_text="The user creation date", auto_now=True, null=True)
     last_access_date = models.DateTimeField(help_text="The user last access date", null=True, blank=True)
     reputation = models.PositiveIntegerField(help_text="The user reputation", default=0)
@@ -91,7 +92,7 @@ class UserBadge(models.Model):
     """
     user = models.ForeignKey(User, help_text="The user", on_delete=models.CASCADE, related_name='badges')
     badge = models.ForeignKey(Badge, help_text="The badge", on_delete=models.CASCADE, related_name='users')
-    date_awarded = models.DateTimeField(help_text="The date awarded", auto_now_add=True)
+    date_awarded = models.DateTimeField(help_text="The date awarded", default=timezone.now)
 
     objects = managers.UserBadgeQuerySet().as_manager()
 
@@ -119,7 +120,7 @@ class Post(models.Model):
                                     related_name='last_edited_posts', null=True, blank=True)
     last_editor_display_name = models.CharField(help_text="The last editor display name", max_length=255, null=True,
                                                 blank=True)
-    creation_date = models.DateTimeField(help_text="The post creation date", auto_now_add=True)
+    creation_date = models.DateTimeField(help_text="The post creation date", default=timezone.now)
     last_edit_date = models.DateTimeField(help_text="The post last edit date", null=True, blank=True, auto_now=True)
     last_activity_date = models.DateTimeField(help_text="The post last activity date")
     community_owned_date = models.DateTimeField(help_text="The post community owned date", null=True, blank=True)
@@ -156,7 +157,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_comments")
     score = models.IntegerField(help_text="The comment score")
     text = models.TextField(help_text="The comment text")
-    creation_date = models.DateTimeField(help_text="The date that the comment was created", auto_now_add=True)
+    creation_date = models.DateTimeField(help_text="The date that the comment was created", default=timezone.now)
     content_license = models.CharField(
         help_text="The content license", max_length=max([len(cl.name) for cl in enums.ContentLicense]),
         choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name)
@@ -182,7 +183,8 @@ class PostHistory(models.Model):
         help_text="The post history type", choices=((pht.value, pht.description) for pht in enums.PostHistoryType))
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
     revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
-    creation_date = models.DateTimeField(help_text="The date that this history record was created", auto_now_add=True)
+    creation_date = models.DateTimeField(
+        help_text="The date that this history record was created", default=timezone.now)
     user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
                              related_name="post_history", null=True, blank=True)
     user_display_name = models.CharField(
@@ -228,7 +230,7 @@ class PostVote(models.Model):
     post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_votes")
     type = models.PositiveSmallIntegerField(
         help_text="The post vote type", choices=((pvt.value, pvt.description) for pvt in enums.PostVoteType))
-    creation_date = models.DateTimeField(help_text="The date that this vote was created", auto_now_add=True)
+    creation_date = models.DateTimeField(help_text="The date that this vote was created", default=timezone.now)
     user = models.ForeignKey(
         User, help_text="The user for the post vote, if the post vote type is FAVORITE or BOUNTY_START",
         on_delete=models.CASCADE, related_name='user_favorites', null=True, blank=True)
