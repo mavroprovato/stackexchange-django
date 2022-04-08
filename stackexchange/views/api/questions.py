@@ -126,7 +126,7 @@ class QuestionViewSet(BaseViewSet):
         :return: The fields used to filter detail actions.
         """
         if self.action == 'answers':
-            return 'parent'
+            return 'question'
         if self.action == 'comments':
             return 'post'
         if self.action == 'linked':
