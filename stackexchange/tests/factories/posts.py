@@ -42,3 +42,19 @@ class AnswerFactory(PostFactory):
     """The answer factory
     """
     type = enums.PostType.ANSWER.value
+
+
+class PostHistoryFactory(factory.django.DjangoModelFactory):
+    """The post history factory
+    """
+    class Meta:
+        model = models.PostHistory
+
+    type = factory.Faker('random_element', elements=[pt.value for pt in enums.PostHistoryType])
+    post = factory.SubFactory(PostFactory)
+    revision_guid = factory.Faker('uuid4')
+    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
+    user = factory.SubFactory(UserFactory)
+    user_display_name = factory.Faker('user_name')
+    comment = factory.Faker('sentence')
+    text = factory.Faker('sentence')
