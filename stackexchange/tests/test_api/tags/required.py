@@ -43,8 +43,8 @@ class TagRequiredTests(BaseTagTestCase):
     def test_range_by_popular(self):
         """Test the tag required endpoint range by badge rank.
         """
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(
             reverse('tag-required'), data={'sort': 'popular', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'popular', min_value, max_value)
@@ -52,7 +52,7 @@ class TagRequiredTests(BaseTagTestCase):
     def test_range_by_name(self):
         """Test the tag required endpoint range by badge type.
         """
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         response = self.client.get(reverse('tag-required'), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'popular', min_value, max_value)

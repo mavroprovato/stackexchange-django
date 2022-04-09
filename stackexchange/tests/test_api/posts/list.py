@@ -75,8 +75,8 @@ class PostListTests(BasePostTestCase):
     def test_range_by_votes(self):
         """Test the post list endpoint range by votes.
         """
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(reverse('post-list'), data={
             'sort': 'votes', 'min': min_value, 'max': max_value
         })

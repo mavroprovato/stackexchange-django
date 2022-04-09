@@ -109,8 +109,8 @@ class UserQuestionTests(BaseQuestionTestCase):
         """Test the user question list endpoint range by votes.
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(
             reverse('user-questions', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}

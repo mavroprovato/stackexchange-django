@@ -107,8 +107,8 @@ class BadgeRetrieveTests(BadgeWithAwardCountTestCase):
         """Test the badges retrieve endpoint range by badge name.
         """
         badges = random.sample(list(models.Badge.objects.all()), 3)
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         response = self.client.get(
             reverse('badge-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}),
             data={'sort': 'name', 'min': min_value, 'max': max_value}

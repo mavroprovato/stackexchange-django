@@ -81,8 +81,8 @@ class QuestionCommentsTests(BaseCommentTestCase):
         """Test the user list endpoint range by comment score.
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(
             reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
                 'sort': 'votes', 'min': min_value, 'max': max_value

@@ -118,8 +118,8 @@ class PostRetrieveTests(BasePostTestCase):
         """Test the post detail endpoint range by votes.
         """
         posts = random.sample(list(models.Post.objects.all()), 3)
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(
             reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}

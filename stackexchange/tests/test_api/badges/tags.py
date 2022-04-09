@@ -72,8 +72,8 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
     def test_range_by_name(self):
         """Test the badges tags endpoint range by badge name.
         """
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_range(response, 'name', min_value, max_value)

@@ -65,8 +65,8 @@ class TagInfoTests(BaseTagTestCase):
     def test_range_by_popular(self):
         """Test the tag list endpoint range by badge rank.
         """
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         tags = random.sample(list(models.Tag.objects.all()), 3)
         response = self.client.get(reverse('tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
@@ -76,8 +76,8 @@ class TagInfoTests(BaseTagTestCase):
     def test_range_by_name(self):
         """Test the tag list endpoint range by badge type.
         """
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         tags = random.sample(list(models.Tag.objects.all()), 3)
         response = self.client.get(reverse('tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)

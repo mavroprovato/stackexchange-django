@@ -45,16 +45,16 @@ class TagListTests(BaseTagTestCase):
     def test_range_by_popular(self):
         """Test the tag list endpoint range by badge rank.
         """
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(reverse('tag-list'), data={'sort': 'popular', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'count', min_value, max_value)
 
     def test_range_by_name(self):
         """Test the tag list endpoint range by badge type.
         """
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         response = self.client.get(reverse('tag-list'), data={
             'sort': 'name', 'min': min_value, 'max': max_value
         })

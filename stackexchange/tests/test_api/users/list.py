@@ -67,8 +67,8 @@ class UserListTests(BaseUserTestCase):
     def test_range_by_reputation(self):
         """Test the user list endpoint range by reputation.
         """
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(reverse('user-list'), data={
             'sort': 'reputation', 'min': min_value, 'max': max_value
         })
@@ -88,8 +88,8 @@ class UserListTests(BaseUserTestCase):
     def test_range_by_display_name(self):
         """Test the user list endpoint range by user display name.
         """
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         response = self.client.get(reverse('user-list'), data={
             'sort': 'name', 'min': min_value, 'max': max_value
         })

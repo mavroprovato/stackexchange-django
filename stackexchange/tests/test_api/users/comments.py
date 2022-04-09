@@ -86,8 +86,8 @@ class UserCommentTests(BaseCommentTestCase):
         """Test the user comments list endpoint range by comment score.
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(
             reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}

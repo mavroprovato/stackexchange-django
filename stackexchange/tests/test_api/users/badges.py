@@ -107,8 +107,8 @@ class UserBadgeTests(UserBadgeTestCase):
         """Test the user badges list endpoint range by badge name.
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         response = self.client.get(
             reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'name', 'min': min_value, 'max': max_value}

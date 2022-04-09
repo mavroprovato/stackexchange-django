@@ -106,8 +106,8 @@ class AnswerQuestionListTests(BaseQuestionTestCase):
         """Test the answer questions list endpoint range by comment score.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(
             reverse('answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}

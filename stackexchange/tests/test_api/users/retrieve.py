@@ -89,8 +89,8 @@ class UserRetrieveTests(BaseUserTestCase):
         """Test the user detail range by reputation.
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        min_value = 10
-        max_value = 1000
+        min_value = 3000
+        max_value = 6000
         response = self.client.get(reverse('user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
                                    data={'sort': 'reputation', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'reputation', min_value, max_value)
@@ -110,8 +110,8 @@ class UserRetrieveTests(BaseUserTestCase):
         """Test the user detail sorted by user display name.
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        min_value = 'b'
-        max_value = 'x'
+        min_value = 'k'
+        max_value = 't'
         response = self.client.get(reverse('user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
                                    data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
