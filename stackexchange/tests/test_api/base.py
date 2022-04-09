@@ -1,5 +1,7 @@
 """Base test classes
 """
+import typing
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -7,7 +9,8 @@ from rest_framework.test import APITestCase
 class BaseTestCase(APITestCase):
     """Base API test case
     """
-    def assert_items_equal(self, response, model_class, obj_filter, attributes: dict, multiple=False):
+    def assert_items_equal(self, response, model_class: typing.ClassVar, obj_filter: typing.Union[str, dict],
+                           multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
 
         :param response: The response.
@@ -30,13 +33,14 @@ class BaseTestCase(APITestCase):
             obj = obj.first() if multiple else obj.get()
 
             # Assert that the returned values are the same as the database values
-            for attribute, value in attributes.items():
-                if callable(value):
-                    expected_value = value(obj)
-                else:
-                    expected_value = getattr(obj, value)
-                source_value = get_attribute(row, attribute)
-                self.assertEqual(source_value, expected_value)
+            if attributes is not None:
+                for attribute, value in attributes.items():
+                    if callable(value):
+                        expected_value = value(obj)
+                    else:
+                        expected_value = getattr(obj, value)
+                    source_value = get_attribute(row, attribute)
+                    self.assertEqual(source_value, expected_value)
 
     def assert_sorted(self, response, attr: str, transform=None, reverse=False):
         """Assert that the response is sorted.
