@@ -19,7 +19,6 @@ class TagModeratorOnlyTests(BaseTagTestCase):
     def test(self):
         """Test the tag moderator only endpoint.
         """
-        # Test getting one tag
         response = self.client.get(reverse('tag-moderator-only'))
         self.assert_items_equal(response)
         self.assertTrue(all(row['is_moderator_only'] for row in response.json()['items']))

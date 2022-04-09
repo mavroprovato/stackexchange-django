@@ -20,7 +20,6 @@ class TagInfoTests(BaseTagTestCase):
     def test(self):
         """Test the tag detail endpoint.
         """
-        # Test getting one tag
         tag = random.sample(list(models.Tag.objects.all()), 1)[0]
         response = self.client.get(reverse('tag-info', kwargs={'pk': tag.name}))
         self.assert_items_equal(response)
