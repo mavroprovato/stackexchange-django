@@ -47,7 +47,7 @@ class TagListTests(BaseTagTestCase):
         """
         min_value = 10
         max_value = 1000
-        response = self.client.get(reverse('tag-list'), data={'min': min_value, 'max': max_value})
+        response = self.client.get(reverse('tag-list'), data={'sort': 'popular', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'count', min_value, max_value)
 
     def test_range_by_name(self):

@@ -82,4 +82,4 @@ class TagInfoTests(BaseTagTestCase):
         response = self.client.get(reverse('tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }), data={'sort': 'name', 'min': min_value, 'max': max_value})
-        self.assert_range(response, 'popular', min_value, max_value)
+        self.assert_range(response, 'name', min_value, max_value)

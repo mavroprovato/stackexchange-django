@@ -26,19 +26,19 @@ class TagModeratorOnlyTests(BaseTagTestCase):
     def test_sort_by_popular(self):
         """Test the tag moderator only endpoint sorted by tag count.
         """
-        response = self.client.get(reverse('tag-moderator-only'))
+        response = self.client.get(reverse('tag-moderator-only'), data={'sort': 'popular', 'order': 'asc'})
         self.assert_sorted(response, 'count')
 
-        response = self.client.get(reverse('tag-moderator-only'))
+        response = self.client.get(reverse('tag-moderator-only'), data={'sort': 'popular', 'order': 'desc'})
         self.assert_sorted(response, 'count', reverse=True)
 
     def test_sort_by_name(self):
         """Test the tag moderator only endpoint sorted by tag name.
         """
-        response = self.client.get(reverse('tag-moderator-only'))
+        response = self.client.get(reverse('tag-moderator-only'), data={'sort': 'name', 'order': 'asc'})
         self.assert_sorted(response, 'name')
 
-        response = self.client.get(reverse('tag-moderator-only'))
+        response = self.client.get(reverse('tag-moderator-only'), data={'sort': 'name', 'order': 'desc'})
         self.assert_sorted(response, 'name', reverse=True)
 
     def test_range_by_popular(self):
@@ -46,7 +46,9 @@ class TagModeratorOnlyTests(BaseTagTestCase):
         """
         min_value = 10
         max_value = 1000
-        response = self.client.get(reverse('tag-moderator-only'))
+        response = self.client.get(reverse('tag-moderator-only'), data={
+            'sort': 'popular', 'min': min_value, 'max': max_value
+        })
         self.assert_range(response, 'popular', min_value, max_value)
 
     def test_range_by_name(self):
@@ -54,5 +56,7 @@ class TagModeratorOnlyTests(BaseTagTestCase):
         """
         min_value = 'b'
         max_value = 'x'
-        response = self.client.get(reverse('tag-moderator-only'))
-        self.assert_range(response, 'popular', min_value, max_value)
+        response = self.client.get(reverse('tag-moderator-only'), data={
+            'sort': 'name', 'min': min_value, 'max': max_value
+        })
+        self.assert_range(response, 'name', min_value, max_value)

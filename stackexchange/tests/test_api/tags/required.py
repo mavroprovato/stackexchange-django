@@ -18,7 +18,6 @@ class TagRequiredTests(BaseTagTestCase):
     def test(self):
         """Test the tag required endpoint.
         """
-        # Test getting one tag
         response = self.client.get(reverse('tag-required'))
         self.assert_items_equal(response)
         self.assertTrue(all(row['is_required'] for row in response.json()['items']))
@@ -26,19 +25,19 @@ class TagRequiredTests(BaseTagTestCase):
     def test_sort_by_popular(self):
         """Test the tag required endpoint sorted by tag count.
         """
-        response = self.client.get(reverse('tag-required'))
+        response = self.client.get(reverse('tag-required'), data={'sort': 'popular', 'order': 'asc'})
         self.assert_sorted(response, 'count')
 
-        response = self.client.get(reverse('tag-required'))
+        response = self.client.get(reverse('tag-required'), data={'sort': 'popular', 'order': 'desc'})
         self.assert_sorted(response, 'count', reverse=True)
 
     def test_sort_by_name(self):
         """Test the tag required endpoint sorted by tag name.
         """
-        response = self.client.get(reverse('tag-required'))
+        response = self.client.get(reverse('tag-required'), data={'sort': 'name', 'order': 'asc'})
         self.assert_sorted(response, 'name')
 
-        response = self.client.get(reverse('tag-required'))
+        response = self.client.get(reverse('tag-required'), data={'sort': 'name', 'order': 'desc'})
         self.assert_sorted(response, 'name', reverse=True)
 
     def test_range_by_popular(self):
@@ -46,7 +45,8 @@ class TagRequiredTests(BaseTagTestCase):
         """
         min_value = 10
         max_value = 1000
-        response = self.client.get(reverse('tag-required'))
+        response = self.client.get(
+            reverse('tag-required'), data={'sort': 'popular', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'popular', min_value, max_value)
 
     def test_range_by_name(self):
@@ -54,5 +54,5 @@ class TagRequiredTests(BaseTagTestCase):
         """
         min_value = 'b'
         max_value = 'x'
-        response = self.client.get(reverse('tag-required'))
+        response = self.client.get(reverse('tag-required'), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'popular', min_value, max_value)
