@@ -107,7 +107,7 @@ class TagViewSet(BaseListViewSet):
 
         :return: The field used for in name filtering.
         """
-        if self.action == 'list':
+        if self.action in ('list', 'moderator_only', 'required'):
             return 'name'
 
         return None
