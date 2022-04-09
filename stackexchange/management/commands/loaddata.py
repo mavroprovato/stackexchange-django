@@ -408,14 +408,15 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.TAGS_FILE):
                 csv_writer.writerow([
                     row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId', '<NULL>'),
-                    row.get('WikiPostId', '<NULL>')
+                    row.get('WikiPostId', '<NULL>'), row.get('IsRequired') == 'True',
+                    row.get('IsModeratorOnly') == 'True'
                 ])
         with (self.temp_dir / 'tags.csv').open('rt') as f:
             self.output.write(f"Loading tags")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE tags CASCADE")
                 cursor.copy_from(f, table='tags', columns=(
-                    'id', 'name', 'award_count', 'excerpt_id', 'wiki_id'
+                    'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
                 ), sep=',', null='<NULL>')
 
         with connection.cursor() as cursor:

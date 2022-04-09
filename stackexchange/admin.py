@@ -49,7 +49,8 @@ class UserAdmin(UserAdminBase):
 class TagAdmin(admin.ModelAdmin):
     """Admin for tags
     """
-    list_display = ('name', 'award_count')
+    list_display = ('name', 'award_count', 'required', 'moderator_only')
+    list_filter = ('required', 'moderator_only')
     search_fields = ('name',)
     ordering = ('name',)
     autocomplete_fields = ('excerpt', 'wiki')

@@ -252,6 +252,8 @@ class Tag(models.Model):
                                 related_name="excerpts", null=True, blank=True)
     wiki = models.ForeignKey(Post, help_text="The tag wiki", on_delete=models.CASCADE, related_name="wikis",
                              null=True, blank=True)
+    required = models.BooleanField(help_text="True if the tag fulfills required tag constraints", default=False)
+    moderator_only = models.BooleanField(help_text="True if the tag can only be used by moderators", default=False)
 
     class Meta:
         db_table = 'tags'
