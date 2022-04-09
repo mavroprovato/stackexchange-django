@@ -133,4 +133,3 @@ class UserBadgeTests(UserBadgeTestCase):
         )
         self.assert_range(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value,
                           max_value=max_value.value)
-

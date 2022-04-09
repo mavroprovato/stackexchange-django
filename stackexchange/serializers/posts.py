@@ -96,4 +96,3 @@ class PostRevisionSerializer(BaseSerializer):
         :return: The post type.
         """
         return enums.PostType(post_history['post_type']).name.lower()
-

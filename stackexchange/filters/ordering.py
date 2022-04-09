@@ -107,7 +107,7 @@ class OrderingFilter(BaseFilterBackend):
                     ordering_field = field
                     break
         # If not provided in the request, use the first ordering field if it exists
-        if ordering_field is None and len(ordering_fields):
+        if ordering_field is None and len(ordering_fields) > 0:
             ordering_field = ordering_fields[0]
 
         # Get the ordering direction from the request

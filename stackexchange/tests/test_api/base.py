@@ -83,6 +83,12 @@ class BaseTestCase(APITestCase):
 
 
 def get_attribute(row: dict, attribute: str):
+    """Get the attribute from a dictionary. The attribute can contain periods in order to get nested attributes.
+
+    :param row: The row.
+    :param attribute: The attribute.
+    :return: The dictionary value.
+    """
     attribute_path = attribute.split('.')
     value = row[attribute_path[0]]
     for attr in attribute_path[1:]:
