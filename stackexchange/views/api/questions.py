@@ -77,9 +77,6 @@ class QuestionViewSet(BaseViewSet):
             return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner')
         if self.action == 'comments':
             return models.Comment.objects.select_related('user')
-        if self.action == 'linked':
-            return models.Post.objects.filter(post_links__type=enums.PostType.QUESTION).select_related(
-                'owner').prefetch_related('tags')
         if self.action == 'no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')
@@ -129,8 +126,6 @@ class QuestionViewSet(BaseViewSet):
             return 'question'
         if self.action == 'comments':
             return 'post'
-        if self.action == 'linked':
-            return 'post_links__related_post'
 
         return super().detail_field
 
@@ -165,15 +160,6 @@ class QuestionViewSet(BaseViewSet):
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:
         """Gets the comments for question identified by id.
-
-        :param request: The request.
-        :return: The response.
-        """
-        return super().list(request, *args, **kwargs)
-
-    @action(detail=True, url_path='linked')
-    def linked(self, request: Request, *args, **kwargs) -> Response:
-        """Get the questions that link to the question identified by an id.
 
         :param request: The request.
         :return: The response.
