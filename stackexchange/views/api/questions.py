@@ -50,16 +50,6 @@ from .base import BaseViewSet
             )
         ]
     ),
-    linked=extend_schema(
-        summary='Get the questions that link to the questions identified by a set of ids',
-        description=render_to_string('doc/questions/linked.md'),
-        parameters=[
-            OpenApiParameter(
-                name='id', type=str, location=OpenApiParameter.PATH,
-                description='A list of semicolon separated question identifiers'
-            )
-        ]
-    ),
     no_answers=extend_schema(
         summary='Get all questions on the site with no answers',
         description=render_to_string('doc/questions/no_answers.md'),
