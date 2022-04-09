@@ -64,7 +64,7 @@ class TagRequiredTests(BaseTagTestCase):
         """Test the in name filter for the tag required endpoint.
         """
         # Create a user that will surely be returned
-        tag = factories.TagFactory.create(name='es', required=True)
+        tag = factories.TagFactory.create(name='test', required=True)
         query = 'es'
         response = self.client.get(reverse('tag-required'), data={'inname': query})
         self.assert_in_string(response, 'name', query=query)

@@ -64,7 +64,7 @@ class TagListTests(BaseTagTestCase):
         """Test the in name filter for the tag list endpoint.
         """
         # Create a user that will surely be returned
-        tag = factories.TagFactory.create(name='es')
+        tag = factories.TagFactory.create(name='test')
         query = 'es'
         response = self.client.get(reverse('tag-list'), data={'inname': query})
         self.assert_in_string(response, 'name', query=query)

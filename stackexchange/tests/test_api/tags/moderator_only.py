@@ -67,7 +67,7 @@ class TagModeratorOnlyTests(BaseTagTestCase):
         """Test the in name filter for the tag moderator only endpoint.
         """
         # Create a user that will surely be returned
-        tag = factories.TagFactory.create(name='es', moderator_only=True)
+        tag = factories.TagFactory.create(name='test', moderator_only=True)
         query = 'es'
         response = self.client.get(reverse('tag-moderator-only'), data={'inname': query})
         self.assert_in_string(response, 'name', query=query)
