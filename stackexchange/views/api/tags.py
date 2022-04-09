@@ -28,6 +28,14 @@ from .base import BaseListViewSet
             )
         ]
     ),
+    moderator_only=extend_schema(
+        summary='Get the tags on the site that only moderators can use',
+        description=render_to_string('doc/tags/moderator-only.md'),
+    ),
+    required=extend_schema(
+        summary='Get the tags on the site that fulfill required tag constraints',
+        description=render_to_string('doc/tags/required.md'),
+    ),
     wikis=extend_schema(
         summary='Get the wiki entries for a set of tags',
         description=render_to_string('doc/tags/wikis.md'),
@@ -49,6 +57,10 @@ class TagViewSet(BaseListViewSet):
 
         :return: The queryset for the action.
         """
+        if self.action == 'moderator_only':
+            return models.Tag.objects.filter(moderator_only=True)
+        if self.action == 'required':
+            return models.Tag.objects.filter(required=True)
         if self.action == 'wikis':
             return models.Tag.objects.all().select_related('excerpt', 'wiki')
 
@@ -104,7 +116,25 @@ class TagViewSet(BaseListViewSet):
 
     @action(detail=True, url_path='info')
     def info(self, request: Request, *args, **kwargs) -> Response:
-        """Gets the wikis for tags identified by ids.
+        """Get tags on the site by their names.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, url_path='moderator-only')
+    def moderator_only(self, request: Request, *args, **kwargs) -> Response:
+        """Get the tags on the site that only moderators can use.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, url_path='required')
+    def required(self, request: Request, *args, **kwargs) -> Response:
+        """Get the tags on the site that fulfill required tag constraints.
 
         :param request: The request.
         :return: The response.
@@ -113,7 +143,7 @@ class TagViewSet(BaseListViewSet):
 
     @action(detail=True, url_path='wikis')
     def wikis(self, request: Request, *args, **kwargs) -> Response:
-        """Gets the wikis for tags identified by ids.
+        """Get the wiki entries for a set of tags.
 
         :param request: The request.
         :return: The response.
