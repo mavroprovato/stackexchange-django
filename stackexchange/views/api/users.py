@@ -92,6 +92,13 @@ from .base import BaseViewSet
             OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
         ]
     ),
+    no_answers=extend_schema(
+        summary='Get the questions asked by a set of users, which have no answers.',
+        description=render_to_string('doc/users/no_answers.md'),
+        parameters=[
+            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
+        ]
+    ),
     questions=extend_schema(
         summary='Get the questions asked by the users identified by a set of ids.',
         description=render_to_string('doc/users/questions.md'),
@@ -286,7 +293,7 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, url_path='no-answers')
     def no_answers(self, request: Request, *args, **kwargs) -> Response:
-        """Gets the questions asked by the users in {ids} which have no answers..
+        """Get the questions asked by a set of users, which have no answers.
 
         :param request: The request.
         :return: The response.
