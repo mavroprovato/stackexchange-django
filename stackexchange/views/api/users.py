@@ -125,6 +125,9 @@ class UserViewSet(BaseViewSet):
             ).select_related('owner').prefetch_related('tags')
         if self.action == 'moderators':
             return models.User.objects.with_badge_counts().filter(is_moderator=True)
+        if self.action == 'no_answers':
+            return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
+                'owner').prefetch_related('tags')
         if self.action == 'posts':
             return models.Post.objects.filter(
                 type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
@@ -149,7 +152,7 @@ class UserViewSet(BaseViewSet):
             return serializers.PostSerializer
         if self.action == 'privileges':
             return serializers.UserPrivilegeSerializer
-        if self.action in ('favorites', 'questions'):
+        if self.action in ('favorites', 'questions', 'no_answers'):
             return serializers.QuestionSerializer
 
         return serializers.UserSerializer
@@ -167,7 +170,7 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
                 filters.OrderingField('modified', 'last_modified_date', type=datetime.date),
             )
-        if self.action in ('answers', 'favorites', 'posts', 'questions'):
+        if self.action in ('answers', 'favorites', 'no_answers', 'posts', 'questions'):
             return (
                 filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
@@ -205,7 +208,7 @@ class UserViewSet(BaseViewSet):
 
         :return: The fields used to filter detail actions.
         """
-        if self.action in ('answers', 'posts', 'questions'):
+        if self.action in ('answers', 'no_answers', 'posts', 'questions'):
             return 'owner'
         if self.action in ('badges', 'comments'):
             return 'user'
@@ -238,7 +241,7 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:
-        """Get the answers for a user.
+        """Get the answers for a set of users.
 
         :param request: The request.
         :return: The response.
@@ -247,7 +250,7 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, url_path='badges')
     def badges(self, request: Request, *args, **kwargs) -> Response:
-        """Get the badges for a user.
+        """Get the badges for a set of users.
 
         :param request: The request.
         :return: The response.
@@ -256,7 +259,7 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:
-        """Get the comments for a user.
+        """Get the comments for a set of users.
 
         :param request: The request.
         :return: The response.
@@ -265,7 +268,7 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, url_path='favorites')
     def favorites(self, request: Request, *args, **kwargs) -> Response:
-        """Get the bookmarked questions for a user.
+        """Get the bookmarked questions for a set of user users.
 
         :param request: The request.
         :return: The response.
@@ -281,9 +284,18 @@ class UserViewSet(BaseViewSet):
         """
         return super().list(request, *args, **kwargs)
 
+    @action(detail=True, url_path='no-answers')
+    def no_answers(self, request: Request, *args, **kwargs) -> Response:
+        """Gets the questions asked by the users in {ids} which have no answers..
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
     @action(detail=True, url_path='posts')
     def posts(self, request: Request, *args, **kwargs) -> Response:
-        """Get the posts for a user.
+        """Get the posts for a set of users.
 
         :param request: The request.
         :return: The response.
@@ -292,7 +304,7 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, url_path='privileges')
     def privileges(self, request: Request, *args, **kwargs) -> Response:
-        """Get the privileges for a user.
+        """Get the privileges for a set of users.
 
         :param request: The request.
         :return: The response.
@@ -307,7 +319,7 @@ class UserViewSet(BaseViewSet):
 
     @action(detail=True, url_path='questions')
     def questions(self, request: Request, *args, **kwargs) -> Response:
-        """Get the questions for a user.
+        """Get the questions for a set of users.
 
         :param request: The request.
         :return: The response.
