@@ -1,6 +1,7 @@
 Return questions which have received no answers.
 
-Compare with /questions/unanswered which merely returns questions that the sites consider insufficiently well answered.
+Compare with [/questions/unanswered](##/questions/questions_unanswered_list) which merely returns questions that the
+sites consider insufficiently well answered.
 
 This method corresponds roughly with this site tab.
 

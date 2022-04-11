@@ -3,7 +3,7 @@
 import datetime
 import typing
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Exists, OuterRef
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -16,11 +16,11 @@ from .base import BaseViewSet
 
 @extend_schema_view(
     list=extend_schema(
-        summary='Get all questions on the site',
+        summary='Get all questions on the site.',
         description=render_to_string('doc/questions/list.md'),
     ),
     retrieve=extend_schema(
-        summary='Get the questions identified by a set of ids',
+        summary='Get the questions identified by a set of ids.',
         description=render_to_string('doc/questions/retrieve.md'),
         operation_id='questions_retrieve',
         parameters=[
@@ -31,7 +31,7 @@ from .base import BaseViewSet
         ]
     ),
     answers=extend_schema(
-        summary='Get the answers to the questions identified by a set of ids',
+        summary=' Get the answers to the questions identified by a set of ids.',
         description=render_to_string('doc/questions/answers.md'),
         parameters=[
             OpenApiParameter(
@@ -41,7 +41,7 @@ from .base import BaseViewSet
         ]
     ),
     comments=extend_schema(
-        summary='Get the comments on the questions identified by a set of ids',
+        summary='Get the comments on the questions identified by a set of ids.',
         description=render_to_string('doc/questions/comments.md'),
         parameters=[
             OpenApiParameter(
@@ -51,8 +51,12 @@ from .base import BaseViewSet
         ]
     ),
     no_answers=extend_schema(
-        summary='Get all questions on the site with no answers',
+        summary='Get all questions on the site with no answers.',
         description=render_to_string('doc/questions/no_answers.md'),
+    ),
+    unanswered=extend_schema(
+        summary='Get all questions the site considers unanswered.',
+        description=render_to_string('doc/questions/unanswered.md'),
     ),
 )
 class QuestionViewSet(BaseViewSet):
@@ -70,6 +74,10 @@ class QuestionViewSet(BaseViewSet):
         if self.action == 'no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')
+        if self.action == 'unanswered':
+            return models.Post.objects.filter(type=enums.PostType.QUESTION).filter(~Exists(
+                models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, answer_count__gt=0)
+            )).select_related('owner').prefetch_related('tags')
 
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
             'tags')
@@ -92,7 +100,7 @@ class QuestionViewSet(BaseViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answers'):
+        if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answers', 'unanswered'):
             return (
                 filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
@@ -159,6 +167,15 @@ class QuestionViewSet(BaseViewSet):
     @action(detail=False, url_path='no-answers')
     def no_answers(self, request: Request, *args, **kwargs) -> Response:
         """Get all questions on the site with no answers.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, url_path='unanswered')
+    def unanswered(self, request: Request, *args, **kwargs) -> Response:
+        """Get all questions the site considers unanswered.
 
         :param request: The request.
         :return: The response.
