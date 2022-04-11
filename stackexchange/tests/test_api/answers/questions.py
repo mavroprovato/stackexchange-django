@@ -17,15 +17,14 @@ class AnswerQuestionListTests(BaseQuestionTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
-        questions = []
+        tags = factories.TagFactory.create_batch(size=100)
+        users = factories.UserFactory.create_batch(size=100)
         for user in users:
-            questions += factories.QuestionFactory.create_batch(size=2, owner=user)
-        answers = []
-        for question in questions:
-            answers += factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
-        for answer in answers:
-            factories.CommentFactory.create_batch(size=2, post=answer, user=random.choice(users))
+            questions = factories.QuestionFactory.create_batch(size=2, owner=user)
+            for question in questions:
+                factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
+                for tag in random.sample(tags, 3):
+                    factories.QuestionTagFactory.create(post=question, tag=tag)
 
     def test(self):
         """Test the answer questions endpoint

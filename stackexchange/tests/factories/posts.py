@@ -4,6 +4,7 @@ import factory
 import pytz
 
 from stackexchange import enums, models
+from .tags import TagFactory
 from .users import UserFactory
 
 
@@ -30,6 +31,14 @@ class QuestionAnswerFactory(PostFactory):
     """The question or answer factory
     """
     type = factory.Faker('random_element', elements=(enums.PostType.QUESTION.value, enums.PostType.ANSWER.value))
+
+
+class QuestionTagFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.PostTag
+
+    post = factory.SubFactory(QuestionAnswerFactory)
+    tag = factory.SubFactory(TagFactory)
 
 
 class QuestionFactory(PostFactory):

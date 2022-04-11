@@ -16,6 +16,7 @@ class BaseQuestionTestCase(BaseTestCase):
         """
         if attributes is None:
             attributes = {
+                'tags': lambda x: {tag.name for tag in x.tags.all()},
                 'owner.reputation': lambda x: x.owner.reputation,
                 'owner.user_id': lambda x: x.owner.pk,
                 'owner.display_name': lambda x: x.owner.display_name,

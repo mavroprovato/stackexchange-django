@@ -40,7 +40,10 @@ class BaseTestCase(APITestCase):
                     else:
                         expected_value = getattr(obj, value)
                     source_value = get_attribute(row, attribute)
-                    self.assertEqual(source_value, expected_value)
+                    if isinstance(expected_value, set):
+                        self.assertSetEqual(set(source_value), expected_value)
+                    else:
+                        self.assertEqual(source_value, expected_value)
 
     def assert_sorted(self, response, attr: str, transform=None, reverse=False):
         """Assert that the response is sorted.
