@@ -3,7 +3,7 @@
 import datetime
 import typing
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Exists, OuterRef
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -121,7 +121,7 @@ class UserViewSet(BaseViewSet):
             return models.Comment.objects.select_related('post', 'user')
         if self.action == 'favorites':
             return models.Post.objects.filter(
-                type=enums.PostType.QUESTION, post_votes__type=enums.PostVoteType.FAVORITE
+                Exists(models.PostVote.objects.filter(user=OuterRef('owner'), type=enums.PostVoteType.FAVORITE))
             ).select_related('owner').prefetch_related('tags')
         if self.action == 'moderators':
             return models.User.objects.with_badge_counts().filter(is_moderator=True)
