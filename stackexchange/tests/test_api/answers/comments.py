@@ -17,15 +17,15 @@ class AnswerCommentsListTests(BaseCommentTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
+        users = factories.UserFactory.create_batch(size=100)
         questions = []
         for user in users:
             questions += factories.QuestionFactory.create_batch(size=2, owner=user)
-        answers = []
         for question in questions:
-            answers += factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
-        for answer in answers:
-            factories.CommentFactory.create_batch(size=2, post=answer, user=random.choice(users))
+            answers = factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
+            for answer in answers:
+                factories.CommentFactory.create_batch(size=2, post=answer, user=random.choice(users))
+            factories.CommentFactory.create_batch(size=2, post=question, user=random.choice(users))
 
     def test(self):
         """Test the answer comments endpoint
