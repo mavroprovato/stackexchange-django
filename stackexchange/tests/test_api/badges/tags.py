@@ -38,17 +38,16 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value, reverse=True)
 
-    @unittest.skip("Postgres and python sorting algorithms differ")
     def test_sort_by_name(self):
         """Test the badges tags endpoint sorted by badge name.
         """
-        response = self.client.get(reverse('badge-named'), data={'sort': 'name', 'order': 'asc'})
+        response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'order': 'asc'})
         self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
-        self.assert_sorted(response, 'name')
+        self.assert_sorted(response, 'name', case_insensitive=True)
 
         response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'order': 'desc'})
         self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
-        self.assert_sorted(response, 'name', reverse=True)
+        self.assert_sorted(response, 'name', case_insensitive=True, reverse=True)
 
     def test_range_by_rank(self):
         """Test the badges tags endpoint range by badge rank.

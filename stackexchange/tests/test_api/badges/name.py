@@ -1,7 +1,6 @@
 """Badges API named testing
 """
 import random
-import unittest
 
 from django.urls import reverse
 
@@ -38,17 +37,16 @@ class BadgeNamedTests(BadgeWithAwardCountTestCase):
         self.assert_badge_type(response, enums.BadgeType.NAMED)
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value, reverse=True)
 
-    @unittest.skip("Postgres and python sorting algorithms differ")
     def test_sort_by_name(self):
         """Test the badges named endpoint sorted by badge name.
         """
         response = self.client.get(reverse('badge-named'), data={'sort': 'name', 'order': 'asc'})
         self.assert_badge_type(response, enums.BadgeType.NAMED)
-        self.assert_sorted(response, 'name')
+        self.assert_sorted(response, 'name', case_insensitive=True)
 
         response = self.client.get(reverse('badge-named'), data={'sort': 'name', 'order': 'desc'})
         self.assert_badge_type(response, enums.BadgeType.NAMED)
-        self.assert_sorted(response, 'name', reverse=True)
+        self.assert_sorted(response, 'name', case_insensitive=True, reverse=True)
 
     def test_range_by_rank(self):
         """Test the badges named endpoint range by badge rank.
@@ -68,7 +66,6 @@ class BadgeNamedTests(BadgeWithAwardCountTestCase):
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
                           max_value=max_value.value)
 
-    @unittest.skip("Postgres and python sorting algorithms differ")
     def test_range_by_name(self):
         """Test the badges named endpoint range by badge name.
         """

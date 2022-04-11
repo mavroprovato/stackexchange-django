@@ -45,17 +45,22 @@ class BaseTestCase(APITestCase):
                     else:
                         self.assertEqual(source_value, expected_value)
 
-    def assert_sorted(self, response, attr: str, transform=None, reverse=False):
+    def assert_sorted(self, response, attr: str, transform=None, case_insensitive=False, reverse=False):
         """Assert that the response is sorted.
 
         :param response: The response.
         :param attr: The attribute to check for sorting.
+        :param case_insensitive: True if the sort should be case-insensitive.
         :param transform: Function used to transform the values.
         :param reverse: True if the response should be reverse sorted, false otherwise.
         """
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         attribute_values = [transform(row[attr]) if transform else row[attr] for row in response.json()['items']]
-        self.assertListEqual(attribute_values, sorted(attribute_values, reverse=reverse))
+        if case_insensitive:
+            expected_values = sorted(attribute_values, reverse=reverse, key=str.casefold)
+        else:
+            expected_values = sorted(attribute_values, reverse=reverse)
+        self.assertListEqual(attribute_values, expected_values)
 
     def assert_range(self, response, attr: str, transform=None, min_value=None, max_value=None):
         """Assert that the response is falls within a range.
