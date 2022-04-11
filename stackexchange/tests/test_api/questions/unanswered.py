@@ -18,7 +18,7 @@ class QuestionUnansweredTests(BaseQuestionTestCase):
         """Set up the test data.
         """
         for _ in range(100):
-            answer_count = random.randint(0, 3)
+            answer_count = random.randint(2, 5)
             question = factories.QuestionFactory.create(answer_count=answer_count)
             for _ in range(answer_count):
                 factories.AnswerFactory.create(question=question, score=random.randint(0, 2))
