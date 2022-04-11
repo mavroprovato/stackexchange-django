@@ -42,6 +42,7 @@ class AnswerFactory(PostFactory):
     """The answer factory
     """
     type = enums.PostType.ANSWER.value
+    question = factory.SubFactory(QuestionFactory)
 
 
 class PostHistoryFactory(factory.django.DjangoModelFactory):

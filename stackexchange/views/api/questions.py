@@ -76,7 +76,7 @@ class QuestionViewSet(BaseViewSet):
                 'owner').prefetch_related('tags')
         if self.action == 'unanswered':
             return models.Post.objects.filter(type=enums.PostType.QUESTION).filter(~Exists(
-                models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, answer_count__gt=0)
+                models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)
             )).select_related('owner').prefetch_related('tags')
 
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
