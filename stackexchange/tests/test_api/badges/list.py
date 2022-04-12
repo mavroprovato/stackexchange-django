@@ -1,5 +1,6 @@
 """Badges API list testing
 """
+import datetime
 import random
 
 from django.urls import reverse
@@ -93,3 +94,13 @@ class BadgeListTests(BadgeWithAwardCountTestCase):
         })
         self.assert_range(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value,
                           max_value=max_value.value)
+
+    def test_date_range(self):
+        """Test the badges list endpoint date range.
+        """
+        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('badge-list'), data={
+            'fromdate': from_value, 'todate': to_value
+        })
+        self.assert_range(response, 'creation_date', from_value, to_value)

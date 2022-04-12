@@ -1,8 +1,8 @@
 """Badges view tags testing
 """
+import datetime
 import random
 import typing
-import unittest
 
 from django.urls import reverse
 
@@ -72,7 +72,6 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
                           max_value=max_value.value)
 
-    @unittest.skip("Postgres and python sorting algorithms differ")
     def test_range_by_name(self):
         """Test the badges tags endpoint range by badge name.
         """
@@ -80,3 +79,13 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         max_value = 't'
         response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'name', min_value, max_value)
+
+    def test_date_range(self):
+        """Test the badges tags endpoint date range.
+        """
+        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('badge-tags'), data={
+            'fromdate': from_value, 'todate': to_value
+        })
+        self.assert_range(response, 'creation_date', from_value, to_value)

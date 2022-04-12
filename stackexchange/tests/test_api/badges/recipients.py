@@ -1,5 +1,6 @@
 """Badges view set recipients testing
 """
+import datetime
 import random
 
 from django.urls import reverse
@@ -25,3 +26,13 @@ class BadgeRecipientTests(BaseBadgeTestCase):
         """
         response = self.client.get(reverse('badge-recipients'))
         self.assert_items_equal(response)
+
+    def test_date_range(self):
+        """Test the badges recipients endpoint date range.
+        """
+        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('badge-recipients'), data={
+            'fromdate': from_value, 'todate': to_value
+        })
+        self.assert_range(response, 'creation_date', from_value, to_value)
