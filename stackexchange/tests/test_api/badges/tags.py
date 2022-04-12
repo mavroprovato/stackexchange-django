@@ -1,11 +1,12 @@
 """Badges view tags testing
 """
 import random
+import typing
 import unittest
 
 from django.urls import reverse
 
-from stackexchange import enums
+from stackexchange import enums, models
 from stackexchange.tests import factories
 from .base import BadgeWithAwardCountTestCase
 
@@ -20,33 +21,37 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         for _ in range(1000):
             factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
 
+    def assert_items_equal(self, response, model_class: typing.ClassVar = models.Badge,
+                           obj_filter: typing.Union[str, dict] = 'badge_id', multiple: bool = False,
+                           attributes: dict = None):
+        """Overridden in order to validate that we only get tag named badges
+        """
+        super().assert_items_equal(response, model_class, obj_filter, multiple, attributes)
+        self.assertTrue(
+            all(row['badge_type'] == enums.BadgeType.TAG_BASED.name.lower() for row in response.json()['items']))
+
     def test(self):
         """Test badges tags endpoint
         """
         response = self.client.get(reverse('badge-tags'))
         self.assert_items_equal(response)
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
 
     def test_sort_by_rank(self):
         """Test the badges tags endpoint sorted by badge rank.
         """
         response = self.client.get(reverse('badge-tags'), data={'sort': 'rank', 'order': 'asc'})
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value)
 
         response = self.client.get(reverse('badge-tags'), data={'sort': 'rank', 'order': 'desc'})
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value, reverse=True)
 
     def test_sort_by_name(self):
         """Test the badges tags endpoint sorted by badge name.
         """
         response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'order': 'asc'})
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_sorted(response, 'name', case_insensitive=True)
 
         response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'order': 'desc'})
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_sorted(response, 'name', case_insensitive=True, reverse=True)
 
     def test_range_by_rank(self):
@@ -56,14 +61,12 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         response = self.client.get(reverse('badge-tags'), data={
             'sort': 'rank', 'min': min_value.name.lower()
         })
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
                           min_value=min_value.value)
         max_value = enums.BadgeClass.SILVER
         response = self.client.get(reverse('badge-tags'), data={
             'sort': 'rank', 'max': max_value.name.lower()
         })
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
                           max_value=max_value.value)
 
@@ -74,5 +77,4 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         min_value = 'k'
         max_value = 't'
         response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'min': min_value, 'max': max_value})
-        self.assert_badge_type(response, enums.BadgeType.TAG_BASED)
         self.assert_range(response, 'name', min_value, max_value)

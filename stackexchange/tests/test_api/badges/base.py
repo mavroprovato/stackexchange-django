@@ -23,14 +23,6 @@ class BaseBadgeTestCase(BaseTestCase):
 
         return super().assert_items_equal(response, model_class, obj_filter, multiple, attributes)
 
-    def assert_badge_type(self, response, badge_type: enums.BadgeType):
-        """Assert that all badges in the response are of the specified type.
-
-        :param response: The response.
-        :param badge_type: The badge type to expect.
-        """
-        self.assertTrue(all(row['badge_type'] == badge_type.name.lower() for row in response.json()['items']))
-
 
 class BadgeWithAwardCountTestCase(BaseBadgeTestCase):
     """Base API badge test case with award count
