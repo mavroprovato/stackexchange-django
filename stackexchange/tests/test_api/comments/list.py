@@ -60,7 +60,7 @@ class CommentListTests(BaseCommentTestCase):
         self.assert_range(response, 'reputation', min_value, max_value)
 
     def test_range_by_votes(self):
-        """Test the user list endpoint range by comment score.
+        """Test the comments list endpoint range by comment score.
         """
         min_value = 3000
         max_value = 6000
@@ -68,3 +68,13 @@ class CommentListTests(BaseCommentTestCase):
             'sort': 'votes', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'score', min_value, max_value)
+
+    def test_date_range(self):
+        """Test the comments list endpoint date range.
+        """
+        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('comment-list'), data={
+            'fromdate': from_value, 'todate': to_value
+        })
+        self.assert_range(response, 'creation_date', from_value, to_value)
