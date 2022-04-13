@@ -96,10 +96,7 @@ class TagViewSet(BaseListViewSet):
 
         :return: The fields used to filter detail actions.
         """
-        if self.action in ('info', 'wikis'):
-            return 'name'
-
-        return super().detail_field
+        return 'name'
 
     @property
     def name_field(self) -> typing.Optional[str]:
