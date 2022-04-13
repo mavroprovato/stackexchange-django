@@ -132,15 +132,15 @@ class UserViewSet(BaseViewSet):
             ).select_related('owner').prefetch_related('tags')
         if self.action == 'moderators':
             return models.User.objects.with_badge_counts().filter(is_moderator=True)
-        if self.action == 'no_answers':
-            return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
-                'owner').prefetch_related('tags')
         if self.action == 'posts':
             return models.Post.objects.filter(
                 type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
         if self.action == 'questions':
             return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
                 'tags')
+        if self.action == 'questions_no_answers':
+            return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
+                'owner').prefetch_related('tags')
 
         return models.User.objects.with_badge_counts()
 
@@ -159,7 +159,7 @@ class UserViewSet(BaseViewSet):
             return serializers.PostSerializer
         if self.action == 'privileges':
             return serializers.UserPrivilegeSerializer
-        if self.action in ('favorites', 'questions', 'no_answers'):
+        if self.action in ('favorites', 'questions', 'questions_no_answers'):
             return serializers.QuestionSerializer
 
         return serializers.UserSerializer
@@ -177,7 +177,7 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
                 filters.OrderingField('modified', 'last_modified_date', type=datetime.date),
             )
-        if self.action in ('answers', 'favorites', 'no_answers', 'posts', 'questions'):
+        if self.action in ('answers', 'favorites', 'posts', 'questions', 'questions_no_answers'):
             return (
                 filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
@@ -215,7 +215,7 @@ class UserViewSet(BaseViewSet):
 
         :return: The fields used to filter detail actions.
         """
-        if self.action in ('answers', 'no_answers', 'posts', 'questions'):
+        if self.action in ('answers', 'posts', 'questions', 'questions_no_answers'):
             return 'owner'
         if self.action in ('badges', 'comments'):
             return 'user'
@@ -291,15 +291,6 @@ class UserViewSet(BaseViewSet):
         """
         return super().list(request, *args, **kwargs)
 
-    @action(detail=True, url_path='no-answers')
-    def no_answers(self, request: Request, *args, **kwargs) -> Response:
-        """Get the questions asked by a set of users, which have no answers.
-
-        :param request: The request.
-        :return: The response.
-        """
-        return super().list(request, *args, **kwargs)
-
     @action(detail=True, url_path='posts')
     def posts(self, request: Request, *args, **kwargs) -> Response:
         """Get the posts for a set of users.
@@ -327,6 +318,15 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='questions')
     def questions(self, request: Request, *args, **kwargs) -> Response:
         """Get the questions for a set of users.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='questions/no-answers')
+    def questions_no_answers(self, request: Request, *args, **kwargs) -> Response:
+        """Get the questions asked by a set of users, which have no answers.
 
         :param request: The request.
         :return: The response.
