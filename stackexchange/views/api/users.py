@@ -110,8 +110,15 @@ from .base import BaseViewSet
         ]
     ),
     questions_unaccepted=extend_schema(
-        summary='Get the questions asked by a set of users, which have no answers.',
+        summary='Get the questions asked by a set of users, which have at least one answer but no accepted answer.',
         description=render_to_string('doc/users/questions_unaccepted.md'),
+        parameters=[
+            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
+        ]
+    ),
+    questions_unanswered=extend_schema(
+        summary='Get the questions asked by a set of users, which are not considered to be adequately answered.',
+        description=render_to_string('doc/users/questions_unanswered.md'),
         parameters=[
             OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
         ]
@@ -152,6 +159,11 @@ class UserViewSet(BaseViewSet):
             return models.Post.objects.filter(type=enums.PostType.QUESTION).filter(
                 answer_count__gt=0, accepted_answer__isnull=True
             ).select_related('owner').prefetch_related('tags')
+        if self.action == 'questions_unanswered':
+            return models.Post.objects.filter(type=enums.PostType.QUESTION).filter(answer_count__gt=0).filter(
+                ~Exists(models.Post.objects.filter(type=enums.PostType.ANSWER, question=OuterRef('pk'), score__gt=0)),
+                accepted_answer__isnull=True
+            ).select_related('owner').prefetch_related('tags')
 
         return models.User.objects.with_badge_counts()
 
@@ -170,7 +182,9 @@ class UserViewSet(BaseViewSet):
             return serializers.PostSerializer
         if self.action == 'privileges':
             return serializers.UserPrivilegeSerializer
-        if self.action in ('favorites', 'questions', 'questions_no_answers', 'questions_unaccepted'):
+        if self.action in (
+                'favorites', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
+        ):
             return serializers.QuestionSerializer
 
         return serializers.UserSerializer
@@ -189,7 +203,8 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('modified', 'last_modified_date', type=datetime.date),
             )
         if self.action in (
-            'answers', 'favorites', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted'
+            'answers', 'favorites', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted',
+            'questions_unanswered'
         ):
             return (
                 filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
@@ -228,7 +243,9 @@ class UserViewSet(BaseViewSet):
 
         :return: The fields used to filter detail actions.
         """
-        if self.action in ('answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted'):
+        if self.action in (
+            'answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
+        ):
             return 'owner'
         if self.action in ('badges', 'comments'):
             return 'user'
@@ -349,6 +366,15 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='questions/unaccepted')
     def questions_unaccepted(self, request: Request, *args, **kwargs) -> Response:
         """Get the questions asked by a set of users, which have at least one answer but no accepted answer.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='questions/unanswered')
+    def questions_unanswered(self, request: Request, *args, **kwargs) -> Response:
+        """Get the questions asked by a set of users, which are not considered to be adequately answered.
 
         :param request: The request.
         :return: The response.
