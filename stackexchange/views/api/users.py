@@ -92,13 +92,6 @@ from .base import BaseViewSet
             OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
         ]
     ),
-    no_answers=extend_schema(
-        summary='Get the questions asked by a set of users, which have no answers.',
-        description=render_to_string('doc/users/no_answers.md'),
-        parameters=[
-            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
-        ]
-    ),
     questions=extend_schema(
         summary='Get the questions asked by the users identified by a set of ids.',
         description=render_to_string('doc/users/questions.md'),
@@ -107,6 +100,20 @@ from .base import BaseViewSet
                 name='id', type=str, location=OpenApiParameter.PATH,
                 description='A list of semicolon separated user identifiers'
             )
+        ]
+    ),
+    questions_no_answers=extend_schema(
+        summary='Get the questions asked by a set of users, which have no answers.',
+        description=render_to_string('doc/users/questions_no_answers.md'),
+        parameters=[
+            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
+        ]
+    ),
+    questions_unaccepted=extend_schema(
+        summary='Get the questions asked by a set of users, which have no answers.',
+        description=render_to_string('doc/users/questions_unaccepted.md'),
+        parameters=[
+            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
         ]
     ),
 )
@@ -141,6 +148,10 @@ class UserViewSet(BaseViewSet):
         if self.action == 'questions_no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')
+        if self.action == 'questions_unaccepted':
+            return models.Post.objects.filter(type=enums.PostType.QUESTION).filter(
+                answer_count__gt=0, accepted_answer__isnull=True
+            ).select_related('owner').prefetch_related('tags')
 
         return models.User.objects.with_badge_counts()
 
@@ -159,7 +170,7 @@ class UserViewSet(BaseViewSet):
             return serializers.PostSerializer
         if self.action == 'privileges':
             return serializers.UserPrivilegeSerializer
-        if self.action in ('favorites', 'questions', 'questions_no_answers'):
+        if self.action in ('favorites', 'questions', 'questions_no_answers', 'questions_unaccepted'):
             return serializers.QuestionSerializer
 
         return serializers.UserSerializer
@@ -177,7 +188,9 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
                 filters.OrderingField('modified', 'last_modified_date', type=datetime.date),
             )
-        if self.action in ('answers', 'favorites', 'posts', 'questions', 'questions_no_answers'):
+        if self.action in (
+            'answers', 'favorites', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted'
+        ):
             return (
                 filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
@@ -215,7 +228,7 @@ class UserViewSet(BaseViewSet):
 
         :return: The fields used to filter detail actions.
         """
-        if self.action in ('answers', 'posts', 'questions', 'questions_no_answers'):
+        if self.action in ('answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted'):
             return 'owner'
         if self.action in ('badges', 'comments'):
             return 'user'
@@ -327,6 +340,15 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='questions/no-answers')
     def questions_no_answers(self, request: Request, *args, **kwargs) -> Response:
         """Get the questions asked by a set of users, which have no answers.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='questions/unaccepted')
+    def questions_unaccepted(self, request: Request, *args, **kwargs) -> Response:
+        """Get the questions asked by a set of users, which have at least one answer but no accepted answer.
 
         :param request: The request.
         :return: The response.
