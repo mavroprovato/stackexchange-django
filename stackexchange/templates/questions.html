@@ -1,1 +1,18 @@
 {% extends "base.html" %}
+{% block content %}
+    {% for post in post_list %}
+        <div>
+            <div>{{ post.score }} votes</div>
+            <div>{{ post.answer_count }} answers</div>
+            <div>{{ post.view_count }} views</div>
+            <div>{{ post.title }}</div>
+            <div>
+                {% for tag in post.tags.all %}
+                    <span>{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+            <div>{{ post.owner.display_name }} asked {{ post.creation_date }}</div>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

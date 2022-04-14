@@ -1,4 +1,4 @@
-"""Index view tests
+"""Question view tests
 """
 import http
 
@@ -6,11 +6,11 @@ from django.test import TestCase
 from django.urls import reverse
 
 
-class IndexViewTests(TestCase):
-    """Index view tests
+class QuestionViewTests(TestCase):
+    """Question view tests
     """
     def test(self):
-        """Test the index view
+        """Test the question view
         """
-        response = self.client.get(reverse('index'), follow=True)
+        response = self.client.get(reverse('questions'), follow=True)
         self.assertEqual(response.status_code, http.HTTPStatus.OK)

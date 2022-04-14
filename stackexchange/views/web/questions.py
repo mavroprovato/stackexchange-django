@@ -1,9 +1,20 @@
 """Web question views
 """
-from django.views.generic import TemplateView
+from django.db.models import QuerySet
+from django.views.generic import ListView
+
+from stackexchange import enums, models
 
 
-class QuestionView(TemplateView):
+class QuestionView(ListView):
     """The index view
     """
     template_name = 'questions.html'
+
+    def get_queryset(self) -> QuerySet:
+        """Return the queryset for the view.
+
+        :return: The queryset for the view.
+        """
+        return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
+            'tags').order_by('-creation_date')[:30]
