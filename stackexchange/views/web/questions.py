@@ -10,6 +10,7 @@ class QuestionView(ListView):
     """The index view
     """
     template_name = 'questions.html'
+    paginate_by = 30
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
@@ -17,4 +18,4 @@ class QuestionView(ListView):
         :return: The queryset for the view.
         """
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
-            'tags').order_by('-creation_date')[:30]
+            'tags').order_by('-creation_date')

@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
     <h1>All questions</h1>
-    {% for post in post_list %}
+    <p>{{ page_obj.paginator.count }} questions</p>
+    <hr>
+    {% for post in page_obj %}
         <div>
             <div>{{ post.score }} votes</div>
             <div>{{ post.answer_count }} answers</div>
