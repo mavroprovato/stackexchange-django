@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+    <h1>{{ heading }}</h1>
+    <p>
+        A tag is a keyword or label that categorizes your question with other, similar questions. Using the right tags
+        makes it easier for others to find and answer your question
+    </p>
+    <hr>
+    {% for tag in tags %}
+        <div>
+            <div>{{ tag.name }}</div>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}
