@@ -3,18 +3,18 @@
     <h1>All questions</h1>
     <p>{{ page_obj.paginator.count }} questions</p>
     <hr>
-    {% for post in page_obj %}
+    {% for question in questions %}
         <div>
-            <div>{{ post.score }} votes</div>
-            <div>{{ post.answer_count }} answers</div>
-            <div>{{ post.view_count }} views</div>
-            <div>{{ post.title }}</div>
+            <div>{{ question.score }} votes</div>
+            <div>{{ question.answer_count }} answers</div>
+            <div>{{ question.view_count }} views</div>
+            <div>{{ question.title }}</div>
             <div>
-                {% for tag in post.tags.all %}
+                {% for tag in question.tags.all %}
                     <span>{{ tag.name }}</span>
                 {% endfor %}
             </div>
-            <div>{{ post.owner.display_name }} asked {{ post.creation_date }}</div>
+            <div>{{ question.owner.display_name }} asked {{ question.creation_date }}</div>
         </div>
         <hr>
     {% endfor %}

@@ -11,6 +11,7 @@ class QuestionView(ListView):
     """
     template_name = 'questions.html'
     paginate_by = 30
+    context_object_name = 'questions'
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
