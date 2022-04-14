@@ -12,7 +12,7 @@
             <div>{{ question.title }}</div>
             <div>
                 {% for tag in question.tags.all %}
-                    <span>{{ tag.name }}</span>
+                    <span><a href="{% url "questions-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
                 {% endfor %}
             </div>
             <div>{{ question.owner.display_name }} asked {{ question.creation_date }}</div>
