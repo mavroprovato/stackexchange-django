@@ -6,15 +6,15 @@
 </head>
 <body>
     <header>
-        <a href="/">Stackexchange Django</a>
+        <a href="{% url "index" %}">Stackexchange Django</a>
     </header>
     <main>
         {% block sidebar %}
         <nav>
             <ul>
-                <li><a href="#">Questions</a></li>
-                <li><a href="#">Tags</a></li>
-                <li><a href="#">Users</a></li>
+                <li><a href="{% url "questions" %}">Questions</a></li>
+                <li><a href="/">Tags</a></li>
+                <li><a href="/">Users</a></li>
             </ul>
         </nav>
         {% endblock %}
