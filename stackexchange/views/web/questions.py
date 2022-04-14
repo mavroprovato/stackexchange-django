@@ -10,8 +10,8 @@ class QuestionView(ListView):
     """The question view
     """
     template_name = 'questions.html'
-    paginate_by = 30
     context_object_name = 'questions'
+    paginate_by = 30
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
@@ -20,6 +20,20 @@ class QuestionView(ListView):
         """
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
             'tags').order_by('-creation_date')
+
+    def get_context_data(self, **kwargs) -> dict:
+        """Get the contest data for the view.
+
+        :param kwargs: The keyword arguments.
+        :return: The context data.
+        """
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': "Newest Questions - Stackexchange Django",
+            'heading': "All Questions"
+        })
+
+        return context
 
 
 class QuestionTaggedView(QuestionView):
@@ -31,3 +45,17 @@ class QuestionTaggedView(QuestionView):
         :return: The queryset for the view.
         """
         return super().get_queryset().filter(tags__name=self.kwargs['tag'])
+
+    def get_context_data(self, **kwargs) -> dict:
+        """Get the contest data for the view.
+
+        :param kwargs: The keyword arguments.
+        :return: The context data.
+        """
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': f"Newest '{self.kwargs['tag']}' Questions - Stackexchange Django",
+            'heading': f"Questions tagged [{self.kwargs['tag']}]",
+        })
+
+        return context
