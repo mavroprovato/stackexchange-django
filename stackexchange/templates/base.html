@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StackExchange Django</title>
+    <title>{% block title %}StackExchange Django{% endblock %}</title>
 </head>
 <body>
     <header>
         <a href="/">Stackexchange Django</a>
     </header>
     <main>
+        {% block sidebar %}
         <nav>
             <ul>
                 <li><a href="#">Questions</a></li>
@@ -16,6 +17,8 @@
                 <li><a href="#">Users</a></li>
             </ul>
         </nav>
+        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 </body>
 </html>

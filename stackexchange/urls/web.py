@@ -7,4 +7,5 @@ from stackexchange import views
 
 urls = [
     path('', views.IndexView.as_view(), name='index'),
+    path('questions', views.QuestionView.as_view(), name='questions'),
 ]

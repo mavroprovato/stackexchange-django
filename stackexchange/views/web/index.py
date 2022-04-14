@@ -1,9 +1,9 @@
 """Web index views
 """
-from django.views.generic import TemplateView
+from django.views.generic import RedirectView
 
 
-class IndexView(TemplateView):
+class IndexView(RedirectView):
     """The index view
     """
-    template_name = "index.html"
+    pattern_name = 'questions'
