@@ -1,7 +1,7 @@
 """Web question views
 """
 from django.db.models import QuerySet
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 
 from stackexchange import enums, models
 
@@ -59,3 +59,10 @@ class QuestionTaggedView(QuestionView):
         })
 
         return context
+
+
+class QuestionDetailView(DetailView):
+    """The question detail view.
+    """
+    model = models.Post
+    template_name = 'question_detail.html'

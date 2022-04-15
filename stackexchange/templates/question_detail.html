@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+    <h1>{{ object.title }}</h1>
+    <div>
+        <div>{{ object.score }}</div>
+    </div>
+    <div>
+        <div>Asked {{ object.creation_date }}</div>
+        <div>Modified {{ object.last_edit_date }}</div>
+        <div>Viewed {{ object.creation_date }}</div>
+    </div>
+    <div>{{ object.body | safe }}</div>
+    <div>
+    {% for tag in object.tags.all %}
+        <span><a href="{% url "questions-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
+    {% endfor %}
+    </div>
+    <hr>
+{% endblock %}
