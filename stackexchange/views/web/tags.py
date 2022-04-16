@@ -26,7 +26,7 @@ class TagView(ListView):
         ).order_by('-award_count')
 
     def get_context_data(self, **kwargs) -> dict:
-        """Get the contest data for the view.
+        """Get the context data for the view.
 
         :param kwargs: The keyword arguments.
         :return: The context data.

@@ -22,7 +22,7 @@ class QuestionView(ListView):
             'tags').order_by('-creation_date')
 
     def get_context_data(self, **kwargs) -> dict:
-        """Get the contest data for the view.
+        """Get the context data for the view.
 
         :param kwargs: The keyword arguments.
         :return: The context data.
@@ -47,7 +47,7 @@ class QuestionTaggedView(QuestionView):
         return super().get_queryset().filter(tags__name=self.kwargs['tag'])
 
     def get_context_data(self, **kwargs) -> dict:
-        """Get the contest data for the view.
+        """Get the context data for the view.
 
         :param kwargs: The keyword arguments.
         :return: The context data.
@@ -66,3 +66,18 @@ class QuestionDetailView(DetailView):
     """
     model = models.Post
     template_name = 'question_detail.html'
+    context_object_name = 'question'
+
+    def get_context_data(self, **kwargs) -> dict:
+        """Get the context data for the view.
+
+        :param kwargs: The keyword arguments.
+        :return: The context data.
+        """
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': f"{self.object.title} - Stackexchange Django",
+            'answers': models.Post.objects.filter(type=enums.PostType.ANSWER, question=self.object).order_by('-score')
+        })
+
+        return context
