@@ -20,5 +20,5 @@ class TagViewTests(TestCase):
     def test(self):
         """Test the question view
         """
-        response = self.client.get(reverse('web-tags'), follow=True)
+        response = self.client.get(reverse('web-tag-list'))
         self.assertEqual(response.status_code, http.HTTPStatus.OK)

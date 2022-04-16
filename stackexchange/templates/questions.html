@@ -12,7 +12,7 @@
             <div><h2><a href="{% url "web-question-detail" pk=question.pk %}">{{ question.title }}</a></h2></div>
             <div>
                 {% for tag in question.tags.all %}
-                    <span><a href="{% url "web-questions-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
+                    <span><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
                 {% endfor %}
             </div>
             <div>{{ question.owner.display_name }} asked {{ question.creation_date }}</div>
