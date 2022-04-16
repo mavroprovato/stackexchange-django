@@ -16,6 +16,15 @@
         <span><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
     {% endfor %}
     </div>
+    <div>
+    {% for comment in question.comments.all %}
+    <div>
+        <div>{{ comment.score }}</div>
+        <div>{{ comment.text }} - {{ comment.user.display_name }}</div>
+        <div>{{ comment.creation_date }}</div>
+    </div>
+    {% endfor %}
+    </div>
     <hr>
     <h2>{{ answers.count }} answers</h2>
     {% for answer in answers %}

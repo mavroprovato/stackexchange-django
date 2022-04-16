@@ -154,7 +154,7 @@ class Post(models.Model):
 class Comment(models.Model):
     """The comment model
     """
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_comments")
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='comments')
     score = models.IntegerField(help_text="The comment score")
     text = models.TextField(help_text="The comment text")
     creation_date = models.DateTimeField(help_text="The date that the comment was created", default=timezone.now)
@@ -181,12 +181,12 @@ class PostHistory(models.Model):
     """
     type = models.PositiveSmallIntegerField(
         help_text="The post history type", choices=((pht.value, pht.description) for pht in enums.PostHistoryType))
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_history")
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='history')
     revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
     creation_date = models.DateTimeField(
         help_text="The date that this history record was created", default=timezone.now)
     user = models.ForeignKey(User, help_text="The user that created this history record", on_delete=models.CASCADE,
-                             related_name="post_history", null=True, blank=True)
+                             related_name='post_history', null=True, blank=True)
     user_display_name = models.CharField(
         help_text="The display name of the user that created this record, if the user has been removed and no longer "
                   "referenced by id", max_length=255, null=True, blank=True)
@@ -215,9 +215,9 @@ class PostLink(models.Model):
         (TYPE_DUPLICATE, 'Duplicate'),
     )
 
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="links")
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='links')
     related_post = models.ForeignKey(Post, help_text="The related post", on_delete=models.CASCADE,
-                                     related_name="related_links")
+                                     related_name='related_links')
     type = models.PositiveSmallIntegerField(help_text="The post link type", choices=TYPE_CHOICES)
 
     class Meta:
@@ -227,13 +227,13 @@ class PostLink(models.Model):
 class PostVote(models.Model):
     """The post vote model
     """
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_votes")
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='votes')
     type = models.PositiveSmallIntegerField(
         help_text="The post vote type", choices=((pvt.value, pvt.description) for pvt in enums.PostVoteType))
     creation_date = models.DateTimeField(help_text="The date that this vote was created", default=timezone.now)
     user = models.ForeignKey(
         User, help_text="The user for the post vote, if the post vote type is FAVORITE or BOUNTY_START",
-        on_delete=models.CASCADE, related_name='user_favorites', null=True, blank=True)
+        on_delete=models.CASCADE, related_name='user_votes', null=True, blank=True)
     bounty_amount = models.PositiveSmallIntegerField(
         help_text="The post bounty amount, if the post vote type is BOUNTY_START or BOUNTY_CLOSE", null=True,
         blank=True)
@@ -249,8 +249,8 @@ class Tag(models.Model):
     name = CICharField(help_text="The tag name", max_length=255, unique=True)
     award_count = models.IntegerField(help_text="The tag award count")
     excerpt = models.ForeignKey(Post, help_text="The tag excerpt", on_delete=models.CASCADE,
-                                related_name="excerpts", null=True, blank=True)
-    wiki = models.ForeignKey(Post, help_text="The tag wiki", on_delete=models.CASCADE, related_name="wikis",
+                                related_name='excerpts', null=True, blank=True)
+    wiki = models.ForeignKey(Post, help_text="The tag wiki", on_delete=models.CASCADE, related_name='wikis',
                              null=True, blank=True)
     required = models.BooleanField(help_text="True if the tag fulfills required tag constraints", default=False)
     moderator_only = models.BooleanField(help_text="True if the tag can only be used by moderators", default=False)
@@ -269,8 +269,8 @@ class Tag(models.Model):
 class PostTag(models.Model):
     """The post tag model
     """
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name="post_tags")
-    tag = models.ForeignKey(Tag, help_text="The tag", on_delete=models.CASCADE, related_name="post_tags")
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='post_tags')
+    tag = models.ForeignKey(Tag, help_text="The tag", on_delete=models.CASCADE, related_name='post_tags')
 
     class Meta:
         db_table = 'post_tags'

@@ -68,6 +68,13 @@ class QuestionDetailView(DetailView):
     template_name = 'question_detail.html'
     context_object_name = 'question'
 
+    def get_queryset(self) -> QuerySet:
+        """Return the queryset for the view.
+
+        :return: The queryset for the view.
+        """
+        return super().get_queryset().prefetch_related('comments__user')
+
     def get_context_data(self, **kwargs) -> dict:
         """Get the context data for the view.
 
