@@ -34,6 +34,8 @@ class QuestionAnswerFactory(PostFactory):
 
 
 class QuestionTagFactory(factory.django.DjangoModelFactory):
+    """The question tag factory
+    """
     class Meta:
         model = models.PostTag
 

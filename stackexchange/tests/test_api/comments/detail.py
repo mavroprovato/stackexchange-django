@@ -4,7 +4,6 @@ import datetime
 import random
 
 from django.urls import reverse
-from rest_framework import status
 
 from stackexchange import models
 from stackexchange.tests import factories

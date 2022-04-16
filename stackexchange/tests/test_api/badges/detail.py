@@ -33,7 +33,8 @@ class BadgeRetrieveTests(BadgeWithAwardCountTestCase):
         """Test the badges retrieve endpoint for multiple ids.
         """
         badges = random.sample(list(models.Badge.objects.all()), 3)
-        response = self.client.get(reverse('api-badge-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}))
+        response = self.client.get(
+            reverse('api-badge-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}))
         self.assert_items_equal(response)
 
     def test_sort_by_rank(self):

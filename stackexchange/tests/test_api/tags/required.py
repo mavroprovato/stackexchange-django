@@ -59,7 +59,8 @@ class TagRequiredTests(BaseTagTestCase):
         """
         min_value = 'k'
         max_value = 't'
-        response = self.client.get(reverse('api-tag-required'), data={'sort': 'name', 'min': min_value, 'max': max_value})
+        response = self.client.get(
+            reverse('api-tag-required'), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'popular', min_value, max_value)
 
     def test_in_name(self):

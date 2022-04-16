@@ -45,11 +45,8 @@ class SearchViewSet(BaseListViewSet):
 
         :return: The ordering fields for the action.
         """
-        if self.action == 'list':
-            return (
-                filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
-                filters.OrderingField('creation', 'creation_date', type=datetime.date),
-                filters.OrderingField('votes', 'score', type=int)
-            )
-
-        return None
+        return (
+            filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
+            filters.OrderingField('creation', 'creation_date', type=datetime.date),
+            filters.OrderingField('votes', 'score', type=int)
+        )
