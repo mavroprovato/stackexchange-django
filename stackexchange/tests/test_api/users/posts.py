@@ -15,6 +15,8 @@ class UserPostTests(BasePostTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         users = factories.UserFactory.create_batch(size=100)
         for user in users:
             factories.PostFactory.create_batch(size=2, owner=user)

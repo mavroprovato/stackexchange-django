@@ -15,6 +15,8 @@ class UserAnswerTests(BaseAnswerTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         users = factories.UserFactory.create_batch(size=100)
         questions = []
         for user in users:

@@ -15,6 +15,8 @@ class UserPrivilegeTests(APITestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         factories.UserFactory.create_batch(size=10)
 
     def test(self):

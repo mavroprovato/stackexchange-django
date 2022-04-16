@@ -15,6 +15,8 @@ class TagModeratorOnlyTests(BaseTagTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         factories.TagFactory.create_batch(size=10, moderator_only=random.choice([True, False]))
 
     def test(self):

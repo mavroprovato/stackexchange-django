@@ -14,6 +14,8 @@ class TagListTests(BaseTagTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         factories.TagFactory.create_batch(size=10)
 
     def test(self):

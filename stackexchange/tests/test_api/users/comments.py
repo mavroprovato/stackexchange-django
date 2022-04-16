@@ -15,6 +15,8 @@ class UserCommentTests(BaseCommentTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         users = factories.UserFactory.create_batch(size=10)
         posts = []
         for user in users:

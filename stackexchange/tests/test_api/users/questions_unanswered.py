@@ -15,6 +15,8 @@ class UserQuestionUnansweredTests(BaseQuestionTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         users = factories.UserFactory.create_batch(size=100)
         for user in users:
             answer_count = random.randint(0, 3)

@@ -15,6 +15,8 @@ class UserFavoriteTests(BaseQuestionTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         users = factories.UserFactory.create_batch(size=10)
         questions = []
         for user in users:

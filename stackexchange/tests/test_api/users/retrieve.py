@@ -17,6 +17,8 @@ class UserRetrieveTests(BaseUserTestCase):
     """
     @classmethod
     def setUpTestData(cls):
+        """Set up the test data.
+        """
         users = factories.UserFactory.create_batch(size=10)
         badges = factories.BadgeFactory.create_batch(size=50)
         for _ in range(100):
