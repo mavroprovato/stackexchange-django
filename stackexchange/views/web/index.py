@@ -6,4 +6,4 @@ from django.views.generic import RedirectView
 class IndexView(RedirectView):
     """The index view
     """
-    pattern_name = 'questions'
+    pattern_name = 'web-questions'

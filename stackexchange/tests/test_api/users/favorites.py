@@ -27,14 +27,15 @@ class UserFavoriteTests(BaseQuestionTestCase):
         """Test the user favorites endpoint
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
-        response = self.client.get(reverse('user-favorites', kwargs={'pk': user.pk}))
+        response = self.client.get(reverse('api-user-favorites', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
         """Test the user favorites endpoint for multiple users
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        response = self.client.get(reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
+        response = self.client.get(
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
         self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
@@ -42,13 +43,13 @@ class UserFavoriteTests(BaseQuestionTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'activity', 'order': 'asc'}
         )
         self.assert_sorted(response, 'last_activity_date')
 
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'activity', 'order': 'desc'}
         )
         self.assert_sorted(response, 'last_activity_date', reverse=True)
@@ -58,13 +59,13 @@ class UserFavoriteTests(BaseQuestionTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'order': 'asc'}
         )
         self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'order': 'desc'}
         )
         self.assert_sorted(response, 'creation_date', reverse=True)
@@ -74,13 +75,13 @@ class UserFavoriteTests(BaseQuestionTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'order': 'asc'}
         )
         self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'order': 'desc'}
         )
         self.assert_sorted(response, 'score', reverse=True)
@@ -88,11 +89,13 @@ class UserFavoriteTests(BaseQuestionTestCase):
     def test_range_by_activity(self):
         """Test the user favorites endpoint range by activity.
         """
+        users = random.sample(list(models.User.objects.all()), 3)
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
-        response = self.client.get(reverse('answer-list'), data={
-            'sort': 'name', 'min': min_value, 'max': max_value
-        })
+        response = self.client.get(
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            data={'sort': 'name', 'min': min_value, 'max': max_value}
+        )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 
     def test_range_by_creation(self):
@@ -102,7 +105,7 @@ class UserFavoriteTests(BaseQuestionTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'reputation', min_value, max_value)
@@ -114,7 +117,7 @@ class UserFavoriteTests(BaseQuestionTestCase):
         min_value = 3000
         max_value = 6000
         response = self.client.get(
-            reverse('user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'score', min_value, max_value)

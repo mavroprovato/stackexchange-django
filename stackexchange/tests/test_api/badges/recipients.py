@@ -24,7 +24,7 @@ class BadgeRecipientTests(BaseBadgeTestCase):
     def test(self):
         """Test badges recipients endpoint
         """
-        response = self.client.get(reverse('badge-recipients'))
+        response = self.client.get(reverse('api-badge-recipients'))
         self.assert_items_equal(response)
 
     def test_date_range(self):
@@ -32,7 +32,7 @@ class BadgeRecipientTests(BaseBadgeTestCase):
         """
         from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
-        response = self.client.get(reverse('badge-recipients'), data={
+        response = self.client.get(reverse('api-badge-recipients'), data={
             'fromdate': from_value, 'todate': to_value
         })
         self.assert_range(response, 'creation_date', from_value, to_value)

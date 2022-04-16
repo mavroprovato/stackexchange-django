@@ -24,14 +24,14 @@ class UserBadgeTests(UserBadgeTestCase):
         """Test the user badges endpoint
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
-        response = self.client.get(reverse('user-badges', kwargs={'pk': user.pk}))
+        response = self.client.get(reverse('api-user-badges', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
         """Test the user badges endpoint for multiple users
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        response = self.client.get(reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
+        response = self.client.get(reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
         self.assert_items_equal(response)
 
     def test_sort_by_rank(self):
@@ -39,13 +39,13 @@ class UserBadgeTests(UserBadgeTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'rank', 'order': 'asc'}
         )
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value)
 
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'rank', 'order': 'desc'}
         )
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value, reverse=True)
@@ -56,13 +56,13 @@ class UserBadgeTests(UserBadgeTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'name', 'order': 'asc'}
         )
         self.assert_sorted(response, 'name')
 
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'name', 'order': 'desc'}
         )
         self.assert_sorted(response, 'name', reverse=True)
@@ -72,13 +72,13 @@ class UserBadgeTests(UserBadgeTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'type', 'order': 'asc'}
         )
         self.assert_sorted(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value)
 
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'type', 'order': 'desc'}
         )
         self.assert_sorted(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value, reverse=True)
@@ -89,14 +89,14 @@ class UserBadgeTests(UserBadgeTestCase):
         users = random.sample(list(models.User.objects.all()), 3)
         min_value = enums.BadgeClass.SILVER
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'rank', 'min': min_value.name.lower()}
         )
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
                           min_value=min_value.value)
         max_value = enums.BadgeClass.SILVER
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'rank', 'max': max_value.name.lower()}
         )
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
@@ -110,7 +110,7 @@ class UserBadgeTests(UserBadgeTestCase):
         min_value = 'k'
         max_value = 't'
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'name', min_value, max_value)
@@ -121,14 +121,14 @@ class UserBadgeTests(UserBadgeTestCase):
         users = random.sample(list(models.User.objects.all()), 3)
         min_value = enums.BadgeType.TAG_BASED
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'type', 'min': min_value.name.lower()}
         )
         self.assert_range(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value,
                           min_value=min_value.value)
         max_value = enums.BadgeType.NAMED
         response = self.client.get(
-            reverse('user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-badges', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'type', 'max': max_value.name.lower()}
         )
         self.assert_range(response, 'badge_type', transform=lambda x: enums.BadgeType[x.upper()].value,

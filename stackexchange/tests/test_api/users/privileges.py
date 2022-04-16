@@ -21,7 +21,7 @@ class UserPrivilegeTests(APITestCase):
         """Test the user privileges endpoint.
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
-        response = self.client.get(reverse('user-privileges', kwargs={'pk': user.pk}))
+        response = self.client.get(reverse('api-user-privileges', kwargs={'pk': user.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Assert that the privileges are returned by ascending reputation
         self.assertListEqual([row['reputation'] for row in response.json()['items']],

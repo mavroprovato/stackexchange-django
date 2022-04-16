@@ -28,25 +28,25 @@ class CommentListTests(BaseCommentTestCase):
     def test(self):
         """Test comment list endpoint
         """
-        response = self.client.get(reverse('comment-list'))
+        response = self.client.get(reverse('api-comment-list'))
         self.assert_items_equal(response)
 
     def test_sort_by_creation(self):
         """Test the comment list sorted by comment creation date.
         """
-        response = self.client.get(reverse('comment-list'), data={'sort': 'creation', 'order': 'asc'})
+        response = self.client.get(reverse('api-comment-list'), data={'sort': 'creation', 'order': 'asc'})
         self.assert_sorted(response, 'creation_date')
 
-        response = self.client.get(reverse('comment-list'), data={'sort': 'creation', 'order': 'desc'})
+        response = self.client.get(reverse('api-comment-list'), data={'sort': 'creation', 'order': 'desc'})
         self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
         """Test the comment list sorted by comment votes.
         """
-        response = self.client.get(reverse('comment-list'), data={'sort': 'votes', 'order': 'asc'})
+        response = self.client.get(reverse('api-comment-list'), data={'sort': 'votes', 'order': 'asc'})
         self.assert_sorted(response, 'score')
 
-        response = self.client.get(reverse('comment-list'), data={'sort': 'votes', 'order': 'desc'})
+        response = self.client.get(reverse('api-comment-list'), data={'sort': 'votes', 'order': 'desc'})
         self.assert_sorted(response, 'score', reverse=True)
 
     def test_range_by_creation(self):
@@ -54,7 +54,7 @@ class CommentListTests(BaseCommentTestCase):
         """
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
-        response = self.client.get(reverse('comment-list'), data={
+        response = self.client.get(reverse('api-comment-list'), data={
             'sort': 'creation', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'reputation', min_value, max_value)
@@ -64,7 +64,7 @@ class CommentListTests(BaseCommentTestCase):
         """
         min_value = 3000
         max_value = 6000
-        response = self.client.get(reverse('comment-list'), data={
+        response = self.client.get(reverse('api-comment-list'), data={
             'sort': 'votes', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'score', min_value, max_value)
@@ -74,7 +74,7 @@ class CommentListTests(BaseCommentTestCase):
         """
         from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
-        response = self.client.get(reverse('comment-list'), data={
+        response = self.client.get(reverse('api-comment-list'), data={
             'fromdate': from_value, 'todate': to_value
         })
         self.assert_range(response, 'creation_date', from_value, to_value)

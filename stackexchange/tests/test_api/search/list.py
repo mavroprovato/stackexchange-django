@@ -11,5 +11,5 @@ class SearchTests(APITestCase):
     def test(self):
         """Test search list endpoint
         """
-        response = self.client.get(reverse('search-list'))
+        response = self.client.get(reverse('api-search-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -28,7 +28,7 @@ class PostRevisionsTests(BasePostRevisionTestCase):
         """
         post = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 1)[0]
-        response = self.client.get(reverse('post-revisions', kwargs={'pk': post.pk}))
+        response = self.client.get(reverse('api-post-revisions', kwargs={'pk': post.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -36,5 +36,6 @@ class PostRevisionsTests(BasePostRevisionTestCase):
         """
         posts = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
-        response = self.client.get(reverse('post-revisions', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
+        response = self.client.get(
+            reverse('api-post-revisions', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
         self.assert_items_equal(response)

@@ -26,7 +26,7 @@ class PostRetrieveTests(BasePostTestCase):
         """
         post = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 1)[0]
-        response = self.client.get(reverse('post-detail', kwargs={'pk': post.pk}))
+        response = self.client.get(reverse('api-post-detail', kwargs={'pk': post.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -34,7 +34,7 @@ class PostRetrieveTests(BasePostTestCase):
         """
         posts = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
-        response = self.client.get(reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
+        response = self.client.get(reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}))
         self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
@@ -43,13 +43,13 @@ class PostRetrieveTests(BasePostTestCase):
         posts = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'activity', 'order': 'asc'}
         )
         self.assert_sorted(response, 'last_activity_date')
 
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'activity', 'order': 'desc'}
         )
         self.assert_sorted(response, 'last_activity_date', reverse=True)
@@ -60,13 +60,13 @@ class PostRetrieveTests(BasePostTestCase):
         posts = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'creation', 'order': 'asc'}
         )
         self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'creation', 'order': 'desc'}
         )
         self.assert_sorted(response, 'creation_date', reverse=True)
@@ -77,13 +77,13 @@ class PostRetrieveTests(BasePostTestCase):
         posts = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'votes', 'order': 'asc'}
         )
         self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'votes', 'order': 'desc'}
         )
         self.assert_sorted(response, 'score', reverse=True)
@@ -96,7 +96,7 @@ class PostRetrieveTests(BasePostTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
@@ -109,7 +109,7 @@ class PostRetrieveTests(BasePostTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
         )
         self.assert_range(response, 'creation_date', min_value, max_value)
@@ -121,7 +121,7 @@ class PostRetrieveTests(BasePostTestCase):
         min_value = 3000
         max_value = 6000
         response = self.client.get(
-            reverse('post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
+            reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'score', min_value, max_value)

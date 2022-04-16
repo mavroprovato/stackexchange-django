@@ -28,14 +28,15 @@ class UserCommentTests(BaseCommentTestCase):
         """Test the user comments endpoint
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
-        response = self.client.get(reverse('user-comments', kwargs={'pk': user.pk}))
+        response = self.client.get(reverse('api-user-comments', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
         """Test the user comments endpoint for multiple users
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        response = self.client.get(reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
+        response = self.client.get(
+            reverse('api-user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
         self.assert_items_equal(response)
 
     def test_sort_by_creation(self):
@@ -43,13 +44,13 @@ class UserCommentTests(BaseCommentTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'order': 'asc'}
         )
         self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'order': 'desc'}
         )
         self.assert_sorted(response, 'creation_date', reverse=True)
@@ -59,13 +60,13 @@ class UserCommentTests(BaseCommentTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'order': 'asc'}
         )
         self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'order': 'desc'}
         )
         self.assert_sorted(response, 'score', reverse=True)
@@ -77,7 +78,7 @@ class UserCommentTests(BaseCommentTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'reputation', min_value, max_value)
@@ -89,7 +90,7 @@ class UserCommentTests(BaseCommentTestCase):
         min_value = 3000
         max_value = 6000
         response = self.client.get(
-            reverse('user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-comments', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'score', min_value, max_value)

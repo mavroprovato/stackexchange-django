@@ -26,7 +26,7 @@ class BadgeRecipientDetailTests(BaseBadgeTestCase):
         """Test badges recipients endpoint
         """
         badge = random.sample(list(models.Badge.objects.all()), 1)[0]
-        response = self.client.get(reverse('badge-recipients-detail', kwargs={'pk': badge.pk}))
+        response = self.client.get(reverse('api-badge-recipients-detail', kwargs={'pk': badge.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -34,7 +34,7 @@ class BadgeRecipientDetailTests(BaseBadgeTestCase):
         """
         badges = random.sample(list(models.Badge.objects.all()), 3)
         response = self.client.get(
-            reverse('badge-recipients-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}))
+            reverse('api-badge-recipients-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}))
         self.assert_items_equal(response)
 
     def test_date_range(self):
@@ -44,7 +44,7 @@ class BadgeRecipientDetailTests(BaseBadgeTestCase):
         from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('badge-recipients-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}), data={
+            reverse('api-badge-recipients-detail', kwargs={'pk': ';'.join(str(badge.pk) for badge in badges)}), data={
                 'fromdate': from_value, 'todate': to_value
             }
         )

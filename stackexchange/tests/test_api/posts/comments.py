@@ -29,7 +29,7 @@ class PostCommentsTests(BaseCommentTestCase):
         """Test the post comment retrieve endpoint.
         """
         comment = random.sample(list(models.Comment.objects.all()), 1)[0]
-        response = self.client.get(reverse('post-comments', kwargs={'pk': comment.pk}))
+        response = self.client.get(reverse('api-post-comments', kwargs={'pk': comment.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -37,5 +37,5 @@ class PostCommentsTests(BaseCommentTestCase):
         """
         comments = random.sample(list(models.Comment.objects.all()), 3)
         response = self.client.get(
-            reverse('post-comments', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}))
+            reverse('api-post-comments', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}))
         self.assert_items_equal(response)

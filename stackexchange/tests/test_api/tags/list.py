@@ -20,26 +20,26 @@ class TagListTests(BaseTagTestCase):
         """Test tag list endpoint
         """
         # Test that the list endpoint returns successfully
-        response = self.client.get(reverse('tag-list'))
+        response = self.client.get(reverse('api-tag-list'))
         self.assert_items_equal(response)
 
     def test_sort_by_popular(self):
         """Test the tag list endpoint sorted by tag count.
         """
-        response = self.client.get(reverse('tag-list'), data={'sort': 'popular', 'order': 'asc'})
+        response = self.client.get(reverse('api-tag-list'), data={'sort': 'popular', 'order': 'asc'})
         self.assert_sorted(response, 'count')
 
-        response = self.client.get(reverse('tag-list'), data={'sort': 'popular', 'order': 'desc'})
+        response = self.client.get(reverse('api-tag-list'), data={'sort': 'popular', 'order': 'desc'})
         self.assert_sorted(response, 'count', reverse=True)
 
     @unittest.skip("Postgres and python sorting algorithms differ")
     def test_sort_by_name(self):
         """Test the tag list endpoint sorted by tag name.
         """
-        response = self.client.get(reverse('tag-list'), data={'sort': 'name', 'order': 'asc'})
+        response = self.client.get(reverse('api-tag-list'), data={'sort': 'name', 'order': 'asc'})
         self.assert_sorted(response, 'name')
 
-        response = self.client.get(reverse('tag-list'), data={'sort': 'name', 'order': 'desc'})
+        response = self.client.get(reverse('api-tag-list'), data={'sort': 'name', 'order': 'desc'})
         self.assert_sorted(response, 'name', reverse=True)
 
     def test_range_by_popular(self):
@@ -47,7 +47,8 @@ class TagListTests(BaseTagTestCase):
         """
         min_value = 3000
         max_value = 6000
-        response = self.client.get(reverse('tag-list'), data={'sort': 'popular', 'min': min_value, 'max': max_value})
+        response = self.client.get(
+            reverse('api-tag-list'), data={'sort': 'popular', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'count', min_value, max_value)
 
     def test_range_by_name(self):
@@ -55,7 +56,7 @@ class TagListTests(BaseTagTestCase):
         """
         min_value = 'k'
         max_value = 't'
-        response = self.client.get(reverse('tag-list'), data={
+        response = self.client.get(reverse('api-tag-list'), data={
             'sort': 'name', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'name', min_value, max_value)
@@ -66,6 +67,6 @@ class TagListTests(BaseTagTestCase):
         # Create a user that will surely be returned
         tag = factories.TagFactory.create(name='test')
         query = 'es'
-        response = self.client.get(reverse('tag-list'), data={'inname': query})
+        response = self.client.get(reverse('api-tag-list'), data={'inname': query})
         self.assert_in_string(response, 'name', query=query)
         self.assertIn(tag.id, [models.Tag.objects.get(name=row['name']).pk for row in response.json()['items']])

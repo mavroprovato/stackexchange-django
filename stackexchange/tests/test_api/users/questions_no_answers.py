@@ -23,7 +23,7 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         """Test user questions no answers endpoint
         """
         user = random.sample(list(models.User.objects.all()), 1)[0]
-        response = self.client.get(reverse('user-questions-no-answers', kwargs={'pk': user.pk}))
+        response = self.client.get(reverse('api-user-questions-no-answers', kwargs={'pk': user.pk}))
         self.assert_items_equal(response)
         self.assertTrue(row['answer_count'] == 0 for row in response.json()['items'])
 
@@ -32,7 +32,7 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)})
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)})
         )
         self.assert_items_equal(response)
         self.assertTrue(row['answer_count'] == 0 for row in response.json()['items'])
@@ -42,13 +42,13 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'activity', 'order': 'asc'}
         )
         self.assert_sorted(response, 'last_activity_date')
 
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'activity', 'order': 'desc'}
         )
         self.assert_sorted(response, 'last_activity_date', reverse=True)
@@ -58,13 +58,13 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'order': 'asc'}
         )
         self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'order': 'desc'}
         )
         self.assert_sorted(response, 'creation_date', reverse=True)
@@ -74,13 +74,13 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         """
         users = random.sample(list(models.User.objects.all()), 3)
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'order': 'asc'}
         )
         self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'order': 'desc'}
         )
         self.assert_sorted(response, 'score', reverse=True)
@@ -92,7 +92,7 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
@@ -104,7 +104,7 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
         )
         self.assert_range(response, 'creation_date', min_value, max_value)
@@ -116,7 +116,7 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
         min_value = 3000
         max_value = 6000
         response = self.client.get(
-            reverse('user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-questions-no-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'score', min_value, max_value)

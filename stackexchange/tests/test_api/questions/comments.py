@@ -29,7 +29,7 @@ class QuestionCommentsTests(BaseCommentTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
         response = self.client.get(
-            reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
+            reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
         self.assert_items_equal(response)
 
     def test_sort_by_creation(self):
@@ -37,13 +37,13 @@ class QuestionCommentsTests(BaseCommentTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
         response = self.client.get(
-            reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'creation', 'order': 'asc'}
         )
         self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'creation', 'order': 'desc'}
         )
         self.assert_sorted(response, 'creation_date', reverse=True)
@@ -53,13 +53,13 @@ class QuestionCommentsTests(BaseCommentTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
         response = self.client.get(
-            reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'votes', 'order': 'asc'}
         )
         self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'votes', 'order': 'desc'}
         )
         self.assert_sorted(response, 'score', reverse=True)
@@ -71,9 +71,8 @@ class QuestionCommentsTests(BaseCommentTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
-                'sort': 'creation', 'min': min_value, 'max': max_value
-            }
+            reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            data={'sort': 'creation', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'reputation', min_value, max_value)
 
@@ -84,8 +83,7 @@ class QuestionCommentsTests(BaseCommentTestCase):
         min_value = 3000
         max_value = 6000
         response = self.client.get(
-            reverse('question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
-                'sort': 'votes', 'min': min_value, 'max': max_value
-            }
+            reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'score', min_value, max_value)

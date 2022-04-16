@@ -20,7 +20,7 @@ class TagWikisTests(BaseTagWikiTestCase):
         """Test the tag wikis endpoint.
         """
         tag = random.sample(list(models.Tag.objects.all()), 1)[0]
-        response = self.client.get(reverse('tag-wikis', kwargs={'pk': tag.name}))
+        response = self.client.get(reverse('api-tag-wikis', kwargs={'pk': tag.name}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -28,7 +28,7 @@ class TagWikisTests(BaseTagWikiTestCase):
         """
         # Test getting multiple tags
         tags = random.sample(list(models.Tag.objects.all()), 3)
-        response = self.client.get(reverse('tag-wikis', kwargs={
+        response = self.client.get(reverse('api-tag-wikis', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }))
         self.assert_items_equal(response)

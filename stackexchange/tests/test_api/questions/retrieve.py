@@ -25,7 +25,7 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         """Test the question detail endpoint
         """
         question = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 1)[0]
-        response = self.client.get(reverse('question-detail', kwargs={'pk': question.pk}))
+        response = self.client.get(reverse('api-question-detail', kwargs={'pk': question.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -33,7 +33,7 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
         self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
@@ -41,13 +41,13 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'activity', 'order': 'asc'}
         )
         self.assert_sorted(response, 'last_activity_date')
 
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'activity', 'order': 'desc'}
         )
         self.assert_sorted(response, 'last_activity_date', reverse=True)
@@ -57,13 +57,13 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'creation', 'order': 'asc'}
         )
         self.assert_sorted(response, 'creation_date')
 
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'creation', 'order': 'desc'}
         )
         self.assert_sorted(response, 'creation_date', reverse=True)
@@ -73,13 +73,13 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'votes', 'order': 'asc'}
         )
         self.assert_sorted(response, 'score')
 
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'votes', 'order': 'desc'}
         )
         self.assert_sorted(response, 'score', reverse=True)
@@ -91,7 +91,7 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
@@ -103,7 +103,7 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
         )
         self.assert_range(response, 'creation_date', min_value, max_value)
@@ -115,7 +115,7 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
         min_value = 3000
         max_value = 6000
         response = self.client.get(
-            reverse('question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-detail', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'score', min_value, max_value)

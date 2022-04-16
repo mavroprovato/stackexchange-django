@@ -35,38 +35,38 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
     def test(self):
         """Test badges tags endpoint
         """
-        response = self.client.get(reverse('badge-tags'))
+        response = self.client.get(reverse('api-badge-tags'))
         self.assert_items_equal(response)
 
     def test_sort_by_rank(self):
         """Test the badges tags endpoint sorted by badge rank.
         """
-        response = self.client.get(reverse('badge-tags'), data={'sort': 'rank', 'order': 'asc'})
+        response = self.client.get(reverse('api-badge-tags'), data={'sort': 'rank', 'order': 'asc'})
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value)
 
-        response = self.client.get(reverse('badge-tags'), data={'sort': 'rank', 'order': 'desc'})
+        response = self.client.get(reverse('api-badge-tags'), data={'sort': 'rank', 'order': 'desc'})
         self.assert_sorted(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value, reverse=True)
 
     def test_sort_by_name(self):
         """Test the badges tags endpoint sorted by badge name.
         """
-        response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'order': 'asc'})
+        response = self.client.get(reverse('api-badge-tags'), data={'sort': 'name', 'order': 'asc'})
         self.assert_sorted(response, 'name', case_insensitive=True)
 
-        response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'order': 'desc'})
+        response = self.client.get(reverse('api-badge-tags'), data={'sort': 'name', 'order': 'desc'})
         self.assert_sorted(response, 'name', case_insensitive=True, reverse=True)
 
     def test_range_by_rank(self):
         """Test the badges tags endpoint range by badge rank.
         """
         min_value = enums.BadgeClass.SILVER
-        response = self.client.get(reverse('badge-tags'), data={
+        response = self.client.get(reverse('api-badge-tags'), data={
             'sort': 'rank', 'min': min_value.name.lower()
         })
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
                           min_value=min_value.value)
         max_value = enums.BadgeClass.SILVER
-        response = self.client.get(reverse('badge-tags'), data={
+        response = self.client.get(reverse('api-badge-tags'), data={
             'sort': 'rank', 'max': max_value.name.lower()
         })
         self.assert_range(response, 'rank', transform=lambda x: enums.BadgeClass[x.upper()].value,
@@ -77,7 +77,7 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         """
         min_value = 'k'
         max_value = 't'
-        response = self.client.get(reverse('badge-tags'), data={'sort': 'name', 'min': min_value, 'max': max_value})
+        response = self.client.get(reverse('api-badge-tags'), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'name', min_value, max_value)
 
     def test_date_range(self):
@@ -85,7 +85,7 @@ class BadgeTagsTests(BadgeWithAwardCountTestCase):
         """
         from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
-        response = self.client.get(reverse('badge-tags'), data={
+        response = self.client.get(reverse('api-badge-tags'), data={
             'fromdate': from_value, 'todate': to_value
         })
         self.assert_range(response, 'creation_date', from_value, to_value)

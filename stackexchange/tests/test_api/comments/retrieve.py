@@ -25,7 +25,7 @@ class CommentRetrieveTests(BaseCommentTestCase):
         """
         # Test getting one comment
         comment = random.sample(list(models.Comment.objects.all()), 1)[0]
-        response = self.client.get(reverse('comment-detail', kwargs={'pk': comment.pk}))
+        response = self.client.get(reverse('api-comment-detail', kwargs={'pk': comment.pk}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -34,7 +34,7 @@ class CommentRetrieveTests(BaseCommentTestCase):
         # Test getting multiple comments
         comments = random.sample(list(models.Comment.objects.all()), 3)
         response = self.client.get(
-            reverse('comment-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}))
+            reverse('api-comment-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}))
         self.assert_items_equal(response)
 
     def test_date_range(self):
@@ -44,8 +44,7 @@ class CommentRetrieveTests(BaseCommentTestCase):
         from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('badge-recipients-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}), data={
-                'fromdate': from_value, 'todate': to_value
-            }
+            reverse('api-badge-recipients-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}),
+            data={'fromdate': from_value, 'todate': to_value}
         )
         self.assert_range(response, 'creation_date', from_value, to_value)

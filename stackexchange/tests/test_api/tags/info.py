@@ -21,7 +21,7 @@ class TagInfoTests(BaseTagTestCase):
         """Test the tag detail endpoint.
         """
         tag = random.sample(list(models.Tag.objects.all()), 1)[0]
-        response = self.client.get(reverse('tag-info', kwargs={'pk': tag.name}))
+        response = self.client.get(reverse('api-tag-info', kwargs={'pk': tag.name}))
         self.assert_items_equal(response)
 
     def test_multiple(self):
@@ -29,7 +29,7 @@ class TagInfoTests(BaseTagTestCase):
         """
         # Test getting multiple tags
         tags = random.sample(list(models.Tag.objects.all()), 3)
-        response = self.client.get(reverse('tag-info', kwargs={
+        response = self.client.get(reverse('api-tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }))
         self.assert_items_equal(response)
@@ -38,12 +38,12 @@ class TagInfoTests(BaseTagTestCase):
         """Test the tag detail endpoint sorted by tag count.
         """
         tags = random.sample(list(models.Tag.objects.all()), 3)
-        response = self.client.get(reverse('tag-info', kwargs={
+        response = self.client.get(reverse('api-tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }), data={'sort': 'popular', 'order': 'asc'})
         self.assert_sorted(response, 'count')
 
-        response = self.client.get(reverse('tag-info', kwargs={
+        response = self.client.get(reverse('api-tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }), data={'sort': 'popular', 'order': 'desc'})
         self.assert_sorted(response, 'count', reverse=True)
@@ -53,12 +53,12 @@ class TagInfoTests(BaseTagTestCase):
         """Test the tag list endpoint sorted by tag name.
         """
         tags = random.sample(list(models.Tag.objects.all()), 3)
-        response = self.client.get(reverse('tag-info', kwargs={
+        response = self.client.get(reverse('api-tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }), data={'sort': 'name', 'order': 'asc'})
         self.assert_sorted(response, 'name')
 
-        response = self.client.get(reverse('tag-info', kwargs={
+        response = self.client.get(reverse('api-tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }), data={'sort': 'name', 'order': 'desc'})
         self.assert_sorted(response, 'name', reverse=True)
@@ -69,7 +69,7 @@ class TagInfoTests(BaseTagTestCase):
         min_value = 3000
         max_value = 6000
         tags = random.sample(list(models.Tag.objects.all()), 3)
-        response = self.client.get(reverse('tag-info', kwargs={
+        response = self.client.get(reverse('api-tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }), data={'sort': 'popular', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'popular', min_value, max_value)
@@ -80,7 +80,7 @@ class TagInfoTests(BaseTagTestCase):
         min_value = 'k'
         max_value = 't'
         tags = random.sample(list(models.Tag.objects.all()), 3)
-        response = self.client.get(reverse('tag-info', kwargs={
+        response = self.client.get(reverse('api-tag-info', kwargs={
             'pk': ';'.join(str(tag.name) for tag in tags)
         }), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assert_range(response, 'name', min_value, max_value)

@@ -12,5 +12,5 @@ class IndexViewTests(TestCase):
     def test(self):
         """Test the index view
         """
-        response = self.client.get(reverse('index'), follow=True)
+        response = self.client.get(reverse('web-index'), follow=True)
         self.assertEqual(response.status_code, http.HTTPStatus.OK)

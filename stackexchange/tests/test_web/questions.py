@@ -12,5 +12,5 @@ class QuestionViewTests(TestCase):
     def test(self):
         """Test the question view
         """
-        response = self.client.get(reverse('questions'), follow=True)
+        response = self.client.get(reverse('web-questions'), follow=True)
         self.assertEqual(response.status_code, http.HTTPStatus.OK)

@@ -29,7 +29,7 @@ class QuestionAnswerTests(BaseAnswerTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         response = self.client.get(
-            reverse('question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
+            reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
         self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
@@ -37,12 +37,12 @@ class QuestionAnswerTests(BaseAnswerTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         response = self.client.get(
-            reverse('question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'activity', 'order': 'asc'}
         )
         self.assert_sorted(response, 'last_activity_date')
 
-        response = self.client.get(reverse('question-list'), data={'sort': 'activity', 'order': 'desc'})
+        response = self.client.get(reverse('api-question-list'), data={'sort': 'activity', 'order': 'desc'})
         self.assert_sorted(response, 'last_activity_date', reverse=True)
 
     def test_sort_by_creation_date(self):
@@ -50,12 +50,12 @@ class QuestionAnswerTests(BaseAnswerTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         response = self.client.get(
-            reverse('question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'creation', 'order': 'asc'}
         )
         self.assert_sorted(response, 'creation_date')
 
-        response = self.client.get(reverse('question-list'), data={'sort': 'creation', 'order': 'desc'})
+        response = self.client.get(reverse('api-question-list'), data={'sort': 'creation', 'order': 'desc'})
         self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
@@ -63,12 +63,12 @@ class QuestionAnswerTests(BaseAnswerTestCase):
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         response = self.client.get(
-            reverse('question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
+            reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'votes', 'order': 'asc'}
         )
         self.assert_sorted(response, 'score')
 
-        response = self.client.get(reverse('question-list'), data={'sort': 'votes', 'order': 'desc'})
+        response = self.client.get(reverse('api-question-list'), data={'sort': 'votes', 'order': 'desc'})
         self.assert_sorted(response, 'score', reverse=True)
 
     def test_range_by_activity(self):
@@ -78,7 +78,7 @@ class QuestionAnswerTests(BaseAnswerTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
+            reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
                 'sort': 'name', 'min': min_value, 'max': max_value
             }
         )
@@ -91,7 +91,7 @@ class QuestionAnswerTests(BaseAnswerTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
-            reverse('question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
+            reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
                 'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
             }
         )
@@ -104,7 +104,7 @@ class QuestionAnswerTests(BaseAnswerTestCase):
         min_value = 3000
         max_value = 6000
         response = self.client.get(
-            reverse('question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
+            reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}), data={
                 'sort': 'votes', 'min': min_value, 'max': max_value
             }
         )

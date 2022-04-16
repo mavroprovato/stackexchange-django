@@ -11,5 +11,5 @@ class InfoTests(APITestCase):
     def test(self):
         """Test info list endpoint
         """
-        response = self.client.get(reverse('info-list'))
+        response = self.client.get(reverse('api-info-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)

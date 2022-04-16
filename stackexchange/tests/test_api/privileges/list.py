@@ -13,7 +13,7 @@ class PrivilegesTests(APITestCase):
     def test(self):
         """Test privileges list endpoint
         """
-        response = self.client.get(reverse('privileges-list'))
+        response = self.client.get(reverse('api-privileges-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for privilege_item in response.json()['items']:
             privilege = enums.Privilege[privilege_item['short_description'].upper().replace(' ', '_')]
