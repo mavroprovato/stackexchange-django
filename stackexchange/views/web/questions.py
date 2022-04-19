@@ -1,6 +1,6 @@
 """Web question views
 """
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Prefetch
 from django.views.generic import ListView, DetailView
 
 from stackexchange import enums, models
@@ -73,7 +73,10 @@ class QuestionDetailView(DetailView):
 
         :return: The queryset for the view.
         """
-        return super().get_queryset().prefetch_related('answers', 'comments__user')
+        return super().get_queryset().prefetch_related(
+            Prefetch('answers', queryset=models.Post.objects.order_by('-score')),
+            Prefetch('comments__user', queryset=models.Comment.objects.order_by('creation_date'))
+        )
 
     def get_context_data(self, **kwargs) -> dict:
         """Get the context data for the view.
