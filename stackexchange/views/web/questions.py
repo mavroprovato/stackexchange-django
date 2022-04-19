@@ -73,7 +73,7 @@ class QuestionDetailView(DetailView):
 
         :return: The queryset for the view.
         """
-        return super().get_queryset().prefetch_related('comments__user')
+        return super().get_queryset().prefetch_related('answers', 'comments__user')
 
     def get_context_data(self, **kwargs) -> dict:
         """Get the context data for the view.
@@ -84,7 +84,6 @@ class QuestionDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context.update({
             'title': f"{self.object.title} - Stackexchange Django",
-            'answers': models.Post.objects.filter(type=enums.PostType.ANSWER, question=self.object).order_by('-score')
         })
 
         return context

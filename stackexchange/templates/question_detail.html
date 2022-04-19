@@ -27,7 +27,7 @@
     </div>
     <hr>
     <h2>{{ answers.count }} answers</h2>
-    {% for answer in answers %}
+    {% for answer in question.answers.all %}
     <div>
         <div>{{ answer.score }}</div>
         <div>{{ answer.body | safe }}</div>
