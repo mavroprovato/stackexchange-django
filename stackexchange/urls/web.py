@@ -10,5 +10,6 @@ urls = [
     path('questions', views.QuestionView.as_view(), name='web-question-list'),
     path('questions/tagged/<str:tag>', views.QuestionTaggedView.as_view(), name='web-question-tagged'),
     path('questions/<int:pk>', views.QuestionDetailView.as_view(), name='web-question-detail'),
+    path('questions/<int:pk>/<slug:slug>', views.QuestionDetailView.as_view(), name='web-question-detail-slug'),
     path('tags', views.TagView.as_view(), name='web-tag-list'),
 ]

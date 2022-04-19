@@ -9,7 +9,7 @@
             <div>{{ question.score }} votes</div>
             <div>{{ question.answer_count }} answers</div>
             <div>{{ question.view_count }} views</div>
-            <div><h2><a href="{% url "web-question-detail" pk=question.pk %}">{{ question.title }}</a></h2></div>
+            <div><h2><a href="{{ question.get_absolute_url }}">{{ question.title }}</a></h2></div>
             <div>
                 {% for tag in question.tags.all %}
                     <span><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></span>

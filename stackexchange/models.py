@@ -1,10 +1,14 @@
 """The application models
 """
+import typing
+
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.fields import CIEmailField, CICharField
 from django.contrib.postgres import indexes, search
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import slugify
 
 from stackexchange import enums, managers
 
@@ -149,6 +153,26 @@ class Post(models.Model):
         :return: The post title
         """
         return str(self.title)
+
+    def slug(self) -> typing.Optional[str]:
+        """Return the slug for the post. Only set if the post is an answer.
+
+        :return: The slug for the post.
+        """
+        if self.type == enums.PostType.QUESTION:
+            return slugify(self.title)
+
+        return None
+
+    def get_absolute_url(self) -> typing.Optional[str]:
+        """Get the absolute URL for the post.
+
+        :return: The absolute URL for the post.
+        """
+        if self.type == enums.PostType.QUESTION.value:
+            return reverse('web-question-detail-slug', args=(str(self.id), self.slug()))
+
+        return None
 
 
 class Comment(models.Model):
