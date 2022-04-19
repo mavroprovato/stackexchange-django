@@ -75,7 +75,8 @@ class QuestionDetailView(DetailView):
         """
         return super().get_queryset().prefetch_related(
             Prefetch('answers', queryset=models.Post.objects.order_by('-score')),
-            Prefetch('comments__user', queryset=models.Comment.objects.order_by('creation_date'))
+            Prefetch('comments__user', queryset=models.Comment.objects.order_by('creation_date')),
+            Prefetch('answers__comments__user', queryset=models.Comment.objects.order_by('creation_date')),
         )
 
     def get_context_data(self, **kwargs) -> dict:

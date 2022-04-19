@@ -26,12 +26,21 @@
     {% endfor %}
     </div>
     <hr>
-    <h2>{{ answers.count }} answers</h2>
+    <h2>{{ question.answers.count }} answers</h2>
     {% for answer in question.answers.all %}
     <div>
         <div>{{ answer.score }}</div>
         <div>{{ answer.body | safe }}</div>
         <div>Answered {{ answer.creation_date }}</div>
+        <div>
+        {% for comment in answer.comments.all %}
+            <div>
+                <div>{{ comment.score }}</div>
+                <div>{{ comment.text }} - {{ comment.user.display_name }}</div>
+                <div>{{ comment.creation_date }}</div>
+            </div>
+        {% endfor %}
+        </div>
     </div>
     <hr>
     {% endfor %}
