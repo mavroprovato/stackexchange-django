@@ -1,6 +1,8 @@
 """Web question views
 """
 from django.db.models import QuerySet, Prefetch
+from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.views.generic import ListView, DetailView
 
 from stackexchange import enums, models
@@ -67,6 +69,20 @@ class QuestionDetailView(DetailView):
     model = models.Post
     template_name = 'question_detail.html'
     context_object_name = 'question'
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        """Return the question detail view. Makes sure that the URL
+
+        :param request: The request.
+        :param args: The positional arguments.
+        :param kwargs: The keyword arguments.
+        :return: The response.
+        """
+        obj = self.get_object()
+        if obj.slug() != self.kwargs.get('slug'):
+            return redirect(obj)
+
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
