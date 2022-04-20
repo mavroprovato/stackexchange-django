@@ -250,7 +250,7 @@ class UserViewSet(BaseViewSet):
         if self.action in ('badges', 'comments'):
             return 'user'
         if self.action == 'favorites':
-            return 'post_votes__user'
+            return 'votes__user'
 
         return super().detail_field
 
