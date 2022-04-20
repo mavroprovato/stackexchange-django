@@ -1,8 +1,10 @@
 """Questions view set list testing
 """
 import datetime
+import random
 
 from django.urls import reverse
+from rest_framework import status
 
 from stackexchange.tests import factories
 from .base import BaseQuestionTestCase
@@ -15,9 +17,14 @@ class QuestionListTests(BaseQuestionTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=100)
+        users = factories.UserFactory.create_batch(size=10)
+        tags = factories.TagFactory.create_batch(size=5)
+        cls.tags = tags
         for user in users:
-            factories.QuestionFactory.create_batch(size=3, owner=user)
+            questions = factories.QuestionFactory.create_batch(size=3, owner=user)
+            for question in questions:
+                for _ in range(3):
+                    factories.QuestionTagFactory(post=question, tag=random.choice(tags))
 
     def test(self):
         """Test question list endpoint
@@ -81,3 +88,26 @@ class QuestionListTests(BaseQuestionTestCase):
             'sort': 'votes', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'score', min_value, max_value)
+
+    def test_tagged_single(self):
+        """Test the question list endpoint filter by a single tag.
+        """
+        tag = random.choice(self.tags)
+        response = self.client.get(reverse('api-question-list'), data={
+            'sort': 'votes', 'tagged': tag.name
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for row in response.json()['items']:
+            self.assertIn(tag.name, row['tags'])
+
+    def test_tagged_multiple(self):
+        """Test the question list endpoint filter by tags.
+        """
+        tags = random.sample(self.tags, 2)
+        response = self.client.get(reverse('api-question-list'), data={
+            'sort': 'votes', 'tagged': ';'.join(tag.name for tag in tags)
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for row in response.json()['items']:
+            for tag in tags:
+                self.assertIn(tag.name, row['tags'])

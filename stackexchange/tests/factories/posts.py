@@ -33,16 +33,6 @@ class QuestionAnswerFactory(PostFactory):
     type = factory.Faker('random_element', elements=(enums.PostType.QUESTION.value, enums.PostType.ANSWER.value))
 
 
-class QuestionTagFactory(factory.django.DjangoModelFactory):
-    """The question tag factory
-    """
-    class Meta:
-        model = models.PostTag
-
-    post = factory.SubFactory(QuestionAnswerFactory)
-    tag = factory.SubFactory(TagFactory)
-
-
 class QuestionFactory(PostFactory):
     """The question factory
     """
@@ -54,6 +44,17 @@ class AnswerFactory(PostFactory):
     """
     type = enums.PostType.ANSWER.value
     question = factory.SubFactory(QuestionFactory)
+
+
+class QuestionTagFactory(factory.django.DjangoModelFactory):
+    """The question tag factory
+    """
+    class Meta:
+        model = models.PostTag
+        django_get_or_create = ('post', 'tag')
+
+    post = factory.SubFactory(QuestionFactory)
+    tag = factory.SubFactory(TagFactory)
 
 
 class PostHistoryFactory(factory.django.DjangoModelFactory):

@@ -33,7 +33,8 @@ class TaggedFilter(BaseFilterBackend):
             for tag_name in request.query_params.get(self.tagged_param, '').split(';') if tag_name.strip()
         ]
         if conditions:
-            queryset = queryset.filter(functools.reduce(operator.or_, conditions))
+            queryset = queryset.filter(functools.reduce(operator.and_, conditions))
+
         return queryset
 
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
