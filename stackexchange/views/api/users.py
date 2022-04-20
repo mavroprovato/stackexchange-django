@@ -224,8 +224,6 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('votes', 'score', type=int),
             )
 
-        return None
-
     @property
     def stable_ordering(self) -> typing.Optional[typing.Sequence[str]]:
         """Get the stable ordering for the view.
@@ -234,8 +232,6 @@ class UserViewSet(BaseViewSet):
         """
         if self.action == 'badges':
             return 'user', 'badge'
-
-        return None
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -273,8 +269,6 @@ class UserViewSet(BaseViewSet):
         """
         if self.action == 'list':
             return 'display_name'
-
-        return None
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:

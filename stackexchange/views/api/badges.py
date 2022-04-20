@@ -101,8 +101,6 @@ class BadgeViewSet(BaseViewSet):
         if self.action in ('recipients', 'recipients_detail'):
             return 'date_awarded'
 
-        return None
-
     @property
     def name_field(self) -> typing.Optional[str]:
         """Return the field used for in name filtering.
@@ -111,8 +109,6 @@ class BadgeViewSet(BaseViewSet):
         """
         if self.action in ('list', 'named', 'tags'):
             return 'name'
-
-        return None
 
     @property
     def ordering_fields(self):
@@ -131,8 +127,6 @@ class BadgeViewSet(BaseViewSet):
                 filters.OrderingField('rank', 'badge_class', type=enums.BadgeClass),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
             )
-
-        return None
 
     @action(detail=False, url_path='name')
     def named(self, request: Request, *args, **kwargs) -> Response:

@@ -10,5 +10,4 @@ ignore-imports=yes
 
 [MESSAGES CONTROL]
 
-# Ignore duplicate code
-disable=duplicate-code
+disable=duplicate-code,inconsistent-return-statements

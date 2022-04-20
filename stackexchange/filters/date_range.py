@@ -54,8 +54,6 @@ class DateRangeFilter(BaseFilterBackend):
             except ValueError as exception:
                 raise ValidationError({param_name: 'Invalid date'}) from exception
 
-        return None
-
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
         """Get the schema operation parameters.
 

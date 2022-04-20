@@ -88,8 +88,6 @@ class TagViewSet(BaseListViewSet):
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC)
             )
 
-        return None
-
     @property
     def detail_field(self) -> typing.Optional[str]:
         """Return the field used to filter detail actions.
@@ -106,8 +104,6 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action in ('list', 'moderator_only', 'required'):
             return 'name'
-
-        return None
 
     @action(detail=True, url_path='info')
     def info(self, request: Request, *args, **kwargs) -> Response:

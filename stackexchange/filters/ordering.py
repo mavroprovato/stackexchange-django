@@ -123,8 +123,6 @@ class OrderingFilter(BaseFilterBackend):
 
             return ordering_field, ordering_direction
 
-        return None
-
     def order_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Order the queryset based on the ordering parameters from the request.
 
@@ -190,8 +188,6 @@ class OrderingFilter(BaseFilterBackend):
                     ) from exception
 
             return value_str
-
-        return None
 
     def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
         """Get the schema operation parameters.

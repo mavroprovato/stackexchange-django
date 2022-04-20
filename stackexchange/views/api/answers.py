@@ -100,8 +100,6 @@ class AnswerViewSet(BaseViewSet):
                 filters.OrderingField('votes', 'score', type=int)
             )
 
-        return None
-
     @property
     def detail_field(self) -> typing.Optional[str]:
         """Return the field used to filter detail actions.
