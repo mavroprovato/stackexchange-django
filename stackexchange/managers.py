@@ -23,7 +23,7 @@ class UserManager(BaseUserManager):
         :param extra_fields: The user extra field.
         :return: The created user.
         """
-        return super().create_user(username, email, password, is_admin=False, **extra_fields)
+        return super()._create_user(username, email, password, is_employee=False, **extra_fields)
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         """Create a superuser.
@@ -34,7 +34,7 @@ class UserManager(BaseUserManager):
         :param extra_fields: The user extra field.
         :return: The created superuser.
         """
-        return self._create_user(username, email, password, is_admin=True, **extra_fields)
+        return self._create_user(username, email, password, is_employee=True, **extra_fields)
 
     def with_badge_counts(self) -> QuerySet:
         """Annotate the queryset with the badge counts per badge type. Tree fields are added, named
