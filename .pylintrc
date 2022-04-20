@@ -7,3 +7,8 @@ max-line-length=120
 
 # Ignore imports when computing similarities.
 ignore-imports=yes
+
+[MESSAGES CONTROL]
+
+# Ignore duplicate code
+disable=duplicate-code
