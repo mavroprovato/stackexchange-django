@@ -93,9 +93,7 @@ class QuestionListTests(BaseQuestionTestCase):
         """Test the question list endpoint filter by a single tag.
         """
         tag = random.choice(self.tags)
-        response = self.client.get(reverse('api-question-list'), data={
-            'sort': 'votes', 'tagged': tag.name
-        })
+        response = self.client.get(reverse('api-question-list'), data={'tagged': tag.name})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for row in response.json()['items']:
             self.assertIn(tag.name, row['tags'])
@@ -104,9 +102,7 @@ class QuestionListTests(BaseQuestionTestCase):
         """Test the question list endpoint filter by tags.
         """
         tags = random.sample(self.tags, 2)
-        response = self.client.get(reverse('api-question-list'), data={
-            'sort': 'votes', 'tagged': ';'.join(tag.name for tag in tags)
-        })
+        response = self.client.get(reverse('api-question-list'), data={'tagged': ';'.join(tag.name for tag in tags)})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for row in response.json()['items']:
             for tag in tags:
