@@ -4,6 +4,7 @@ import datetime
 import random
 
 from django.urls import reverse
+from rest_framework import status
 
 from stackexchange.tests import factories
 from .base import BaseAnswerTestCase
@@ -95,3 +96,11 @@ class AnswerListTests(BaseAnswerTestCase):
             'fromdate': from_value, 'todate': to_value
         })
         self.assert_range(response, 'creation_date', from_value, to_value)
+
+    def test_invalid_date_range(self):
+        """Test the answer list endpoint with invalid date range
+        """
+        response = self.client.get(reverse('api-answer-list'), data={'fromdate': 'invalid'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.get(reverse('api-answer-list'), data={'todate': 'invalid'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

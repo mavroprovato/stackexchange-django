@@ -4,6 +4,7 @@ import datetime
 import random
 
 from django.urls import reverse
+from rest_framework import status
 
 from stackexchange import enums, models
 from stackexchange.tests import factories
@@ -137,3 +138,20 @@ class AnswerQuestionListTests(BaseQuestionTestCase):
             }
         )
         self.assert_range(response, 'creation_date', from_value, to_value)
+
+    def test_invalid_date_range(self):
+        """Test the answer questions list endpoint with invalid date range
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        response = self.client.get(
+            reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}), data={
+                'fromdate': 'invalid',
+            }
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        response = self.client.get(
+            reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}), data={
+                'todate': 'invalid',
+            }
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
