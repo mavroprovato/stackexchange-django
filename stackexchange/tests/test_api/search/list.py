@@ -108,6 +108,15 @@ class SearchTests(BaseQuestionTestCase):
             for tag in tags:
                 self.assertIn(tag.name, row['tags'])
 
+    def test_not_tagged(self):
+        """Test the search endpoint filter by not tagged.
+        """
+        tag = random.choice(self.tags)
+        response = self.client.get(reverse('api-search-list'), data={'nottagged': tag.name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for row in response.json()['items']:
+            self.assertNotIn(tag.name, row['tags'])
+
     def test_in_title(self):
         """Test the search endpoint in title filter.
         """
