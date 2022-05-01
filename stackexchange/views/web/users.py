@@ -1,4 +1,4 @@
-"""Web tag views
+"""Web user views
 """
 from django.db.models import QuerySet, Subquery, OuterRef, Count
 from django.views.generic import ListView
@@ -6,11 +6,11 @@ from django.views.generic import ListView
 from stackexchange import models
 
 
-class TagView(ListView):
-    """The tag view
+class UserView(ListView):
+    """The user view
     """
-    template_name = 'tags.html'
-    context_object_name = 'tags'
+    template_name = 'users.html'
+    context_object_name = 'users'
     paginate_by = 36
 
     def get_queryset(self) -> QuerySet:
@@ -18,12 +18,7 @@ class TagView(ListView):
 
         :return: The queryset for the view.
         """
-        return models.Tag.objects.annotate(
-            exprert=Subquery(models.Post.objects.filter(pk=OuterRef('excerpt_id')).values('body')[:1]),
-            question_count=models.Post.objects.filter(tags=OuterRef('pk')).values('tags').annotate(
-                question_count=Count('*')
-            ).values('question_count')
-        ).order_by('-award_count')
+        return models.User.objects.order_by('-reputation')
 
     def get_context_data(self, **kwargs) -> dict:
         """Get the context data for the view.
@@ -33,8 +28,8 @@ class TagView(ListView):
         """
         context = super().get_context_data(**kwargs)
         context.update({
-            'title': "Tags - Stackexchange Django",
-            'heading': "Tags"
+            'title': "Users - Stackexchange Django",
+            'heading': "Users"
         })
 
         return context

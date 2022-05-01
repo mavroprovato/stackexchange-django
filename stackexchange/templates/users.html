@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+    {% for user in users %}
+        <div>
+            <div>{{ user.display_name }}</div>
+            <div>{{ user.location|default:"" }}</div>
+            <div><strong>{{ user.reputation }}</strong></div>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}
