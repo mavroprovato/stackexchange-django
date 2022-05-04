@@ -9,7 +9,7 @@
     <hr>
     {% for tag in tags %}
         <div>
-            <div>{{ tag.name }}</div>
+            <div><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></div>
             <div>{{ tag.exprert }}</div>
             <div>{{ tag.question_count }} questions</div>
         </div>
