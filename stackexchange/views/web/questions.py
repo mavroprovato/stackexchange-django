@@ -1,12 +1,9 @@
 """Web question views
 """
 from django.db.models import QuerySet, Prefetch
-from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.views.generic import DetailView
 
 from stackexchange import enums, models
-from .base import BaseListView
+from .base import BaseListView, BaseDetailView
 
 
 class QuestionView(BaseListView):
@@ -52,24 +49,10 @@ class QuestionTaggedView(QuestionView):
         return f"Questions tagged [{self.kwargs['tag']}]"
 
 
-class QuestionDetailView(DetailView):
+class QuestionDetailView(BaseDetailView):
     """The question detail view.
     """
     model = models.Post
-
-    def get(self, request, *args, **kwargs) -> HttpResponse:
-        """Return the question detail view. Makes sure that the URL
-
-        :param request: The request.
-        :param args: The positional arguments.
-        :param kwargs: The keyword arguments.
-        :return: The response.
-        """
-        obj = self.get_object()
-        if obj.slug() != self.kwargs.get('slug'):
-            return redirect(obj)
-
-        return super().get(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
@@ -82,12 +65,18 @@ class QuestionDetailView(DetailView):
             Prefetch('answers__comments__user', queryset=models.Comment.objects.order_by('creation_date')),
         )
 
-    def get_context_data(self, **kwargs) -> dict:
-        """Get the context data for the view.
+    @property
+    def title(self) -> str:
+        """Return the page title.
 
-        :param kwargs: The keyword arguments.
-        :return: The context data.
+        :return: The post title.
         """
-        return super().get_context_data(**kwargs) | {
-            'title': f"{self.object.title}",
-        }
+        return self.object.title
+
+    @property
+    def heading(self) -> str:
+        """Return the page heading.
+
+        :return: The post title.
+        """
+        return self.object.title

@@ -1,10 +1,9 @@
 """Web user views
 """
 from django.db.models import QuerySet
-from django.views.generic import DetailView
 
 from stackexchange import models
-from .base import BaseListView
+from .base import BaseListView, BaseDetailView
 
 
 class UserView(BaseListView):
@@ -22,7 +21,23 @@ class UserView(BaseListView):
         return models.User.objects.order_by('-reputation')
 
 
-class UserDetailView(DetailView):
-    """The question detail view.
+class UserDetailView(BaseDetailView):
+    """The user detail view.
     """
     model = models.User
+
+    @property
+    def title(self) -> str:
+        """Return the page title.
+
+        :return: The user display name.
+        """
+        return self.object.display_name
+
+    @property
+    def heading(self) -> str:
+        """Return the page heading.
+
+        :return: The user display name.
+        """
+        return self.object.display_name
