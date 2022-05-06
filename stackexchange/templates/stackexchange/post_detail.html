@@ -4,15 +4,10 @@
     <div>
         <div>{{ object.score }}</div>
     </div>
-    <div>
-        <div>Asked {{ object.creation_date }}</div>
-        <div>Modified {{ object.last_edit_date }}</div>
-        <div>Viewed {{ object.creation_date }}</div>
-    </div>
     <div>{{ object.body | safe }}</div>
     <div>
     {% for tag in object.tags.all %}
-        <span><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
+        <a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a>
     {% endfor %}
     </div>
     <div>
