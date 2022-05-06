@@ -46,9 +46,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         )
 
     def __str__(self) -> str:
-        """Return the string representation of the user
+        """Return the string representation of the user.
 
-        :return: The user display name
+        :return: The user display name.
         """
         return str(self.display_name)
 
@@ -68,6 +68,20 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         return self.is_employee
 
+    def slug(self) -> typing.Optional[str]:
+        """Return the slug for the user.
+
+        :return: The slug for the user.
+        """
+        return slugify(self.display_name)
+
+    def get_absolute_url(self) -> typing.Optional[str]:
+        """Get the absolute URL for the user.
+
+        :return: The absolute URL for the user.
+        """
+        return reverse('web-user-detail-slug', args=(str(self.id), self.slug()))
+
 
 class Badge(models.Model):
     """The badge model
@@ -84,9 +98,9 @@ class Badge(models.Model):
         db_table = 'badges'
 
     def __str__(self) -> str:
-        """Return the string representation of the badge
+        """Return the string representation of the badge.
 
-        :return: The badge name
+        :return: The badge name.
         """
         return str(self.name)
 
@@ -148,9 +162,9 @@ class Post(models.Model):
         )
 
     def __str__(self) -> str:
-        """Return the string representation of the post
+        """Return the string representation of the post.
 
-        :return: The post title
+        :return: The post title.
         """
         return str(self.title)
 
@@ -189,9 +203,9 @@ class Comment(models.Model):
         indexes = (models.Index(fields=('-creation_date', 'id')), models.Index(fields=('-score', 'id')))
 
     def __str__(self) -> str:
-        """Return the string representation of the comment
+        """Return the string representation of the comment.
 
-        :return: The comment text
+        :return: The comment text.
         """
         return str(self.text)
 
@@ -279,9 +293,9 @@ class Tag(models.Model):
         db_table = 'tags'
 
     def __str__(self) -> str:
-        """Return the string representation of the tag
+        """Return the string representation of the tag.
 
-        :return: The tag name
+        :return: The tag name.
         """
         return str(self.name)
 

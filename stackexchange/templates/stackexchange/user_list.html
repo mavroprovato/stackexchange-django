@@ -1,9 +1,11 @@
 {% extends "stackexchange/base.html" %}
+
 {% block title %}{{ title }}{% endblock %}
+
 {% block content %}
     {% for user in object_list %}
         <div>
-            <div>{{ user.display_name }}</div>
+            <div><a href="{{ user.get_absolute_url }}">{{ user.display_name }}</a></div>
             <div>{{ user.location|default:"" }}</div>
             <div><strong>{{ user.reputation }}</strong></div>
         </div>

@@ -1,5 +1,7 @@
 {% extends "stackexchange/base.html" %}
+
 {% block title %}{{ title }}{% endblock %}
+
 {% block content %}
     <p>{{ page_obj.paginator.count }} questions</p>
     <hr>
@@ -11,7 +13,7 @@
             <div><h2><a href="{{ question.get_absolute_url }}">{{ question.title }}</a></h2></div>
             <div>
                 {% for tag in question.tags.all %}
-                    <span><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
+                    <a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a>
                 {% endfor %}
             </div>
             <div>{{ question.owner.display_name }} asked {{ question.creation_date }}</div>

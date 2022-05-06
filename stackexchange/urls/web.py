@@ -13,4 +13,6 @@ urls = [
     path('questions/<int:pk>/<slug:slug>', views.QuestionDetailView.as_view(), name='web-question-detail-slug'),
     path('tags', views.TagView.as_view(), name='web-tag-list'),
     path('users', views.UserView.as_view(), name='web-user-list'),
+    path('users/<int:pk>', views.UserDetailView.as_view(), name='web-user-detail'),
+    path('users/<int:pk>/<slug:slug>', views.UserDetailView.as_view(), name='web-user-detail-slug'),
 ]
