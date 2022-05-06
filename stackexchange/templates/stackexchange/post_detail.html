@@ -1,7 +1,10 @@
 {% extends "stackexchange/base.html" %}
+
 {% block title %}{{ title }}{% endblock %}
+
+{% block heading %}<h1>{{ title }}</h1>{% endblock %}
+
 {% block content %}
-    <h1>{{ object.title }}</h1>
     <div>
         <div>{{ object.score }}</div>
     </div>

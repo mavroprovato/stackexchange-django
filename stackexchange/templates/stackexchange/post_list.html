@@ -1,7 +1,6 @@
 {% extends "stackexchange/base.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-    <h1>{{ heading }}</h1>
     <p>{{ page_obj.paginator.count }} questions</p>
     <hr>
     {% for question in object_list %}
