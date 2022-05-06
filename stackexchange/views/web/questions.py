@@ -3,16 +3,19 @@
 from django.db.models import QuerySet, Prefetch
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.views.generic import ListView, DetailView
+from django.views.generic import DetailView
 
 from stackexchange import enums, models
+from .base import BaseListView
 
 
-class QuestionView(ListView):
+class QuestionView(BaseListView):
     """The question view
     """
     template_name = 'questions.html'
     paginate_by = 30
+    title = "Newest Questions"
+    heading = "All Questions"
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
@@ -21,22 +24,6 @@ class QuestionView(ListView):
         """
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
             'tags').order_by('-creation_date')
-
-    def get_context_data(self, **kwargs) -> dict:
-        """Get the context data for the view.
-
-        :param kwargs: The keyword arguments.
-        :return: The context data.
-        """
-        context = super().get_context_data(**kwargs)
-
-        return context | {
-            'title': "Newest Questions - Stackexchange Django",
-            'heading': "All Questions",
-            'page_range': context['paginator'].get_elided_page_range(
-                context['page_obj'].number, on_each_side=2, on_ends=1
-            )
-        }
 
 
 class QuestionTaggedView(QuestionView):
@@ -49,19 +36,21 @@ class QuestionTaggedView(QuestionView):
         """
         return super().get_queryset().filter(tags__name=self.kwargs['tag'])
 
-    def get_context_data(self, **kwargs) -> dict:
-        """Get the context data for the view.
+    @property
+    def title(self) -> str:
+        """Return the page title.
 
-        :param kwargs: The keyword arguments.
-        :return: The context data.
+        :return: The page title.
         """
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'title': f"Newest '{self.kwargs['tag']}' Questions - Stackexchange Django",
-            'heading': f"Questions tagged [{self.kwargs['tag']}]",
-        })
+        return f"Newest '{self.kwargs['tag']}' Questions"
 
-        return context
+    @property
+    def heading(self) -> str:
+        """Return the page heading.
+
+        :return: The page heading.
+        """
+        return f"Questions tagged [{self.kwargs['tag']}]"
 
 
 class QuestionDetailView(DetailView):

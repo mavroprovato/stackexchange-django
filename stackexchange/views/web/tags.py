@@ -1,14 +1,16 @@
 """Web tag views
 """
 from django.db.models import QuerySet, Subquery, OuterRef, Count
-from django.views.generic import ListView
 
 from stackexchange import models
+from .base import BaseListView
 
 
-class TagView(ListView):
+class TagView(BaseListView):
     """The tag view
     """
+    title = "Tags"
+    heading = "Tags"
     template_name = 'tags.html'
     paginate_by = 36
 
@@ -23,19 +25,3 @@ class TagView(ListView):
                 question_count=Count('*')
             ).values('question_count')
         ).order_by('-award_count')
-
-    def get_context_data(self, **kwargs) -> dict:
-        """Get the context data for the view.
-
-        :param kwargs: The keyword arguments.
-        :return: The context data.
-        """
-        context = super().get_context_data(**kwargs)
-
-        return context | {
-            'title': "Tags - Stackexchange Django",
-            'heading': "Tags",
-            'page_range': context['paginator'].get_elided_page_range(
-                context['page_obj'].number, on_each_side=2, on_ends=1
-            )
-        }

@@ -1,16 +1,18 @@
 """Web user views
 """
-from django.db.models import QuerySet, Subquery, OuterRef, Count
-from django.views.generic import ListView
+from django.db.models import QuerySet
 
 from stackexchange import models
+from .base import BaseListView
 
 
-class UserView(ListView):
+class UserView(BaseListView):
     """The user view
     """
     template_name = 'users.html'
     paginate_by = 36
+    title = "Users"
+    heading = "Users"
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
@@ -18,17 +20,3 @@ class UserView(ListView):
         :return: The queryset for the view.
         """
         return models.User.objects.order_by('-reputation')
-
-    def get_context_data(self, **kwargs) -> dict:
-        """Get the context data for the view.
-
-        :param kwargs: The keyword arguments.
-        :return: The context data.
-        """
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'title': "Users - Stackexchange Django",
-            'heading': "Users"
-        })
-
-        return context
