@@ -7,7 +7,7 @@
         makes it easier for others to find and answer your question
     </p>
     <hr>
-    {% for tag in tags %}
+    {% for tag in object_list %}
         <div>
             <div><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></div>
             <div>{{ tag.exprert }}</div>

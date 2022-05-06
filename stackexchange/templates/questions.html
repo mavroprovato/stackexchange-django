@@ -4,7 +4,7 @@
     <h1>{{ heading }}</h1>
     <p>{{ page_obj.paginator.count }} questions</p>
     <hr>
-    {% for question in questions %}
+    {% for question in object_list %}
         <div>
             <div>{{ question.score }} votes</div>
             <div>{{ question.answer_count }} answers</div>

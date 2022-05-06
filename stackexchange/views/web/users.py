@@ -10,7 +10,6 @@ class UserView(ListView):
     """The user view
     """
     template_name = 'users.html'
-    context_object_name = 'users'
     paginate_by = 36
 
     def get_queryset(self) -> QuerySet:

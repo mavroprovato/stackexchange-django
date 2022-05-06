@@ -12,7 +12,6 @@ class QuestionView(ListView):
     """The question view
     """
     template_name = 'questions.html'
-    context_object_name = 'questions'
     paginate_by = 30
 
     def get_queryset(self) -> QuerySet:
@@ -30,12 +29,14 @@ class QuestionView(ListView):
         :return: The context data.
         """
         context = super().get_context_data(**kwargs)
-        context.update({
-            'title': "Newest Questions - Stackexchange Django",
-            'heading': "All Questions"
-        })
 
-        return context
+        return context | {
+            'title': "Newest Questions - Stackexchange Django",
+            'heading': "All Questions",
+            'page_range': context['paginator'].get_elided_page_range(
+                context['page_obj'].number, on_each_side=2, on_ends=1
+            )
+        }
 
 
 class QuestionTaggedView(QuestionView):

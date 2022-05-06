@@ -10,7 +10,6 @@ class TagView(ListView):
     """The tag view
     """
     template_name = 'tags.html'
-    context_object_name = 'tags'
     paginate_by = 36
 
     def get_queryset(self) -> QuerySet:
@@ -32,9 +31,11 @@ class TagView(ListView):
         :return: The context data.
         """
         context = super().get_context_data(**kwargs)
-        context.update({
-            'title': "Tags - Stackexchange Django",
-            'heading': "Tags"
-        })
 
-        return context
+        return context | {
+            'title': "Tags - Stackexchange Django",
+            'heading': "Tags",
+            'page_range': context['paginator'].get_elided_page_range(
+                context['page_obj'].number, on_each_side=2, on_ends=1
+            )
+        }
