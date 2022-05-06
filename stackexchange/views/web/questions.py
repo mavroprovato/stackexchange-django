@@ -12,7 +12,6 @@ from .base import BaseListView
 class QuestionView(BaseListView):
     """The question view
     """
-    template_name = 'questions.html'
     paginate_by = 30
     title = "Newest Questions"
     heading = "All Questions"
@@ -57,8 +56,6 @@ class QuestionDetailView(DetailView):
     """The question detail view.
     """
     model = models.Post
-    template_name = 'question_detail.html'
-    context_object_name = 'question'
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
         """Return the question detail view. Makes sure that the URL
@@ -91,9 +88,6 @@ class QuestionDetailView(DetailView):
         :param kwargs: The keyword arguments.
         :return: The context data.
         """
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'title': f"{self.object.title} - Stackexchange Django",
-        })
-
-        return context
+        return super().get_context_data(**kwargs) | {
+            'title': f"{self.object.title}",
+        }

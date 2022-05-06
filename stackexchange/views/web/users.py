@@ -9,7 +9,6 @@ from .base import BaseListView
 class UserView(BaseListView):
     """The user view
     """
-    template_name = 'users.html'
     paginate_by = 36
     title = "Users"
     heading = "Users"

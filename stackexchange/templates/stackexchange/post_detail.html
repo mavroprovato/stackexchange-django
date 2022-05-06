@@ -1,23 +1,23 @@
-{% extends "base.html" %}
+{% extends "stackexchange/base.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
-    <h1>{{ question.title }}</h1>
+    <h1>{{ object.title }}</h1>
     <div>
-        <div>{{ question.score }}</div>
+        <div>{{ object.score }}</div>
     </div>
     <div>
-        <div>Asked {{ question.creation_date }}</div>
-        <div>Modified {{ question.last_edit_date }}</div>
-        <div>Viewed {{ question.creation_date }}</div>
+        <div>Asked {{ object.creation_date }}</div>
+        <div>Modified {{ object.last_edit_date }}</div>
+        <div>Viewed {{ object.creation_date }}</div>
     </div>
-    <div>{{ question.body | safe }}</div>
+    <div>{{ object.body | safe }}</div>
     <div>
-    {% for tag in question.tags.all %}
+    {% for tag in object.tags.all %}
         <span><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></span>
     {% endfor %}
     </div>
     <div>
-    {% for comment in question.comments.all %}
+    {% for comment in object.comments.all %}
     <div>
         <div>{{ comment.score }}</div>
         <div>{{ comment.text }} - {{ comment.user.display_name }}</div>
@@ -26,8 +26,8 @@
     {% endfor %}
     </div>
     <hr>
-    <h2>{{ question.answers.count }} answers</h2>
-    {% for answer in question.answers.all %}
+    <h2>{{ object.answers.count }} answers</h2>
+    {% for answer in object.answers.all %}
     <div>
         <div>{{ answer.score }}</div>
         <div>{{ answer.body | safe }}</div>

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "stackexchange/base.html" %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
     <h1>{{ heading }}</h1>
@@ -15,5 +15,5 @@
         </div>
         <hr>
     {% endfor %}
-    {% include "pagination.html" %}
+    {% include "stackexchange/pagination.html" %}
 {% endblock %}

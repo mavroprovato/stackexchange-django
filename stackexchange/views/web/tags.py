@@ -9,10 +9,9 @@ from .base import BaseListView
 class TagView(BaseListView):
     """The tag view
     """
+    paginate_by = 36
     title = "Tags"
     heading = "Tags"
-    template_name = 'tags.html'
-    paginate_by = 36
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.
