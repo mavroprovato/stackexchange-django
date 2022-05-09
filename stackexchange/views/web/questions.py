@@ -61,9 +61,9 @@ class QuestionDetailView(BaseDetailView):
         """
         return super().get_queryset().prefetch_related(
             'tags',
-            Prefetch('comments__user', queryset=models.Comment.objects.order_by('creation_date')),
+            Prefetch('post_comments__user', queryset=models.Comment.objects.order_by('creation_date')),
             Prefetch('answers', queryset=models.Post.objects.order_by('-score')),
-            Prefetch('answers__comments__user', queryset=models.Comment.objects.order_by('creation_date')),
+            Prefetch('answers__post_comments__user', queryset=models.Comment.objects.order_by('creation_date')),
         )
 
     @property
