@@ -197,6 +197,7 @@ class Comment(models.Model):
         choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name)
     user = models.ForeignKey(User, help_text="The user for the comment", on_delete=models.CASCADE,
                              related_name='comments', null=True, blank=True)
+    user_display_name = models.CharField(help_text="The user display name", max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'comments'

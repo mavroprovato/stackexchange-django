@@ -321,14 +321,14 @@ class Importer:
             for row in self.iterate_xml(self.temp_dir / self.COMMENTS_FILE):
                 csv_writer.writerow([
                     row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row['ContentLicense'],
-                    row.get('UserId', '<NULL>')
+                    row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>')
                 ])
         with (self.temp_dir / 'comments.csv').open('rt') as f:
             self.output.write(f"Loading comments")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE comments CASCADE")
                 cursor.copy_from(f, table='comments', columns=(
-                    'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id'
+                    'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
                 ), sep=',', null='<NULL>')
         self.output.write(f"Comments loaded")
 
