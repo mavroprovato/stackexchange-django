@@ -60,8 +60,9 @@ class QuestionDetailView(BaseDetailView):
         :return: The queryset for the view.
         """
         return super().get_queryset().prefetch_related(
-            Prefetch('answers', queryset=models.Post.objects.order_by('-score')),
+            'tags',
             Prefetch('comments__user', queryset=models.Comment.objects.order_by('creation_date')),
+            Prefetch('answers', queryset=models.Post.objects.order_by('-score')),
             Prefetch('answers__comments__user', queryset=models.Comment.objects.order_by('creation_date')),
         )
 

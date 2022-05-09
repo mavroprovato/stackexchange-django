@@ -38,6 +38,15 @@ class BaseDetailView(DetailView):
     # The page heading
     heading = None
 
+    def __init__(self, *args, **kwargs):
+        """Create the detail view.
+
+        :param args: The positional arguments.
+        :param kwargs: The keyword arguments.
+        """
+        super().__init__(*args, **kwargs)
+        self.object = None
+
     def get(self, request, *args, **kwargs) -> HttpResponse:
         """Return the detail view. Makes sure that the URL includes the slug.
 
@@ -46,11 +55,13 @@ class BaseDetailView(DetailView):
         :param kwargs: The keyword arguments.
         :return: The response.
         """
-        obj = self.get_object()
-        if obj.slug() != self.kwargs.get('slug'):
-            return redirect(obj)
+        self.object = self.get_object()
+        context = self.get_context_data(object=self.object)
 
-        return super().get(request, *args, **kwargs)
+        if self.object.slug() != self.kwargs.get('slug'):
+            return redirect(self.object)
+
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs) -> dict:
         """Get the context data.
