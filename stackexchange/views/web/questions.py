@@ -1,6 +1,6 @@
 """Web question views
 """
-from django.db.models import QuerySet, Prefetch
+from django.db.models import QuerySet
 
 from stackexchange import enums, models
 from .base import BaseListView, BaseDetailView
@@ -60,10 +60,7 @@ class QuestionDetailView(BaseDetailView):
         :return: The queryset for the view.
         """
         return super().get_queryset().prefetch_related(
-            'tags',
-            Prefetch('post_comments__user', queryset=models.Comment.objects.order_by('creation_date')),
-            Prefetch('answers', queryset=models.Post.objects.order_by('-score')),
-            Prefetch('answers__post_comments__user', queryset=models.Comment.objects.order_by('creation_date')),
+            'tags', 'comments__user', 'answers__comments__user'
         )
 
     @property

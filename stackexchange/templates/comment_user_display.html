@@ -1,0 +1,5 @@
+{% if user %}
+    <a href="{{ user.get_absolute_url }}">{{ user.display_name }}</a>
+{% else %}
+    <span>{{ user_display_name }}</span>
+{% endif %}

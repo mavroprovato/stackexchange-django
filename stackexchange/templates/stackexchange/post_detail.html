@@ -1,40 +1,39 @@
 {% extends "stackexchange/base.html" %}
+{% load user_tags %}
 
 {% block content %}
     <div>
         <div>{{ object.score }}</div>
     </div>
-    <div>{{ object.body | safe }}</div>
+    <div>{{ object.body|safe }}</div>
     <div>
     {% for tag in object.tags.all %}
         <a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a>
     {% endfor %}
     </div>
     <div>
-    {% for comment in object.comments.all %}
+    {% for comment in object.comments.all|dictsort:'creation_date' %}
     <div>
         <div>{{ comment.score }}</div>
-        <div>{{ comment.text }} - {{ comment.user.display_name }}</div>
+        <div>{{ comment.text }} - {% comment_user_display comment %}</div>
         <div>{{ comment.creation_date }}</div>
     </div>
     {% endfor %}
     </div>
     <hr>
     <h2>{{ object.answers.count }} answers</h2>
-    {% for answer in object.answers.all %}
+    {% for answer in object.answers.all|dictsortreversed:'score' %}
     <div>
         <div>{{ answer.score }}</div>
         <div>{{ answer.body | safe }}</div>
         <div>Answered {{ answer.creation_date }}</div>
-        <div>
-        {% for comment in answer.comments.all %}
+        {% for comment in answer.comments.all|dictsort:'creation_date' %}
             <div>
                 <div>{{ comment.score }}</div>
-                <div>{{ comment.text }} - {{ comment.user.display_name }}</div>
+                <div>{{ comment.text }} - {% comment_user_display comment %}</div>
                 <div>{{ comment.creation_date }}</div>
             </div>
         {% endfor %}
-        </div>
     </div>
     <hr>
     {% endfor %}

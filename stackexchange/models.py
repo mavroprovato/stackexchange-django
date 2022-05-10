@@ -188,7 +188,7 @@ class Post(models.Model):
 class Comment(models.Model):
     """The comment model
     """
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='post_comments')
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='comments')
     score = models.IntegerField(help_text="The comment score")
     text = models.TextField(help_text="The comment text")
     creation_date = models.DateTimeField(help_text="The date that the comment was created", default=timezone.now)
