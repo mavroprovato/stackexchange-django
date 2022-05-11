@@ -3,5 +3,14 @@
 {% block heading %}<h1>{{ object.display_name }}</h1>{% endblock %}
 
 {% block content %}
-
+<p>Member since {{ object.creation_date }}</p>
+<p>{{ object.location }}</p>
+<h2>Stats</h2>
+<div>
+    <p>{{ object.reputation }} reputation</p>
+    <p>{{ object.answer_count }} answers</p>
+    <p>{{ object.question_count }} questions</p>
+</div>
+<h2>About</h2>
+<p>{{ object.about | safe }}</p>
 {% endblock %}
