@@ -1,5 +1,7 @@
 """Web tag views
 """
+import datetime
+
 from django.db.models import QuerySet, Subquery, OuterRef, Count
 
 from stackexchange import models
@@ -18,9 +20,27 @@ class TagView(BaseListView):
 
         :return: The queryset for the view.
         """
+        start_of_day = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).replace(
+            hour=0, minute=0, second=0, microsecond=0)
+        start_of_week = start_of_day - datetime.timedelta(days=start_of_day.isoweekday())
+        start_of_month = start_of_day.replace(day=1)
+        start_of_year = start_of_month.replace(month=1)
+
         return models.Tag.objects.annotate(
             exprert=Subquery(models.Post.objects.filter(pk=OuterRef('excerpt_id')).values('body')[:1]),
-            question_count=models.Post.objects.filter(tags=OuterRef('pk')).values('tags').annotate(
-                question_count=Count('*')
-            ).values('question_count')
+            question_count_total=models.Post.objects.filter(
+                tags=OuterRef('pk')
+            ).values('tags').annotate(count=Count('*')).values('count'),
+            question_count_today=models.Post.objects.filter(
+                tags=OuterRef('pk'), creation_date__gte=start_of_day
+            ).values('tags').annotate(count=Count('*')).values('count'),
+            question_count_week=models.Post.objects.filter(
+                tags=OuterRef('pk'), creation_date__gte=start_of_week
+            ).values('tags').annotate(count=Count('*')).values('count'),
+            question_count_month=models.Post.objects.filter(
+                tags=OuterRef('pk'), creation_date__gte=start_of_month
+            ).values('tags').annotate(count=Count('*')).values('count'),
+            question_count_year=models.Post.objects.filter(
+                tags=OuterRef('pk'), creation_date__gte=start_of_year
+            ).values('tags').annotate(count=Count('*')).values('count')
         ).order_by('-award_count')

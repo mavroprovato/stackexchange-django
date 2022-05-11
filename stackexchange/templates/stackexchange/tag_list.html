@@ -10,7 +10,21 @@
         <div>
             <div><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></div>
             <div>{{ tag.exprert }}</div>
-            <div>{{ tag.question_count }} questions</div>
+            {% if tag.question_count_total %}
+            <div>{{ tag.question_count_total }} questions</div>
+            {% endif %}
+            {% if tag.question_count_today %}
+            <div>{{ tag.question_count_today }} asked today</div>
+            {% endif %}
+            {% if tag.question_count_week %}
+            <div>{{ tag.question_count_week }} asked this week</div>
+            {% endif %}
+            {% if tag.question_count_month and not tag.question_count_today %}
+            <div>{{ tag.question_count_month }} asked this month</div>
+            {% endif %}
+            {% if tag.question_count_year and not tag.question_count_week %}
+            <div>{{ tag.question_count_year }} asked this year</div>
+            {% endif %}
         </div>
         <hr>
     {% endfor %}
