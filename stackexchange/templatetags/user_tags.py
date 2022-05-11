@@ -5,7 +5,7 @@ from stackexchange import models
 register = template.Library()
 
 
-@register.inclusion_tag('comment_user_display.html')
+@register.inclusion_tag('stackexchange/templatetags/comment_user_display.html')
 def comment_user_display(comment: models.Comment) -> dict:
     """Tag for displaying users for comments.
 
