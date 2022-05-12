@@ -1,11 +1,26 @@
 """Web tag views
 """
 import datetime
+import enum
 
 from django.db.models import QuerySet, Subquery, OuterRef, Count
 
 from stackexchange import models
 from .base import BaseListView
+
+
+class TagViewTab(enum.Enum):
+    """The tag view tab enumeration
+    """
+    POPULAR = '-award_count'
+    NAME = 'name'
+
+    def __init__(self, sort_field: str) -> None:
+        """Creates the tag view tab.
+
+        :param sort_field: The sort field.
+        """
+        self.sort_field = sort_field
 
 
 class TagView(BaseListView):
@@ -20,6 +35,7 @@ class TagView(BaseListView):
 
         :return: The queryset for the view.
         """
+        tab = TagViewTab[self.request.GET.get('tab', TagViewTab.POPULAR.name).upper()]
         start_of_day = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).replace(
             hour=0, minute=0, second=0, microsecond=0)
         start_of_week = start_of_day - datetime.timedelta(days=start_of_day.isoweekday())
@@ -43,4 +59,4 @@ class TagView(BaseListView):
             question_count_year=models.Post.objects.filter(
                 tags=OuterRef('pk'), creation_date__gte=start_of_year
             ).values('tags').annotate(count=Count('*')).values('count')
-        ).order_by('-award_count')
+        ).order_by(tab.sort_field)

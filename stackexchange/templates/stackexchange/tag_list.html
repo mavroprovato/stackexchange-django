@@ -6,6 +6,11 @@
         makes it easier for others to find and answer your question
     </p>
     <hr>
+    <div>
+        <a href="{% url "web-tag-list" %}?tab=popular">Popular</a>
+        <a href="{% url "web-tag-list" %}?tab=name">Name</a>
+    </div>
+    <hr>
     {% for tag in object_list %}
         <div>
             <div><a href="{% url "web-question-tagged" tag=tag.name %}">{{ tag.name }}</a></div>
