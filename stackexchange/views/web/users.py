@@ -1,6 +1,6 @@
 """Web user views
 """
-from django.db.models import QuerySet, Subquery, OuterRef, Count
+from django.db.models import QuerySet, OuterRef, Count
 
 from stackexchange import enums, models
 from .base import BaseListView, BaseDetailView
@@ -26,7 +26,11 @@ class UserDetailView(BaseDetailView):
     """
     model = models.User
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet:
+        """Return the queryset for the view.
+
+        :return: The queryset for the view.
+        """
         return super().get_queryset().annotate(
             answer_count=models.Post.objects.filter(
                 owner=OuterRef('pk'), type=enums.PostType.ANSWER
