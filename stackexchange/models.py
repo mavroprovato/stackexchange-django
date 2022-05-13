@@ -73,7 +73,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
         :return: The slug for the user.
         """
-        return slugify(self.display_name)
+        return slugify(self.display_name, allow_unicode=True)
 
     def get_absolute_url(self) -> typing.Optional[str]:
         """Get the absolute URL for the user.

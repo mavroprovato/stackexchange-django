@@ -1,6 +1,10 @@
 {% extends "stackexchange/base.html" %}
 
 {% block content %}
+    <div>
+        <a href="{% url "web-user-list" %}?tab=reputation">Reputation</a>
+        <a href="{% url "web-user-list" %}?tab=newusers">New users</a>
+    </div>
     {% for user in object_list %}
         <div>
             <div><a href="{{ user.get_absolute_url }}">{{ user.display_name }}</a></div>

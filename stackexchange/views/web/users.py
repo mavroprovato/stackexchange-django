@@ -1,9 +1,25 @@
 """Web user views
 """
+import enum
+
 from django.db.models import QuerySet, OuterRef, Count
 
 from stackexchange import enums, models
 from .base import BaseListView, BaseDetailView
+
+
+class UserViewTab(enum.Enum):
+    """The user view tab enumeration
+    """
+    REPUTATION = '-reputation'
+    NEWUSERS = '-creation_date'
+
+    def __init__(self, sort_field: str) -> None:
+        """Creates the tag view tab.
+
+        :param sort_field: The sort field.
+        """
+        self.sort_field = sort_field
 
 
 class UserView(BaseListView):
@@ -18,7 +34,9 @@ class UserView(BaseListView):
 
         :return: The queryset for the view.
         """
-        return models.User.objects.order_by('-reputation')
+        tab = UserViewTab[self.request.GET.get('tab', UserViewTab.REPUTATION.name).upper()]
+
+        return models.User.objects.order_by(tab.sort_field)
 
 
 class UserDetailView(BaseDetailView):
