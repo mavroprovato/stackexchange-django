@@ -96,7 +96,7 @@ class UserBadgeDetailSerializer(BaseSerializer):
         :param user_badge: The user badge info.
         :return: The badge type.
         """
-        return enums.BadgeType(user_badge['badge__badge_type']).name.lower()
+        return str(enums.BadgeType(user_badge['badge__badge_type']).name).lower()
 
     @staticmethod
     def get_rank(user_badge: dict) -> str:
@@ -105,7 +105,7 @@ class UserBadgeDetailSerializer(BaseSerializer):
         :param user_badge: The user badge info.
         :return: The badge type.
         """
-        return enums.BadgeClass(user_badge['badge__badge_class']).name.lower()
+        return str(enums.BadgeClass(user_badge['badge__badge_class']).name).lower()
 
 
 class UserPrivilegeSerializer(BaseSerializer):
