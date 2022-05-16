@@ -3,7 +3,7 @@
 import datetime
 import typing
 
-from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F
+from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F, Subquery
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -170,7 +170,23 @@ class UserViewSet(BaseViewSet):
             ).values(
                 user_id=F('owner_id'), tag_name=F('tags__name')
             ).annotate(
-                question_count=Count('*'), question_score=Sum('score')
+                question_count=Count('*'), question_score=Sum('score'),
+                answer_count=Subquery(
+                    models.Post.objects.filter(
+                        type=enums.PostType.ANSWER, owner_id=OuterRef('user_id'),
+                        question__tags__name=OuterRef('tag_name')
+                    ).values('owner_id', 'question__tags__name').annotate(
+                        answer_count=Count('*')
+                    ).values('answer_count')
+                ),
+                answer_score=Subquery(
+                    models.Post.objects.filter(
+                        type=enums.PostType.ANSWER, owner_id=OuterRef('user_id'),
+                        question__tags__name=OuterRef('tag_name')
+                    ).values('owner_id', 'question__tags__name').annotate(
+                        answer_score=Sum('score')
+                    ).values('answer_score')
+                ),
             ).order_by('-question_score')
 
         return models.User.objects.with_badge_counts()

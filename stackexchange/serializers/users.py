@@ -132,4 +132,6 @@ class TopUserTags(BaseSerializer):
     user_id = fields.IntegerField(help_text="The user identifier")
     question_count = fields.IntegerField(help_text="The question count")
     question_score = fields.IntegerField(help_text="The question score")
+    answer_count = fields.IntegerField(help_text="The answer count")
+    answer_score = fields.IntegerField(help_text="The answer score")
     tag_name = fields.CharField(help_text="The tag name")
