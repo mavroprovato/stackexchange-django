@@ -296,13 +296,15 @@ class UserViewSet(BaseViewSet):
         return super().detail_field
 
     @property
-    def date_field(self) -> str:
+    def date_field(self) -> typing.Optional[str]:
         """Return the field used for date filtering.
 
         :return: The field used for date filtering.
         """
         if self.action == 'badges':
             return 'date_awarded'
+        if self.action == 'top_question_tags':
+            return None
 
         return 'creation_date'
 

@@ -18,7 +18,7 @@ class DateRangeFilter(BaseFilterBackend):
     to_date_param = 'todate'
 
     def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
-        """Filter the queryset based on the from date and to date parameters.
+        """Filter the queryset based on the "from date" and "to date" parameters.
 
         :param request: The request.
         :param queryset: The queryset.
