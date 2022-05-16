@@ -124,3 +124,12 @@ class UserPrivilegeSerializer(BaseSerializer):
         :return: The short description.
         """
         return privilege.name.replace('_', ' ').capitalize()
+
+
+class TopUserTags(BaseSerializer):
+    """The top user tags serializer
+    """
+    user_id = fields.IntegerField(help_text="The user identifier")
+    question_count = fields.IntegerField(help_text="The question count")
+    question_score = fields.IntegerField(help_text="The question score")
+    tag_name = fields.CharField(help_text="The tag name")

@@ -3,7 +3,7 @@
 import datetime
 import typing
 
-from django.db.models import QuerySet, Exists, OuterRef
+from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -164,6 +164,14 @@ class UserViewSet(BaseViewSet):
                 ~Exists(models.Post.objects.filter(type=enums.PostType.ANSWER, question=OuterRef('pk'), score__gt=0)),
                 accepted_answer__isnull=True
             ).select_related('owner').prefetch_related('tags')
+        if self.action == 'top_question_tags':
+            return models.Post.objects.filter(
+                type=enums.PostType.QUESTION
+            ).values(
+                user_id=F('owner_id'), tag_name=F('tags__name')
+            ).annotate(
+                question_count=Count('*'), question_score=Sum('score')
+            ).order_by('-question_score')
 
         return models.User.objects.with_badge_counts()
 
@@ -186,6 +194,8 @@ class UserViewSet(BaseViewSet):
                 'favorites', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
         ):
             return serializers.QuestionSerializer
+        if self.action == 'top_question_tags':
+            return serializers.TopUserTags
 
         return serializers.UserSerializer
 
@@ -232,6 +242,8 @@ class UserViewSet(BaseViewSet):
         """
         if self.action == 'badges':
             return 'user', 'badge'
+        if self.action == 'top_question_tags':
+            return '-question_score',
 
     @property
     def detail_field(self) -> typing.Optional[str]:
@@ -240,7 +252,8 @@ class UserViewSet(BaseViewSet):
         :return: The fields used to filter detail actions.
         """
         if self.action in (
-            'answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
+            'answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered',
+            'top_question_tags'
         ):
             return 'owner'
         if self.action in ('badges', 'comments'):
@@ -269,6 +282,17 @@ class UserViewSet(BaseViewSet):
         """
         if self.action == 'list':
             return 'display_name'
+
+    @property
+    def single_object(self) -> bool:
+        """Return true if the action is for a single object.
+
+        :return: True if the action is for a single object.
+        """
+        if self.action == 'top_question_tags':
+            return True
+
+        return super().single_object
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:
@@ -369,6 +393,15 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='questions/unanswered')
     def questions_unanswered(self, request: Request, *args, **kwargs) -> Response:
         """Get the questions asked by a set of users, which are not considered to be adequately answered.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='top-question-tags')
+    def top_question_tags(self, request: Request, *args, **kwargs) -> Response:
+        """Get the top tags (by score) a single user has asked questions in.
 
         :param request: The request.
         :return: The response.

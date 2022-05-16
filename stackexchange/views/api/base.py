@@ -26,9 +26,12 @@ class BaseListViewSet(GenericViewSet):
         if lookup_url_kwarg in self.kwargs:
             if self.detail_field is None:
                 raise AssertionError(f'Detail field for action {self.action} should not be None')
-            queryset = queryset.filter(**{
-                f"{self.detail_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]
-            })
+            if self.single_object:
+                queryset = queryset.filter(**{self.detail_field: self.kwargs[lookup_url_kwarg]})
+            else:
+                queryset = queryset.filter(**{
+                    f"{self.detail_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]
+                })
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -38,6 +41,14 @@ class BaseListViewSet(GenericViewSet):
         serializer = self.get_serializer(queryset, many=True)
 
         return Response(serializer.data)
+
+    @property
+    def single_object(self) -> bool:
+        """Return true if the action is for a single object.
+
+        :return: True if the action is for a single object.
+        """
+        return False
 
     @property
     def detail_field(self) -> typing.Optional[str]:
