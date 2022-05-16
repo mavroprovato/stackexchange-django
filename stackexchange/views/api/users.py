@@ -4,6 +4,7 @@ import datetime
 import typing
 
 from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F, Subquery
+from django.db.models.functions import Coalesce
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
@@ -132,6 +133,13 @@ from .base import BaseViewSet
             )
         ]
     ),
+    top_answer_tags=extend_schema(
+        summary='Get the top tags (by score) a single user has posted answers in.',
+        description=render_to_string('doc/users/top_answer_tags.md'),
+        parameters=[
+            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
+        ]
+    ),
     top_question_tags=extend_schema(
         summary='Get the top questions a user has posted with a set of tags.',
         description=render_to_string('doc/users/top_question_tags.md'),
@@ -180,6 +188,28 @@ class UserViewSet(BaseViewSet):
                 ~Exists(models.Post.objects.filter(type=enums.PostType.ANSWER, question=OuterRef('pk'), score__gt=0)),
                 accepted_answer__isnull=True
             ).select_related('owner').prefetch_related('tags')
+        if self.action == 'top_answer_tags':
+            return models.Post.objects.filter(
+                type=enums.PostType.ANSWER
+            ).values(
+                user_id=F('owner_id'), tag_name=F('question__tags__name')
+            ).annotate(
+                answer_count=Count('*'), answer_score=Sum('score'),
+                question_count=Coalesce(Subquery(
+                    models.Post.objects.filter(
+                        type=enums.PostType.QUESTION, owner_id=OuterRef('user_id'), tags__name=OuterRef('tag_name')
+                    ).values('owner_id', 'question__tags__name').annotate(
+                        question_count=Count('*')
+                    ).values('question_count')
+                ), 0),
+                question_score=Coalesce(Subquery(
+                    models.Post.objects.filter(
+                        type=enums.PostType.QUESTION, owner_id=OuterRef('user_id'), tags__name=OuterRef('tag_name')
+                    ).values('owner_id', 'question__tags__name').annotate(
+                        question_score=Sum('score')
+                    ).values('question_score')
+                ), 0),
+            ).order_by('-answer_score')
         if self.action == 'top_question_tags':
             return models.Post.objects.filter(
                 type=enums.PostType.QUESTION
@@ -187,22 +217,22 @@ class UserViewSet(BaseViewSet):
                 user_id=F('owner_id'), tag_name=F('tags__name')
             ).annotate(
                 question_count=Count('*'), question_score=Sum('score'),
-                answer_count=Subquery(
+                answer_count=Coalesce(Subquery(
                     models.Post.objects.filter(
                         type=enums.PostType.ANSWER, owner_id=OuterRef('user_id'),
                         question__tags__name=OuterRef('tag_name')
                     ).values('owner_id', 'question__tags__name').annotate(
                         answer_count=Count('*')
                     ).values('answer_count')
-                ),
-                answer_score=Subquery(
+                ), 0),
+                answer_score=Coalesce(Subquery(
                     models.Post.objects.filter(
                         type=enums.PostType.ANSWER, owner_id=OuterRef('user_id'),
                         question__tags__name=OuterRef('tag_name')
                     ).values('owner_id', 'question__tags__name').annotate(
                         answer_score=Sum('score')
                     ).values('answer_score')
-                ),
+                ), 0),
             ).order_by('-question_score')
 
         return models.User.objects.with_badge_counts()
@@ -223,10 +253,10 @@ class UserViewSet(BaseViewSet):
         if self.action == 'privileges':
             return serializers.UserPrivilegeSerializer
         if self.action in (
-                'favorites', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
+            'favorites', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
         ):
             return serializers.QuestionSerializer
-        if self.action == 'top_question_tags':
+        if self.action in ('top_answer_tags', 'top_question_tags'):
             return serializers.TopTags
 
         return serializers.UserSerializer
@@ -274,6 +304,8 @@ class UserViewSet(BaseViewSet):
         """
         if self.action == 'badges':
             return 'user', 'badge'
+        if self.action == 'top_answer_tags':
+            return '-answer_score',
         if self.action == 'top_question_tags':
             return '-question_score',
 
@@ -285,7 +317,7 @@ class UserViewSet(BaseViewSet):
         """
         if self.action in (
             'answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered',
-            'top_question_tags'
+            'top_answer_tags', 'top_question_tags'
         ):
             return 'owner'
         if self.action in ('badges', 'comments'):
@@ -303,7 +335,7 @@ class UserViewSet(BaseViewSet):
         """
         if self.action == 'badges':
             return 'date_awarded'
-        if self.action == 'top_question_tags':
+        if self.action in ('top_answer_tags', 'top_question_tags'):
             return None
 
         return 'creation_date'
@@ -323,7 +355,7 @@ class UserViewSet(BaseViewSet):
 
         :return: True if the action is for a single object.
         """
-        if self.action == 'top_question_tags':
+        if self.action in ('top_answer_tags', 'top_question_tags'):
             return True
 
         return super().single_object
@@ -427,6 +459,15 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='questions/unanswered')
     def questions_unanswered(self, request: Request, *args, **kwargs) -> Response:
         """Get the questions asked by a set of users, which are not considered to be adequately answered.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=True, url_path='top-answer-tags')
+    def top_answer_tags(self, request: Request, *args, **kwargs) -> Response:
+        """Get the top tags (by score) a single user has posted answers in.
 
         :param request: The request.
         :return: The response.
