@@ -126,8 +126,8 @@ class UserPrivilegeSerializer(BaseSerializer):
         return privilege.name.replace('_', ' ').capitalize()
 
 
-class TopUserTags(BaseSerializer):
-    """The top user tags serializer
+class TopTags(BaseSerializer):
+    """The top tags serializer
     """
     user_id = fields.IntegerField(help_text="The user identifier")
     question_count = fields.IntegerField(help_text="The question count")

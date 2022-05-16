@@ -106,19 +106,35 @@ from .base import BaseViewSet
         summary='Get the questions asked by a set of users, which have no answers.',
         description=render_to_string('doc/users/questions_no_answers.md'),
         parameters=[
-            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
+            OpenApiParameter(
+                name='id', type=str, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated user identifiers'
+            )
         ]
     ),
     questions_unaccepted=extend_schema(
         summary='Get the questions asked by a set of users, which have at least one answer but no accepted answer.',
         description=render_to_string('doc/users/questions_unaccepted.md'),
         parameters=[
-            OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
+            OpenApiParameter(
+                name='id', type=int, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated user identifiers'
+            )
         ]
     ),
     questions_unanswered=extend_schema(
         summary='Get the questions asked by a set of users, which are not considered to be adequately answered.',
         description=render_to_string('doc/users/questions_unanswered.md'),
+        parameters=[
+            OpenApiParameter(
+                name='id', type=int, location=OpenApiParameter.PATH,
+                description='A list of semicolon separated user identifiers'
+            )
+        ]
+    ),
+    top_question_tags=extend_schema(
+        summary='Get the top questions a user has posted with a set of tags.',
+        description=render_to_string('doc/users/top_question_tags.md'),
         parameters=[
             OpenApiParameter(name='id', type=int, location=OpenApiParameter.PATH, description='The user identifier')
         ]
@@ -211,7 +227,7 @@ class UserViewSet(BaseViewSet):
         ):
             return serializers.QuestionSerializer
         if self.action == 'top_question_tags':
-            return serializers.TopUserTags
+            return serializers.TopTags
 
         return serializers.UserSerializer
 
