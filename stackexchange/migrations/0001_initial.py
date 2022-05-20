@@ -5,7 +5,6 @@ import django.contrib.postgres.fields.citext
 import django.contrib.postgres.indexes
 import django.contrib.postgres.search
 from django.db import migrations, models
-import django.db.models.deletion
 import django.utils.timezone
 import stackexchange.managers
 
@@ -243,5 +242,13 @@ class Migration(migrations.Migration):
         migrations.AddIndex(
             model_name='user',
             index=models.Index(fields=['-last_modified_date', 'id'], name='users_last_mo_c6b797_idx'),
+        ),
+        migrations.RunSQL(
+            sql='''
+            CREATE TRIGGER title_search_trigger
+            BEFORE INSERT OR UPDATE OF title ON posts
+            FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(title_search, 'pg_catalog.english', title);
+        ''',
+            reverse_sql='DROP TRIGGER IF EXISTS title_search_trigger ON posts;'
         ),
     ]
