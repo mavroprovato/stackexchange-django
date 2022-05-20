@@ -40,7 +40,6 @@ def _calculate_site_info() -> dict:
 
     :return: The site information.
     """
-    print('Calculating site info')
     logger.info('Calculating site info')
     site_info = {
         **models.UserBadge.objects.aggregate(
