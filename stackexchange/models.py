@@ -309,3 +309,4 @@ class PostTag(models.Model):
 
     class Meta:
         db_table = 'post_tags'
+        unique_together = ['post', 'tag']
