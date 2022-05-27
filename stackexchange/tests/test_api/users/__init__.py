@@ -13,3 +13,5 @@ from .questions import *
 from .questions_no_answers import *
 from .questions_unaccepted import *
 from .questions_unanswered import *
+from .top_answer_tags import *
+from .top_question_tags import *

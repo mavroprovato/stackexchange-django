@@ -349,17 +349,6 @@ class UserViewSet(BaseViewSet):
         if self.action == 'list':
             return 'display_name'
 
-    @property
-    def single_object(self) -> bool:
-        """Return true if the action is for a single object.
-
-        :return: True if the action is for a single object.
-        """
-        if self.action in ('top_answer_tags', 'top_question_tags'):
-            return True
-
-        return super().single_object
-
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:
         """Get the answers for a set of users.

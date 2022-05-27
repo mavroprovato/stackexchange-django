@@ -71,3 +71,14 @@ class PostHistoryFactory(factory.django.DjangoModelFactory):
     user_display_name = factory.Faker('user_name')
     comment = factory.Faker('sentence')
     text = factory.Faker('sentence')
+
+
+class PostTagFactory(factory.django.DjangoModelFactory):
+    """The post tag factory
+    """
+    class Meta:
+        model = models.PostTag
+        django_get_or_create = ('post', 'tag')
+
+    post = factory.SubFactory(QuestionFactory)
+    tag = factory.SubFactory(TagFactory)
