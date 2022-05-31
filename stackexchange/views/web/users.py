@@ -3,6 +3,7 @@
 import enum
 
 from django.db.models import QuerySet, OuterRef, Count
+from django.db.models.functions import Coalesce
 
 from stackexchange import enums, models
 from .base import BaseListView, BaseDetailView
@@ -50,12 +51,12 @@ class UserDetailView(BaseDetailView):
         :return: The queryset for the view.
         """
         return super().get_queryset().annotate(
-            answer_count=models.Post.objects.filter(
+            answer_count=Coalesce(models.Post.objects.filter(
                 owner=OuterRef('pk'), type=enums.PostType.ANSWER
-            ).values('owner').annotate(count=Count('pk')).values('count'),
-            question_count=models.Post.objects.filter(
+            ).values('owner').annotate(count=Count('pk')).values('count'), 0),
+            question_count=Coalesce(models.Post.objects.filter(
                 owner=OuterRef('pk'), type=enums.PostType.QUESTION
-            ).values('owner').annotate(count=Count('pk')).values('count'),
+            ).values('owner').annotate(count=Count('pk')).values('count'), 0),
         )
 
     @property
