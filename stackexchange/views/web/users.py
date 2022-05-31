@@ -57,6 +57,15 @@ class UserDetailView(BaseDetailView):
             question_count=Coalesce(models.Post.objects.filter(
                 owner=OuterRef('pk'), type=enums.PostType.QUESTION
             ).values('owner').annotate(count=Count('pk')).values('count'), 0),
+            gold_badge_count=Coalesce(models.UserBadge.objects.filter(
+                user=OuterRef('pk'), badge__badge_class=enums.BadgeClass.GOLD.value
+            ).values('user').annotate(count=Count('pk')).values('count'), 0),
+            silver_badge_count=Coalesce(models.UserBadge.objects.filter(
+                user=OuterRef('pk'), badge__badge_class=enums.BadgeClass.SILVER.value
+            ).values('user').annotate(count=Count('pk')).values('count'), 0),
+            bronze_badge_count=Coalesce(models.UserBadge.objects.filter(
+                user=OuterRef('pk'), badge__badge_class=enums.BadgeClass.BRONZE.value
+            ).values('user').annotate(count=Count('pk')).values('count'), 0)
         )
 
     @property

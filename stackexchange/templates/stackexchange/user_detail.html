@@ -17,4 +17,14 @@
 <h2>About</h2>
 <p>{{ object.about | safe }}</p>
 {% endif %}
+<h2>Badges</h2>
+<div>
+    <strong>{{ object.gold_badge_count }}</strong> gold badges
+</div>
+<div>
+    <strong>{{ object.silver_badge_count }}</strong> gold badges
+</div>
+<div>
+    <strong>{{ object.bronze_badge_count }}</strong> gold badges
+</div>
 {% endblock %}
