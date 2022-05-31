@@ -4,7 +4,9 @@
 
 {% block content %}
 <p>Member since {{ object.creation_date }}</p>
+{% if object.location %}
 <p>{{ object.location }}</p>
+{% endif %}
 <h2>Stats</h2>
 <div>
     <p>{{ object.reputation }} reputation</p>
