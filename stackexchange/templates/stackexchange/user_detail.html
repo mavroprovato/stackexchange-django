@@ -10,8 +10,8 @@
 <h2>Stats</h2>
 <div>
     <p>{{ object.reputation }} reputation</p>
-    <p>{{ object.answer_count }} answers</p>
-    <p>{{ object.question_count }} questions</p>
+    <p>{{ object.answer_count }} answer{{ object.answer_count|pluralize }}</p>
+    <p>{{ object.question_count }} question{{ object.question_count|pluralize }}</p>
 </div>
 {% if object.about %}
 <h2>About</h2>
@@ -19,12 +19,12 @@
 {% endif %}
 <h2>Badges</h2>
 <div>
-    <strong>{{ object.gold_badge_count }}</strong> gold badges
+    <strong>{{ object.gold_badge_count }}</strong> gold badge{{ object.gold_badge_count|pluralize }}
 </div>
 <div>
-    <strong>{{ object.silver_badge_count }}</strong> gold badges
+    <strong>{{ object.silver_badge_count }}</strong> silver badge{{ object.silver_badge_count|pluralize }}
 </div>
 <div>
-    <strong>{{ object.bronze_badge_count }}</strong> gold badges
+    <strong>{{ object.bronze_badge_count }}</strong> bronze badge{{ object.bronze_badge_count|pluralize }}
 </div>
 {% endblock %}
