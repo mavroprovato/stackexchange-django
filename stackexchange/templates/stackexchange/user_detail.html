@@ -11,6 +11,8 @@
     <p>{{ object.answer_count }} answers</p>
     <p>{{ object.question_count }} questions</p>
 </div>
+{% if object.about %}
 <h2>About</h2>
 <p>{{ object.about | safe }}</p>
+{% endif %}
 {% endblock %}
