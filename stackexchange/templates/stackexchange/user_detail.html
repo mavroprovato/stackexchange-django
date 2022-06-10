@@ -9,9 +9,9 @@
 {% endif %}
 <h2>Stats</h2>
 <div>
-    <p>{{ object.reputation }} reputation</p>
-    <p>{{ object.answer_count }} answer{{ object.answer_count|pluralize }}</p>
-    <p>{{ object.question_count }} question{{ object.question_count|pluralize }}</p>
+    <div>{{ object.reputation }} reputation</div>
+    <div>{{ object.answer_count }} answer{{ object.answer_count|pluralize }}</div>
+    <div>{{ object.question_count }} question{{ object.question_count|pluralize }}</div>
 </div>
 {% if object.about %}
 <h2>About</h2>
