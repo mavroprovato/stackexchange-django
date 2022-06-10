@@ -52,6 +52,7 @@ the root directory of the application and is named `.env.example`. The environme
   The key is used to provide cryptographic signing, and should be set to a unique, unpredictable value. You can generate
   one by running `python -c 'from django.core.management.utils import get_random_secret_key;print(get_random_secret_key())'` 
 * `DB_HOST` is the name of the host where the database is located. The default value is `localhost`.
+* `DB_PORT` is the port on which the database is running. The default value is `5432`.
 * `DB_NAME` is the name of the database that is used to store the data. The default value is `stackexchange`. It should
   have the same value as the one you used when creating the database.
 * `DB_USER` is the name of the PostgreSQL user that will be used to access the database. This should be set to the value
