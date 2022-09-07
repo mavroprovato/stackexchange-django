@@ -3,7 +3,7 @@
 This project implements an API for a StackExchange-like site. The API tries to be as faithful as possible to the 
 [official stackexchange API](https://api.stackexchange.com/docs).
 
-The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) 3.8+ and
+The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) 3.10+ and
 [Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used as the
 project database. [RabbitMQ](https://www.rabbitmq.com/) is used for background application tasks, and
 [Redis](https://redis.io/) is used for caching.

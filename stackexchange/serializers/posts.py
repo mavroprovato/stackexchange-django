@@ -1,7 +1,5 @@
 """The post serializers
 """
-import typing
-
 from rest_framework import fields, serializers
 
 from stackexchange import enums, models
@@ -66,7 +64,7 @@ class PostRevisionSerializer(BaseSerializer):
         )
 
     @staticmethod
-    def get_revision_number(post_history: dict) -> typing.Optional[int]:
+    def get_revision_number(post_history: dict) -> int | None:
         """Get the revision number for the post history. Only single user revisions have post histories.
 
         :param post_history: The post history object.

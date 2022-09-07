@@ -1,7 +1,5 @@
 """Base tag test case.
 """
-import typing
-
 from stackexchange import models
 from ..base import BaseTestCase
 
@@ -9,8 +7,8 @@ from ..base import BaseTestCase
 class BaseTagTestCase(BaseTestCase):
     """Base API tag test case
     """
-    def assert_items_equal(self, response, model_class: typing.ClassVar = models.Tag,
-                           obj_filter: typing.Union[str, dict] = None, multiple: bool = False, attributes: dict = None):
+    def assert_items_equal(self, response, model_class=models.Tag, obj_filter: str | dict = None,
+                           multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """
         if obj_filter is None:
@@ -29,8 +27,8 @@ class BaseTagTestCase(BaseTestCase):
 class BaseTagWikiTestCase(BaseTestCase):
     """Base API tag wiki test case
     """
-    def assert_items_equal(self, response, model_class: typing.ClassVar = models.Tag,
-                           obj_filter: typing.Union[str, dict] = None, multiple: bool = False, attributes: dict = None):
+    def assert_items_equal(self, response, model_class=models.Tag, obj_filter: str | dict = None,
+                           multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """
         if obj_filter is None:

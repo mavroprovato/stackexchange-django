@@ -1,6 +1,6 @@
 """The managers for the models
 """
-import typing
+import collections.abc
 
 from django.apps import apps
 from django.contrib.auth.models import UserManager as BaseUserManager
@@ -17,7 +17,7 @@ class UserManager(BaseUserManager):
     def create_user(self, username, email=None, password=None, **extra_fields):
         """Create a user.
 
-        :param username: The user name.
+        :param username: The username.
         :param email: The user email.
         :param password: The user password.
         :param extra_fields: The user extra field.
@@ -89,7 +89,7 @@ class PostHistoryQuerySet(QuerySet):
     """The post history queryset
     """
     @staticmethod
-    def group_by_revision(post_ids: typing.Iterable) -> typing.Iterable[dict]:
+    def group_by_revision(post_ids: collections.abc.Iterable[str]) -> collections.abc.Iterable[dict]:
         """Group a list of post history objects by revision.
 
         :param post_ids: The post identifiers.

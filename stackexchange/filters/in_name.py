@@ -1,7 +1,5 @@
 """The in name filter
 """
-import typing
-
 from django.db.models import QuerySet
 from django.views import View
 from rest_framework.filters import BaseFilterBackend
@@ -31,7 +29,7 @@ class InNameFilter(BaseFilterBackend):
 
         return queryset
 
-    def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
+    def get_schema_operation_parameters(self, view: View) -> list[dict]:
         """Get the schema operation parameters.
 
         :param view: The view to get the parameters for.

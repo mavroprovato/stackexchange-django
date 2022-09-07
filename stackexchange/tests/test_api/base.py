@@ -1,7 +1,5 @@
 """Base test classes
 """
-import typing
-
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -9,8 +7,8 @@ from rest_framework.test import APITestCase
 class BaseTestCase(APITestCase):
     """Base API test case
     """
-    def assert_items_equal(self, response, model_class: typing.ClassVar, obj_filter: typing.Union[str, dict],
-                           multiple: bool = False, attributes: dict = None):
+    def assert_items_equal(
+            self, response, model_class, obj_filter: str | dict, multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
 
         :param response: The response.

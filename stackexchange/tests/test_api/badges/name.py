@@ -2,7 +2,6 @@
 """
 import datetime
 import random
-import typing
 
 from django.urls import reverse
 
@@ -23,9 +22,8 @@ class BadgeNamedTests(BadgeWithAwardCountTestCase):
         for _ in range(1000):
             factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
 
-    def assert_items_equal(self, response, model_class: typing.ClassVar = models.Badge,
-                           obj_filter: typing.Union[str, dict] = 'badge_id', multiple: bool = False,
-                           attributes: dict = None):
+    def assert_items_equal(self, response, model_class=models.Badge, obj_filter: str | dict = 'badge_id',
+                           multiple: bool = False, attributes: dict = None):
         """Overridden in order to validate that we only get named badges
         """
         super().assert_items_equal(response, model_class, obj_filter, multiple, attributes)

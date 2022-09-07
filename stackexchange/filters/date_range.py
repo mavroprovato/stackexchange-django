@@ -1,7 +1,6 @@
 """The date range filter
 """
 import datetime
-import typing
 
 from django.db.models import QuerySet
 from django.views import View
@@ -39,7 +38,7 @@ class DateRangeFilter(BaseFilterBackend):
         return queryset
 
     @staticmethod
-    def get_date(request: Request, param_name: str) -> typing.Optional[datetime.datetime]:
+    def get_date(request: Request, param_name: str) -> datetime.datetime:
         """Get a date to filter from the request parameters. The date should be contained in the `param_name` query
         parameter.
 
@@ -54,7 +53,7 @@ class DateRangeFilter(BaseFilterBackend):
             except ValueError as exception:
                 raise ValidationError({param_name: 'Invalid date'}) from exception
 
-    def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
+    def get_schema_operation_parameters(self, view: View) -> list[dict]:
         """Get the schema operation parameters.
 
         :param view: The view to get the parameters for.

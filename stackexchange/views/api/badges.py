@@ -1,7 +1,5 @@
 """The badges view set.
 """
-import typing
-
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
@@ -82,7 +80,7 @@ class BadgeViewSet(BaseViewSet):
         return serializers.BadgeSerializer
 
     @property
-    def detail_field(self) -> typing.Optional[str]:
+    def detail_field(self) -> str | None:
         """Return the field used to filter detail actions.
 
         :return: The fields used to filter detail actions.
@@ -93,7 +91,7 @@ class BadgeViewSet(BaseViewSet):
         return super().detail_field
 
     @property
-    def date_field(self) -> typing.Optional[str]:
+    def date_field(self) -> str | None:
         """Return the field used for date filtering.
 
         :return: The field used for date filtering.
@@ -102,7 +100,7 @@ class BadgeViewSet(BaseViewSet):
             return 'date_awarded'
 
     @property
-    def name_field(self) -> typing.Optional[str]:
+    def name_field(self) -> str | None:
         """Return the field used for in name filtering.
 
         :return: The field used for in name filtering.

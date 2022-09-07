@@ -1,7 +1,6 @@
 """The posts view set
 """
 import datetime
-import typing
 
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
@@ -99,7 +98,7 @@ class PostViewSet(BaseViewSet):
             )
 
     @property
-    def detail_field(self) -> typing.Optional[str]:
+    def detail_field(self) -> str | None:
         """Return the field used to filter detail actions.
 
         :return: The fields used to filter detail actions.

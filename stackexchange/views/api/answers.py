@@ -1,7 +1,6 @@
 """Answers view set
 """
 import datetime
-import typing
 
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
@@ -56,7 +55,7 @@ class AnswerViewSet(BaseViewSet):
     """
     filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
 
-    def get_queryset(self) -> typing.Optional[QuerySet]:
+    def get_queryset(self) -> QuerySet | None:
         """Return the queryset for the action.
 
         :return: The queryset for the action.
@@ -101,7 +100,7 @@ class AnswerViewSet(BaseViewSet):
             )
 
     @property
-    def detail_field(self) -> typing.Optional[str]:
+    def detail_field(self) -> str | None:
         """Return the field used to filter detail actions.
 
         :return: The fields used to filter detail actions.

@@ -1,6 +1,5 @@
 """Base question test case.
 """
-import typing
 
 from stackexchange import enums, models
 from ..base import BaseTestCase
@@ -9,9 +8,8 @@ from ..base import BaseTestCase
 class BaseQuestionTestCase(BaseTestCase):
     """Base question API test case
     """
-    def assert_items_equal(self, response, model_class: typing.ClassVar = models.Post,
-                           obj_filter: typing.Union[str, dict] = 'question_id', multiple: bool = False,
-                           attributes: dict = None):
+    def assert_items_equal(self, response, model_class=models.Post, obj_filter: str | dict = 'question_id',
+                           multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """
         if attributes is None:

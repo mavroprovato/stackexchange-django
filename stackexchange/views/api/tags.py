@@ -1,7 +1,5 @@
 """The tag views
 """
-import typing
-
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
@@ -52,7 +50,7 @@ class TagViewSet(BaseListViewSet):
     """
     filter_backends = (filters.OrderingFilter, filters.InNameFilter)
 
-    def get_queryset(self) -> typing.Optional[QuerySet]:
+    def get_queryset(self) -> QuerySet | None:
         """Return the queryset for the action.
 
         :return: The queryset for the action.
@@ -89,7 +87,7 @@ class TagViewSet(BaseListViewSet):
             )
 
     @property
-    def detail_field(self) -> typing.Optional[str]:
+    def detail_field(self) -> str | None:
         """Return the field used to filter detail actions.
 
         :return: The fields used to filter detail actions.
@@ -97,7 +95,7 @@ class TagViewSet(BaseListViewSet):
         return 'name'
 
     @property
-    def name_field(self) -> typing.Optional[str]:
+    def name_field(self) -> str | None:
         """Return the field used for in name filtering.
 
         :return: The field used for in name filtering.

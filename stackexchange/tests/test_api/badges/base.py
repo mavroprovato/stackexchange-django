@@ -1,7 +1,5 @@
 """Base badge test case.
 """
-import typing
-
 from stackexchange import enums, models
 from ..base import BaseTestCase
 
@@ -9,8 +7,7 @@ from ..base import BaseTestCase
 class BaseBadgeTestCase(BaseTestCase):
     """Base API badge test case
     """
-    def assert_items_equal(self, response, model_class: typing.ClassVar = models.Badge,
-                           obj_filter: typing.Union[str, dict] = 'badge_id',
+    def assert_items_equal(self, response, model_class=models.Badge, obj_filter: str | dict = 'badge_id',
                            multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """
@@ -27,8 +24,7 @@ class BaseBadgeTestCase(BaseTestCase):
 class BadgeWithAwardCountTestCase(BaseBadgeTestCase):
     """Base API badge test case with award count
     """
-    def assert_items_equal(self, response, model_class: typing.ClassVar = models.Badge,
-                           obj_filter: typing.Union[str, dict] = 'badge_id',
+    def assert_items_equal(self, response, model_class=models.Badge, obj_filter: str | dict = 'badge_id',
                            multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """
@@ -46,8 +42,7 @@ class BadgeWithAwardCountTestCase(BaseBadgeTestCase):
 class UserBadgeTestCase(BaseBadgeTestCase):
     """Base API user badge test case
     """
-    def assert_items_equal(self, response, model_class: typing.ClassVar = models.UserBadge,
-                           obj_filter: typing.Union[str, dict] = None,
+    def assert_items_equal(self, response, model_class=models.UserBadge, obj_filter: str | dict = None,
                            multiple: bool = True, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """

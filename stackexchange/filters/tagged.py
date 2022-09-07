@@ -2,7 +2,6 @@
 """
 import functools
 import operator
-import typing
 
 from django.db.models import QuerySet, Exists, OuterRef
 from django.views import View
@@ -37,7 +36,7 @@ class TaggedFilter(BaseFilterBackend):
 
         return queryset
 
-    def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
+    def get_schema_operation_parameters(self, view: View) -> list[dict]:
         """Get the schema operation parameters.
 
         :param view: The view to get the parameters for.

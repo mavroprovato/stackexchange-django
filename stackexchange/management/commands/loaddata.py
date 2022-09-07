@@ -5,7 +5,6 @@ import pathlib
 import re
 import time
 import tempfile
-import typing
 
 import defusedxml.ElementTree as eT
 from django.conf import settings
@@ -453,7 +452,7 @@ class Command(BaseCommand):
     """
     help = 'Load the data for a stackexchange site'
 
-    def add_arguments(self, parser: CommandParser) -> typing.NoReturn:
+    def add_arguments(self, parser: CommandParser):
         """Add the command arguments.
 
         :param parser: The argument parser.

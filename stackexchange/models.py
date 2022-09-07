@@ -1,7 +1,5 @@
 """The application models
 """
-import typing
-
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.postgres.fields import CIEmailField, CICharField
 from django.contrib.postgres import indexes, search
@@ -53,7 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return str(self.display_name)
 
     @property
-    def is_staff(self):
+    def is_staff(self) -> bool:
         """Returns true if the user is a member of the staff.
 
         :return: True if the user is a member of the staff.
@@ -61,21 +59,21 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.is_employee
 
     @property
-    def is_superuser(self):
+    def is_superuser(self) -> bool:
         """Returns true if the user is a superuser.
 
         :return: True if the user is a superuser.
         """
         return self.is_employee
 
-    def slug(self) -> typing.Optional[str]:
+    def slug(self) -> str:
         """Return the slug for the user.
 
         :return: The slug for the user.
         """
         return slugify(self.display_name, allow_unicode=True)
 
-    def get_absolute_url(self) -> typing.Optional[str]:
+    def get_absolute_url(self) -> str:
         """Get the absolute URL for the user.
 
         :return: The absolute URL for the user.
@@ -168,7 +166,7 @@ class Post(models.Model):
         """
         return str(self.title)
 
-    def slug(self) -> typing.Optional[str]:
+    def slug(self) -> str | None:
         """Return the slug for the post. Only set if the post is an answer.
 
         :return: The slug for the post.
@@ -176,7 +174,7 @@ class Post(models.Model):
         if self.type == enums.PostType.QUESTION:
             return slugify(self.title)
 
-    def get_absolute_url(self) -> typing.Optional[str]:
+    def get_absolute_url(self) -> str | None:
         """Get the absolute URL for the post.
 
         :return: The absolute URL for the post.

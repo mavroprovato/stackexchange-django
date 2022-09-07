@@ -1,8 +1,6 @@
 """Pagination classes
 """
-import collections
 import collections.abc
-import typing
 
 from django.core.paginator import InvalidPage, PageNotAnInteger, EmptyPage
 from django.views import View
@@ -16,7 +14,7 @@ from rest_framework.response import Response
 class Page(collections.abc.Sequence):
     """The default page implementation.
     """
-    def __init__(self, object_list: typing.Collection, page_size: int, paginator) -> None:
+    def __init__(self, object_list: collections.abc.Collection, page_size: int, paginator) -> None:
         """Create the page.
 
         :param object_list: The object list.
@@ -31,7 +29,7 @@ class Page(collections.abc.Sequence):
         self.page_size = page_size
         self.paginator = paginator
 
-    def __getitem__(self, index: typing.Union[int, slice]) -> object:
+    def __getitem__(self, index: int | slice) -> object:
         """Get the item at the specified index.
 
         :param index: The index.
@@ -60,7 +58,7 @@ class Page(collections.abc.Sequence):
 class Paginator:
     """The default paginator.
     """
-    def __init__(self, queryset: typing.Collection, page_size: int) -> None:
+    def __init__(self, queryset: collections.abc.Collection, page_size: int) -> None:
         """Create the paginator.
 
         :param queryset: The queryset to paginate.
@@ -113,7 +111,8 @@ class Pagination(pagination.PageNumberPagination):
         """
         self.page = None
 
-    def paginate_queryset(self, queryset: typing.Collection, request: Request, view: View = None) -> typing.Collection:
+    def paginate_queryset(self, queryset: collections.abc.Collection, request: Request, view: View = None
+                          ) -> collections.abc.Collection:
         """Paginate a queryset if required, either returning a page object, or `None` if pagination is not configured
         for this view.
 
@@ -138,7 +137,7 @@ class Pagination(pagination.PageNumberPagination):
 
         return list(self.page)[:page_size]
 
-    def get_paginated_response(self, data: typing.Iterable) -> Response:
+    def get_paginated_response(self, data: collections.abc.Iterable) -> Response:
         """Return the paginated response.
 
         :param data: The data.

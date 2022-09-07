@@ -1,7 +1,6 @@
 """The question views
 """
 import datetime
-import typing
 
 from django.db.models import QuerySet, Exists, OuterRef
 from django.template.loader import render_to_string
@@ -113,7 +112,7 @@ class QuestionViewSet(BaseViewSet):
             )
 
     @property
-    def detail_field(self) -> typing.Optional[str]:
+    def detail_field(self) -> str | None:
         """Return the field used to filter detail actions.
 
         :return: The fields used to filter detail actions.

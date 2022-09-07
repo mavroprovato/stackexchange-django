@@ -1,10 +1,10 @@
 """The ordering filter
 """
+import collections.abc
 import dataclasses
 import datetime
 import enum
 import functools
-import typing
 
 from django.db.models import QuerySet
 from django.utils import timezone
@@ -23,7 +23,7 @@ class OrderingField:
     name: str
     field: str = None
     direction: enums.OrderingDirection = enums.OrderingDirection.DESC
-    type: typing.Type = str
+    type: type = str
 
     def __post_init__(self):
         """Post init method. Sets the database field to sort by to the field name if the database field name is not set.
@@ -55,7 +55,7 @@ class OrderingFilter(BaseFilterBackend):
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
-    def get_ordering_fields(view: View) -> typing.Sequence[OrderingField]:
+    def get_ordering_fields(view: View) -> collections.abc.Sequence[OrderingField]:
         """Get the ordering fields from the view.
 
         :param view: The view.
@@ -74,7 +74,7 @@ class OrderingFilter(BaseFilterBackend):
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
-    def get_stable_ordering(view: View) -> typing.Sequence[str]:
+    def get_stable_ordering(view: View) -> collections.abc.Sequence[str]:
         """Get the ordering fields from the view.
 
         :param view: The view.
@@ -88,8 +88,7 @@ class OrderingFilter(BaseFilterBackend):
         return list(stable_ordering_fields)
 
     def get_ordering_from_request(
-            self, request: Request, view: View
-    ) -> typing.Optional[typing.Tuple[OrderingField, enums.OrderingDirection]]:
+            self, request: Request, view: View) -> tuple[OrderingField, enums.OrderingDirection] | None:
         """Get the ordering field and direction from the request.
 
         :param request: The request.
@@ -158,7 +157,7 @@ class OrderingFilter(BaseFilterBackend):
         return queryset
 
     @staticmethod
-    def get_range_value(request: Request, param_name: str, ordering_field: OrderingField) -> typing.Optional:
+    def get_range_value(request: Request, param_name: str, ordering_field: OrderingField) -> object | None:
         """Get the value of the field to filter for a range.
 
         :param request: The request.
@@ -189,7 +188,7 @@ class OrderingFilter(BaseFilterBackend):
 
             return value_str
 
-    def get_schema_operation_parameters(self, view: View) -> typing.List[dict]:
+    def get_schema_operation_parameters(self, view: View) -> list[dict]:
         """Get the schema operation parameters.
 
         :param view: The view to get the parameters for.

@@ -1,7 +1,7 @@
 """The users view set.
 """
+import collections.abc
 import datetime
-import typing
 
 from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F, Subquery
 from django.db.models.functions import Coalesce
@@ -297,7 +297,7 @@ class UserViewSet(BaseViewSet):
             )
 
     @property
-    def stable_ordering(self) -> typing.Optional[typing.Sequence[str]]:
+    def stable_ordering(self) -> collections.abc.Sequence[str] | None:
         """Get the stable ordering for the view.
 
         :return: An iterable of strings that define the stable ordering.
@@ -310,7 +310,7 @@ class UserViewSet(BaseViewSet):
             return '-question_score',
 
     @property
-    def detail_field(self) -> typing.Optional[str]:
+    def detail_field(self) -> str | None:
         """Return the field used to filter detail actions.
 
         :return: The fields used to filter detail actions.
@@ -328,7 +328,7 @@ class UserViewSet(BaseViewSet):
         return super().detail_field
 
     @property
-    def date_field(self) -> typing.Optional[str]:
+    def date_field(self) -> str | None:
         """Return the field used for date filtering.
 
         :return: The field used for date filtering.
@@ -341,7 +341,7 @@ class UserViewSet(BaseViewSet):
         return 'creation_date'
 
     @property
-    def name_field(self) -> typing.Optional[str]:
+    def name_field(self) -> str | None:
         """Return the field used for in name filtering.
 
         :return: The field used for in name filtering.

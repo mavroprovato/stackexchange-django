@@ -1,7 +1,5 @@
 """The users view set.
 """
-import typing
-
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -51,7 +49,7 @@ class BaseListViewSet(GenericViewSet):
         return False
 
     @property
-    def detail_field(self) -> typing.Optional[str]:
+    def detail_field(self) -> str | None:
         """Return the field used to filter detail actions.
 
         :return: The fields used to filter detail actions.
