@@ -7,7 +7,7 @@ authors = ["Kostas Kokkoros"]
 [tool.poetry.dependencies]
 python = "^3.8"
 celery = "*"
-Django = "*"
+Django = "~4.0" # Django extensions not compatible with 4.1, https://github.com/django-extensions/django-extensions/issues/1756 must be released first
 redis = "*"
 defusedxml = "*"
 django-celery-results = "*"
@@ -28,7 +28,7 @@ factory-boy = "*"
 pylint = "*"
 pylint-django = "*"
 safety = "*"
-Werkzeug = "<2.1.0"
+Werkzeug = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
