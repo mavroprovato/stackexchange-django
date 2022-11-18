@@ -7,7 +7,7 @@ authors = ["Kostas Kokkoros"]
 [tool.poetry.dependencies]
 python = "^3.10"
 celery = "*"
-Django = "~4.0" # Django extensions not compatible with 4.1, https://github.com/django-extensions/django-extensions/issues/1756 must be released first
+Django = "*"
 redis = "*"
 defusedxml = "*"
 django-celery-results = "*"
