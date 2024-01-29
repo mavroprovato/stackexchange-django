@@ -1,7 +1,6 @@
 """The application models
 """
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.contrib.postgres.fields import CIEmailField, CICharField
 from django.contrib.postgres import indexes, search
 from django.db import models
 from django.urls import reverse
@@ -17,8 +16,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ('email', )
 
-    username = CICharField(help_text="The user name", max_length=255, unique=True)
-    email = CIEmailField(help_text="The user email", max_length=255, unique=True)
+    username = models.CharField(help_text="The user name", max_length=255, unique=True)
+    email = models.EmailField(help_text="The user email", max_length=255, unique=True)
     display_name = models.CharField(help_text="The user display name", max_length=255)
     website_url = models.URLField(help_text="The user web site URL", null=True, blank=True)
     location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
@@ -279,7 +278,7 @@ class PostVote(models.Model):
 class Tag(models.Model):
     """The tag model
     """
-    name = CICharField(help_text="The tag name", max_length=255, unique=True)
+    name = models.CharField(help_text="The tag name", max_length=255, unique=True)
     award_count = models.IntegerField(help_text="The tag award count")
     excerpt = models.ForeignKey(Post, help_text="The tag excerpt", on_delete=models.CASCADE,
                                 related_name='excerpts', null=True, blank=True)
