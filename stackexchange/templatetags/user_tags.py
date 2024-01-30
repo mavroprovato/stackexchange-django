@@ -1,3 +1,5 @@
+"""Template tags for user tags
+"""
 from django import template
 
 from stackexchange import models

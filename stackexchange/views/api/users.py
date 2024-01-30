@@ -305,9 +305,9 @@ class UserViewSet(BaseViewSet):
         if self.action == 'badges':
             return 'user', 'badge'
         if self.action == 'top_answer_tags':
-            return '-answer_score',
+            return ('-answer_score',)
         if self.action == 'top_question_tags':
-            return '-question_score',
+            return ('-question_score',)
 
     @property
     def detail_field(self) -> str | None:

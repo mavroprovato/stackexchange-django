@@ -29,9 +29,18 @@ class Migration(migrations.Migration):
                 ('website_url', models.URLField(blank=True, help_text='The user web site URL', null=True)),
                 ('location', models.CharField(blank=True, help_text='The user location', max_length=255, null=True)),
                 ('about', models.TextField(blank=True, help_text='The user about information', null=True)),
-                ('creation_date', models.DateTimeField(default=django.utils.timezone.now, help_text='The user creation date')),
-                ('last_modified_date', models.DateTimeField(auto_now=True, help_text='The user last modified date', null=True)),
-                ('last_access_date', models.DateTimeField(blank=True, help_text='The user last access date', null=True)),
+                (
+                    'creation_date',
+                    models.DateTimeField(default=django.utils.timezone.now, help_text='The user creation date')
+                ),
+                (
+                    'last_modified_date',
+                    models.DateTimeField(auto_now=True, help_text='The user last modified date', null=True)
+                ),
+                (
+                    'last_access_date',
+                    models.DateTimeField(blank=True, help_text='The user last access date', null=True)
+                ),
                 ('reputation', models.PositiveIntegerField(default=0, help_text='The user reputation')),
                 ('views', models.PositiveIntegerField(default=0, help_text='The user profile views')),
                 ('up_votes', models.PositiveIntegerField(default=0, help_text='The user up votes')),
@@ -39,8 +48,22 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True, help_text='True if the user is active')),
                 ('is_moderator', models.BooleanField(default=False, help_text='True if the user is a moderator')),
                 ('is_employee', models.BooleanField(default=False, help_text='True if the user is an employee')),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
+                (
+                    'groups',
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text='The groups this user belongs to. A user will get all permissions granted to each of '
+                                  'their groups.',
+                        related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups'
+                    )
+                ),
+                (
+                    'user_permissions',
+                    models.ManyToManyField(
+                        blank=True, help_text='Specific permissions for this user.', related_name='user_set',
+                        related_query_name='user', to='auth.permission', verbose_name='user permissions'
+                    )
+                ),
             ],
             options={
                 'db_table': 'users',
@@ -54,8 +77,16 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='The badge name', max_length=255, unique=True)),
-                ('badge_class', models.PositiveSmallIntegerField(choices=[(1, 'Gold'), (2, 'Silver'), (3, 'Bronze')], help_text='The badge class')),
-                ('badge_type', models.PositiveSmallIntegerField(choices=[(1, 'Named'), (2, 'Tag based')], help_text='The badge type')),
+                (
+                    'badge_class',
+                    models.PositiveSmallIntegerField(
+                        choices=[(1, 'Gold'), (2, 'Silver'), (3, 'Bronze')], help_text='The badge class')
+                ),
+                (
+                    'badge_type',
+                    models.PositiveSmallIntegerField(
+                        choices=[(1, 'Named'), (2, 'Tag based')], help_text='The badge type')
+                ),
             ],
             options={
                 'db_table': 'badges',
@@ -65,26 +96,85 @@ class Migration(migrations.Migration):
             name='Post',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.PositiveSmallIntegerField(choices=[(1, 'Question'), (2, 'Answer'), (3, 'Wiki'), (4, 'Tag wiki expert'), (5, 'Tag wiki'), (6, 'Moderator nomination'), (7, 'Wiki placeholder'), (8, 'Privilege wiki')], help_text='The post type')),
+                (
+                    'type',
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, 'Question'), (2, 'Answer'), (3, 'Wiki'), (4, 'Tag wiki expert'), (5, 'Tag wiki'),
+                            (6, 'Moderator nomination'), (7, 'Wiki placeholder'), (8, 'Privilege wiki')
+                        ], help_text='The post type'
+                    )
+                ),
                 ('title', models.CharField(blank=True, help_text='The post title', max_length=1000, null=True)),
                 ('body', models.TextField(help_text='The post body')),
-                ('last_editor_display_name', models.CharField(blank=True, help_text='The last editor display name', max_length=255, null=True)),
-                ('creation_date', models.DateTimeField(default=django.utils.timezone.now, help_text='The post creation date')),
+                (
+                    'last_editor_display_name',
+                    models.CharField(blank=True, help_text='The last editor display name', max_length=255, null=True)
+                ),
+                (
+                    'creation_date',
+                    models.DateTimeField(default=django.utils.timezone.now, help_text='The post creation date')
+                ),
                 ('last_edit_date', models.DateTimeField(auto_now=True, help_text='The post last edit date', null=True)),
                 ('last_activity_date', models.DateTimeField(help_text='The post last activity date')),
-                ('community_owned_date', models.DateTimeField(blank=True, help_text='The post community owned date', null=True)),
+                (
+                    'community_owned_date',
+                    models.DateTimeField(blank=True, help_text='The post community owned date', null=True)
+                ),
                 ('closed_date', models.DateTimeField(blank=True, help_text='The post closed date', null=True)),
                 ('score', models.IntegerField(help_text='The post score')),
                 ('view_count', models.PositiveIntegerField(blank=True, help_text='The post view count', null=True)),
                 ('answer_count', models.PositiveIntegerField(blank=True, help_text='The post answer count', null=True)),
-                ('comment_count', models.PositiveIntegerField(blank=True, help_text='The post comment count', null=True)),
-                ('favorite_count', models.PositiveIntegerField(blank=True, help_text='The post favorite count', null=True)),
-                ('content_license', models.CharField(choices=[('CC_BY_SA_2_5', 'Attribution-ShareAlike 2.5 Generic'), ('CC_BY_SA_3_0', 'Attribution-ShareAlike 3.0 Unported'), ('CC_BY_SA_4_0', 'Attribution-ShareAlike 4.0 International')], default='CC_BY_SA_4_0', help_text='The content license', max_length=12)),
-                ('title_search', django.contrib.postgres.search.SearchVectorField(help_text='The title search vector', null=True)),
-                ('accepted_answer', models.ForeignKey(blank=True, help_text='The accepted answer, if the post type is QUESTION', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='accepted_answers', to='stackexchange.post')),
-                ('last_editor', models.ForeignKey(blank=True, help_text='The last editor of the post', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='last_edited_posts', to=settings.AUTH_USER_MODEL)),
-                ('owner', models.ForeignKey(blank=True, help_text='The owner of the post', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='posts', to=settings.AUTH_USER_MODEL)),
-                ('question', models.ForeignKey(blank=True, help_text='The post question, if the post type is ANSWER', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='stackexchange.post')),
+                (
+                    'comment_count',
+                    models.PositiveIntegerField(blank=True, help_text='The post comment count', null=True)
+                ),
+                (
+                    'favorite_count',
+                    models.PositiveIntegerField(blank=True, help_text='The post favorite count', null=True)
+                ),
+                (
+                    'content_license',
+                    models.CharField(choices=[
+                        ('CC_BY_SA_2_5', 'Attribution-ShareAlike 2.5 Generic'),
+                        ('CC_BY_SA_3_0', 'Attribution-ShareAlike 3.0 Unported'),
+                        ('CC_BY_SA_4_0', 'Attribution-ShareAlike 4.0 International')
+                    ], default='CC_BY_SA_4_0', help_text='The content license', max_length=12)
+                ),
+                (
+                    'title_search',
+                    django.contrib.postgres.search.SearchVectorField(help_text='The title search vector', null=True)
+                ),
+                (
+                    'accepted_answer',
+                    models.ForeignKey(
+                        blank=True, help_text='The accepted answer, if the post type is QUESTION', null=True,
+                        on_delete=django.db.models.deletion.CASCADE, related_name='accepted_answers',
+                        to='stackexchange.post'
+                    )
+                ),
+                (
+                    'last_editor',
+                    models.ForeignKey(
+                        blank=True, help_text='The last editor of the post', null=True,
+                        on_delete=django.db.models.deletion.CASCADE, related_name='last_edited_posts',
+                        to=settings.AUTH_USER_MODEL
+                    )
+                ),
+                (
+                    'owner',
+                    models.ForeignKey(
+                        blank=True, help_text='The owner of the post', null=True,
+                        on_delete=django.db.models.deletion.CASCADE, related_name='posts', to=settings.AUTH_USER_MODEL
+                    )
+                ),
+                (
+                    'question',
+                    models.ForeignKey(
+                        blank=True, help_text='The post question, if the post type is ANSWER', null=True,
+                        on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='stackexchange.post'
+                    )
+                ),
             ],
             options={
                 'db_table': 'posts',
@@ -96,10 +186,28 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='The tag name', max_length=255, unique=True)),
                 ('award_count', models.IntegerField(help_text='The tag award count')),
-                ('required', models.BooleanField(default=False, help_text='True if the tag fulfills required tag constraints')),
-                ('moderator_only', models.BooleanField(default=False, help_text='True if the tag can only be used by moderators')),
-                ('excerpt', models.ForeignKey(blank=True, help_text='The tag excerpt', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='excerpts', to='stackexchange.post')),
-                ('wiki', models.ForeignKey(blank=True, help_text='The tag wiki', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='wikis', to='stackexchange.post')),
+                (
+                    'required',
+                    models.BooleanField(default=False, help_text='True if the tag fulfills required tag constraints')
+                ),
+                (
+                    'moderator_only',
+                    models.BooleanField(default=False, help_text='True if the tag can only be used by moderators')
+                ),
+                (
+                    'excerpt',
+                    models.ForeignKey(
+                        blank=True, help_text='The tag excerpt', null=True, on_delete=django.db.models.deletion.CASCADE,
+                        related_name='excerpts', to='stackexchange.post'
+                    )
+                ),
+                (
+                    'wiki',
+                    models.ForeignKey(
+                        blank=True, help_text='The tag wiki', null=True, on_delete=django.db.models.deletion.CASCADE,
+                        related_name='wikis', to='stackexchange.post'
+                    )
+                ),
             ],
             options={
                 'db_table': 'tags',
@@ -109,8 +217,20 @@ class Migration(migrations.Migration):
             name='PostTag',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('post', models.ForeignKey(help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='post_tags', to='stackexchange.post')),
-                ('tag', models.ForeignKey(help_text='The tag', on_delete=django.db.models.deletion.CASCADE, related_name='post_tags', to='stackexchange.tag')),
+                (
+                    'post',
+                    models.ForeignKey(
+                        help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='post_tags',
+                        to='stackexchange.post'
+                    )
+                ),
+                (
+                    'tag',
+                    models.ForeignKey(
+                        help_text='The tag', on_delete=django.db.models.deletion.CASCADE, related_name='post_tags',
+                        to='stackexchange.tag'
+                    )
+                ),
             ],
             options={
                 'db_table': 'post_tags',
@@ -121,9 +241,25 @@ class Migration(migrations.Migration):
             name='PostLink',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.PositiveSmallIntegerField(choices=[(1, 'Linked'), (3, 'Duplicate')], help_text='The post link type')),
-                ('post', models.ForeignKey(help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='links', to='stackexchange.post')),
-                ('related_post', models.ForeignKey(help_text='The related post', on_delete=django.db.models.deletion.CASCADE, related_name='related_links', to='stackexchange.post')),
+                (
+                    'type',
+                    models.PositiveSmallIntegerField(
+                        choices=[(1, 'Linked'), (3, 'Duplicate')], help_text='The post link type')
+                ),
+                (
+                    'post',
+                    models.ForeignKey(
+                        help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='links',
+                        to='stackexchange.post'
+                    )
+                ),
+                (
+                    'related_post',
+                    models.ForeignKey(
+                        help_text='The related post', on_delete=django.db.models.deletion.CASCADE,
+                        related_name='related_links', to='stackexchange.post'
+                    )
+                ),
             ],
             options={
                 'db_table': 'post_links',
@@ -133,15 +269,79 @@ class Migration(migrations.Migration):
             name='PostHistory',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.PositiveSmallIntegerField(choices=[(1, 'Initial title'), (2, 'Initial body'), (3, 'Initial tags'), (4, 'Edit title'), (5, 'Edit body'), (6, 'Edit tags'), (7, 'Rollback title'), (8, 'Rollback body'), (9, 'Rollback tags'), (10, 'Post closed'), (11, 'Post reopened'), (12, 'Post deleted'), (13, 'Post undeleted'), (14, 'Post locked'), (15, 'Post unlocked'), (16, 'Community owned'), (17, 'Post migrated'), (18, 'Question merged'), (19, 'Question protected'), (20, 'Question unprotected'), (22, 'Question unmerged'), (24, 'Suggested edit applied'), (25, 'Post tweeted'), (31, 'Discussion moved to chat'), (33, 'Post notice added'), (34, 'Post notice removed'), (35, 'Post migrated away'), (36, 'Post migrated here'), (37, 'Post merge source'), (38, 'Post merge destination'), (50, 'Community bump'), (52, 'Selected hot question'), (53, 'Removed hot question')], help_text='The post history type')),
-                ('revision_guid', models.UUIDField(help_text='The GUID of the action that created this history record')),
-                ('creation_date', models.DateTimeField(default=django.utils.timezone.now, help_text='The date that this history record was created')),
-                ('user_display_name', models.CharField(blank=True, help_text='The display name of the user that created this record, if the user has been removed and no longer referenced by id', max_length=255, null=True)),
-                ('comment', models.TextField(blank=True, help_text='The comment of the user that has edited this post', null=True)),
-                ('text', models.TextField(blank=True, help_text='A raw version of the new value for a given revision', null=True)),
-                ('content_license', models.CharField(blank=True, choices=[('CC_BY_SA_2_5', 'Attribution-ShareAlike 2.5 Generic'), ('CC_BY_SA_3_0', 'Attribution-ShareAlike 3.0 Unported'), ('CC_BY_SA_4_0', 'Attribution-ShareAlike 4.0 International')], default='CC_BY_SA_4_0', help_text='The content license', max_length=12, null=True)),
-                ('post', models.ForeignKey(help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='history', to='stackexchange.post')),
-                ('user', models.ForeignKey(blank=True, help_text='The user that created this history record', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='post_history', to=settings.AUTH_USER_MODEL)),
+                (
+                    'type',
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (1, 'Initial title'), (2, 'Initial body'), (3, 'Initial tags'), (4, 'Edit title'),
+                            (5, 'Edit body'), (6, 'Edit tags'), (7, 'Rollback title'), (8, 'Rollback body'),
+                            (9, 'Rollback tags'), (10, 'Post closed'), (11, 'Post reopened'), (12, 'Post deleted'),
+                            (13, 'Post undeleted'), (14, 'Post locked'), (15, 'Post unlocked'), (16, 'Community owned'),
+                            (17, 'Post migrated'), (18, 'Question merged'), (19, 'Question protected'),
+                            (20, 'Question unprotected'), (22, 'Question unmerged'), (24, 'Suggested edit applied'),
+                            (25, 'Post tweeted'), (31, 'Discussion moved to chat'), (33, 'Post notice added'),
+                            (34, 'Post notice removed'), (35, 'Post migrated away'), (36, 'Post migrated here'),
+                            (37, 'Post merge source'), (38, 'Post merge destination'), (50, 'Community bump'),
+                            (52, 'Selected hot question'), (53, 'Removed hot question')
+                        ], help_text='The post history type')
+                ),
+                (
+                    'revision_guid',
+                    models.UUIDField(help_text='The GUID of the action that created this history record')
+                ),
+                (
+                    'creation_date',
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, help_text='The date that this history record was created'
+                    )
+                ),
+                (
+                    'user_display_name',
+                    models.CharField(
+                        blank=True,
+                        help_text='The display name of the user that created this record, if the user has been removed '
+                                  'and no longer referenced by id',
+                        max_length=255, null=True
+                    )
+                ),
+                (
+                    'comment',
+                    models.TextField(
+                        blank=True, help_text='The comment of the user that has edited this post', null=True
+                    )
+                ),
+                (
+                    'text',
+                    models.TextField(
+                        blank=True, help_text='A raw version of the new value for a given revision', null=True
+                    )
+                ),
+                (
+                    'content_license',
+                    models.CharField(
+                        blank=True, choices=[
+                            ('CC_BY_SA_2_5', 'Attribution-ShareAlike 2.5 Generic'),
+                            ('CC_BY_SA_3_0', 'Attribution-ShareAlike 3.0 Unported'),
+                            ('CC_BY_SA_4_0', 'Attribution-ShareAlike 4.0 International')
+                        ],
+                        default='CC_BY_SA_4_0', help_text='The content license', max_length=12, null=True
+                    )
+                ),
+                (
+                    'post',
+                    models.ForeignKey(
+                        help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='history',
+                        to='stackexchange.post'
+                    )
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        blank=True, help_text='The user that created this history record', null=True,
+                        on_delete=django.db.models.deletion.CASCADE, related_name='post_history',
+                        to=settings.AUTH_USER_MODEL
+                    )
+                ),
             ],
             options={
                 'verbose_name_plural': 'post history',
@@ -159,11 +359,41 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('score', models.IntegerField(help_text='The comment score')),
                 ('text', models.TextField(help_text='The comment text')),
-                ('creation_date', models.DateTimeField(default=django.utils.timezone.now, help_text='The date that the comment was created')),
-                ('content_license', models.CharField(choices=[('CC_BY_SA_2_5', 'Attribution-ShareAlike 2.5 Generic'), ('CC_BY_SA_3_0', 'Attribution-ShareAlike 3.0 Unported'), ('CC_BY_SA_4_0', 'Attribution-ShareAlike 4.0 International')], default='CC_BY_SA_4_0', help_text='The content license', max_length=12)),
-                ('user_display_name', models.CharField(blank=True, help_text='The user display name', max_length=255, null=True)),
-                ('post', models.ForeignKey(help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='comments', to='stackexchange.post')),
-                ('user', models.ForeignKey(blank=True, help_text='The user for the comment', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='comments', to=settings.AUTH_USER_MODEL)),
+                (
+                    'creation_date',
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, help_text='The date that the comment was created'
+                    )
+                ),
+                (
+                    'content_license',
+                    models.CharField(
+                        choices=[
+                            ('CC_BY_SA_2_5', 'Attribution-ShareAlike 2.5 Generic'),
+                            ('CC_BY_SA_3_0', 'Attribution-ShareAlike 3.0 Unported'),
+                            ('CC_BY_SA_4_0', 'Attribution-ShareAlike 4.0 International')
+                        ], default='CC_BY_SA_4_0', help_text='The content license', max_length=12
+                    )
+                ),
+                (
+                    'user_display_name',
+                    models.CharField(blank=True, help_text='The user display name', max_length=255, null=True)
+                ),
+                (
+                    'post',
+                    models.ForeignKey(
+                        help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='comments',
+                        to='stackexchange.post'
+                    )
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        blank=True, help_text='The user for the comment', null=True,
+                        on_delete=django.db.models.deletion.CASCADE, related_name='comments',
+                        to=settings.AUTH_USER_MODEL
+                    )
+                ),
             ],
             options={
                 'db_table': 'comments',
@@ -174,8 +404,20 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('date_awarded', models.DateTimeField(default=django.utils.timezone.now, help_text='The date awarded')),
-                ('badge', models.ForeignKey(help_text='The badge', on_delete=django.db.models.deletion.CASCADE, related_name='users', to='stackexchange.badge')),
-                ('user', models.ForeignKey(help_text='The user', on_delete=django.db.models.deletion.CASCADE, related_name='badges', to=settings.AUTH_USER_MODEL)),
+                (
+                    'badge',
+                    models.ForeignKey(
+                        help_text='The badge', on_delete=django.db.models.deletion.CASCADE, related_name='users',
+                        to='stackexchange.badge'
+                    )
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        help_text='The user', on_delete=django.db.models.deletion.CASCADE, related_name='badges',
+                        to=settings.AUTH_USER_MODEL
+                    )
+                ),
             ],
             options={
                 'db_table': 'user_badges',
@@ -186,11 +428,44 @@ class Migration(migrations.Migration):
             name='PostVote',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.PositiveSmallIntegerField(choices=[(1, 'Accepted by originator'), (2, 'Up mod'), (3, 'Down mod'), (4, 'Offensive'), (5, 'Favorite'), (6, 'Close'), (7, 'Reopen'), (8, 'Bounty start'), (9, 'Bounty close'), (10, 'Deletion'), (11, 'Un deletion'), (12, 'Spam'), (13, 'Inform moderator')], help_text='The post vote type')),
-                ('creation_date', models.DateTimeField(default=django.utils.timezone.now, help_text='The date that this vote was created')),
-                ('bounty_amount', models.PositiveSmallIntegerField(blank=True, help_text='The post bounty amount, if the post vote type is BOUNTY_START or BOUNTY_CLOSE', null=True)),
-                ('post', models.ForeignKey(help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='votes', to='stackexchange.post')),
-                ('user', models.ForeignKey(blank=True, help_text='The user for the post vote, if the post vote type is FAVORITE or BOUNTY_START', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='user_votes', to=settings.AUTH_USER_MODEL)),
+                (
+                    'type',
+                    models.PositiveSmallIntegerField(choices=[
+                        (1, 'Accepted by originator'), (2, 'Up mod'), (3, 'Down mod'), (4, 'Offensive'),
+                        (5, 'Favorite'), (6, 'Close'), (7, 'Reopen'), (8, 'Bounty start'), (9, 'Bounty close'),
+                        (10, 'Deletion'), (11, 'Un deletion'), (12, 'Spam'), (13, 'Inform moderator')
+                    ], help_text='The post vote type')
+                ),
+                (
+                    'creation_date',
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, help_text='The date that this vote was created'
+                    )
+                ),
+                (
+                    'bounty_amount',
+                    models.PositiveSmallIntegerField(
+                        blank=True,
+                        help_text='The post bounty amount, if the post vote type is BOUNTY_START or BOUNTY_CLOSE',
+                        null=True
+                    )
+                ),
+                (
+                    'post',
+                    models.ForeignKey(
+                        help_text='The post', on_delete=django.db.models.deletion.CASCADE, related_name='votes',
+                        to='stackexchange.post'
+                    )
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        blank=True,
+                        help_text='The user for the post vote, if the post vote type is FAVORITE or BOUNTY_START',
+                        null=True, on_delete=django.db.models.deletion.CASCADE, related_name='user_votes',
+                        to=settings.AUTH_USER_MODEL
+                    )
+                ),
             ],
             options={
                 'db_table': 'post_votes',
