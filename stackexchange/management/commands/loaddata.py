@@ -48,14 +48,6 @@ class Downloader:
         """
         return self._download_dir / f"{self.site}.7z"
 
-    @property
-    def cache_file(self) -> pathlib.Path:
-        """Get the local cache file.
-
-        :return: The local cache file.
-        """
-        return self._download_dir / f"{self.site}.7z.cache"
-
     def download(self) -> bool:
         """Download the dump file if needed.
 
@@ -74,8 +66,13 @@ class Downloader:
                         size = f.write(data)
                         bar.update(size)
             # Save cache version
-            with open(self.cache_file, 'wt') as f:
-                f.write(response.headers['ETag'])
+            with connection.cursor() as cursor:
+                cursor.execute('''
+                    INSERT INTO sites(name, cache_key)
+                    VALUES (%(name)s, %(cache_key)s)
+                    ON CONFLICT (name) DO UPDATE SET cache_key = %(cache_key)s
+                ''', {'name': self.site, 'cache_key': response.headers['ETag'].strip('"')})
+                connection.commit()
 
             return True
 
@@ -89,9 +86,6 @@ class Downloader:
         if not self.dump_file.exists():
             self.output.write("Local dump file does not exist")
             return True
-        if not self.cache_file.exists():
-            self.output.write("Cache file does not exist")
-            return True
         if self.dump_changed():
             self.output.write("Dump File has changed")
             return True
@@ -103,10 +97,17 @@ class Downloader:
 
         :return: True if the dump file has changed, False otherwise.
         """
-        local_etag = self.cache_file.read_text()
         remote_etag = requests.head(self.download_url, allow_redirects=True).headers['Etag']
 
-        return local_etag != remote_etag
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT cache_key FROM sites WHERE name = %s", [self.site])
+            result = cursor.fetchone()
+            if result:
+                local_etag, = result
+
+                return local_etag != remote_etag
+
+        return True
 
 
 class Importer:
@@ -143,14 +144,14 @@ class Importer:
             self.output.write("Dump extracted")
             self.temp_dir = pathlib.Path(temp_dir)
             self.load_users()
-            self.load_badges()
-            self.load_user_badges()
-            self.load_posts()
-            self.load_comments()
-            self.load_post_history()
-            self.load_post_links()
-            self.load_post_votes()
-            self.load_tags()
+            # self.load_badges()
+            # self.load_user_badges()
+            # self.load_posts()
+            # self.load_comments()
+            # self.load_post_history()
+            # self.load_post_links()
+            # self.load_post_votes()
+            # self.load_tags()
         self.recreate_indexes()
         self.analyze()
         self.clear_caches()
@@ -213,24 +214,26 @@ class Importer:
         """
         password = make_password("password")
         with (self.temp_dir / 'users.csv').open('wt') as f:
-            self.output.write(f"Extracting users")
+            self.output.write("Extracting users")
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
                     row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
-                    True, row['Id'] == '-1', row['Id'] == '-1', password, row['Reputation'], row['CreationDate'],
-                    row['LastAccessDate'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
-                    row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['Views'], row['UpVotes'],
-                    row['DownVotes'],
+                    password, 'False'
+                    # True, row['Id'] == '-1', row['Id'] == '-1', password, row['Reputation'], row['CreationDate'],
+                    # row['LastAccessDate'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
+                    # row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['Views'], row['UpVotes'],
+                    # row['DownVotes'],
                 ])
         with (self.temp_dir / 'users.csv').open('rt') as f:
             self.output.write(f"Loading users")
             with connection.cursor() as cursor:
                 cursor.execute(f"TRUNCATE TABLE users CASCADE")
                 cursor.copy_from(f, table='users', columns=(
-                    'id', 'username', 'email', 'is_active', 'is_employee', 'is_moderator', 'password', 'reputation',
-                    'creation_date', 'last_access_date', 'display_name', 'website_url', 'location', 'about', 'views',
-                    'up_votes', 'down_votes'
+                    'id', 'username', 'email', 'password', 'is_superuser'
+                    # 'is_active', 'is_employee', 'is_moderator', 'password', 'reputation',
+                    # 'creation_date', 'last_access_date', 'display_name', 'website_url', 'location', 'about', 'views',
+                    # 'up_votes', 'down_votes'
                 ), sep=',', null='<NULL>')
         self.output.write("Users loaded")
 
@@ -468,7 +471,7 @@ class Command(BaseCommand):
         site = options['site']
         start = time.time()
         self.stdout.write(f"Loading data for {site}")
-        downloader = Downloader(site, self.stdout)
+        downloader = Downloader(site=site, output=self.stdout)
         downloader.download()
         importer = Importer(downloader.dump_file, self.stdout)
         importer.do_import()

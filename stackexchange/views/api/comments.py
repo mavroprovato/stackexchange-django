@@ -23,11 +23,11 @@ from .base import BaseViewSet
 class CommentViewSet(BaseViewSet):
     """The comment view set
     """
-    queryset = models.Comment.objects.select_related('post', 'user')
-    serializer_class = serializers.CommentSerializer
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
-    ordering_fields = (
-        filters.OrderingField('creation', 'creation_date', type=datetime.date),
-        filters.OrderingField('votes', 'score', type=int)
-    )
-    date_field = 'creation_date'
+    # queryset = models.Comment.objects.select_related('post', 'user')
+    # serializer_class = serializers.CommentSerializer
+    # filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
+    # ordering_fields = (
+    #     filters.OrderingField('creation', 'creation_date', type=datetime.date),
+    #     filters.OrderingField('votes', 'score', type=int)
+    # )
+    # date_field = 'creation_date'
