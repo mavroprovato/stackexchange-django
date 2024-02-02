@@ -97,7 +97,7 @@ class Downloader:
 
         :return: True if the dump file has changed, False otherwise.
         """
-        remote_etag = requests.head(self.download_url, allow_redirects=True).headers['Etag']
+        remote_etag = requests.head(self.download_url, allow_redirects=True).headers['Etag'].strip('"')
 
         with connection.cursor() as cursor:
             cursor.execute("SELECT cache_key FROM sites WHERE name = %s", [self.site])
@@ -218,8 +218,7 @@ class Importer:
             csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in self.iterate_xml(self.temp_dir / self.USERS_FILE):
                 csv_writer.writerow([
-                    row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com",
-                    password, 'False'
+                    row['Id'], 'admin' if row['Id'] == '-1' else f"user{row['Id']}", f"user{row['Id']}@example.com"
                     # True, row['Id'] == '-1', row['Id'] == '-1', password, row['Reputation'], row['CreationDate'],
                     # row['LastAccessDate'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
                     # row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['Views'], row['UpVotes'],
@@ -228,9 +227,9 @@ class Importer:
         with (self.temp_dir / 'users.csv').open('rt') as f:
             self.output.write(f"Loading users")
             with connection.cursor() as cursor:
-                cursor.execute(f"TRUNCATE TABLE users CASCADE")
-                cursor.copy_from(f, table='users', columns=(
-                    'id', 'username', 'email', 'password', 'is_superuser'
+                cursor.execute(f"TRUNCATE TABLE site_users CASCADE")
+                cursor.copy_from(f, table='site_users', columns=(
+                    'id', 'username', 'email',
                     # 'is_active', 'is_employee', 'is_moderator', 'password', 'reputation',
                     # 'creation_date', 'last_access_date', 'display_name', 'website_url', 'location', 'about', 'views',
                     # 'up_votes', 'down_votes'

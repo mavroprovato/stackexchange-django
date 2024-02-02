@@ -28,12 +28,22 @@ class Site(models.Model):
         return str(self.name)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser):
     """The user model
     """
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ('email', )
+    EMAIL_FIELD = 'email'
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
+    email = models.EmailField(help_text="The user email", max_length=255, unique=True)
+
+    class Meta:
+        db_table = 'users'
+
+
+class SiteUser(models.Model):
+    """The site user model
+    """
     username = models.CharField(help_text="The user name", max_length=255, unique=True)
     email = models.EmailField(help_text="The user email", max_length=255, unique=True)
 #     display_name = models.CharField(help_text="The user display name", max_length=255)
@@ -54,7 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 #     objects = managers.UserManager()
 
     class Meta:
-        db_table = 'users'
+        db_table = 'site_users'
 #         indexes = (
 #             models.Index(fields=('-reputation', 'id')), models.Index(fields=('-creation_date', 'id')),
 #             models.Index(fields=('display_name', 'id')), models.Index(fields=('-last_modified_date', 'id'))
@@ -67,35 +77,19 @@ class User(AbstractBaseUser, PermissionsMixin):
 #         """
 #         return str(self.display_name)
 
-    @property
-    def is_staff(self) -> bool:
-        """Returns true if the user is a member of the staff.
-
-        :return: True if the user is a member of the staff.
-        """
-        return False
-
-    @property
-    def is_superuser(self) -> bool:
-        """Returns true if the user is a superuser.
-
-        :return: True if the user is a superuser.
-        """
-        return False
-#
 #     def slug(self) -> str:
 #         """Return the slug for the user.
 #
 #         :return: The slug for the user.
 #         """
 #         return slugify(self.display_name, allow_unicode=True)
-
-    def get_absolute_url(self) -> str:
-        """Get the absolute URL for the user.
-
-        :return: The absolute URL for the user.
-        """
-        return reverse('web-user-detail-slug', args=(str(self.id), self.slug()))
+#
+#     def get_absolute_url(self) -> str:
+#         """Get the absolute URL for the user.
+#
+#         :return: The absolute URL for the user.
+#         """
+#         return reverse('web-user-detail-slug', args=(str(self.id), self.slug()))
 
 
 # class Badge(models.Model):
