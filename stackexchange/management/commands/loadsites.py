@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
             models.Site.objects.update_or_create(pk=site['Id'], defaults={
-                'name': site['TinyName'], 'description': site['Name'], 'long_description': site['LongName'],
+                'name': get_site_name(site['Url']), 'description': site['Name'], 'long_description': site['LongName'],
                 'tagline': site['Tagline'], 'url': site['Url'], 'icon_url': site['IconUrl'],
                 'badge_icon_url': site['BadgeIconUrl'], 'image_url': site['ImageUrl'], 'tag_css': site['TagCss'],
                 'total_questions': site['TotalQuestions'], 'total_answers': site['TotalAnswers'],
@@ -37,3 +37,12 @@ class Command(BaseCommand):
         for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
             if 'ParentId' in site:
                 models.Site.objects.filter(pk=site['Id']).update(parent=site['ParentId'])
+
+
+def get_site_name(site_url: str) -> str:
+    """Get the site name from the site URL.
+
+    :param site_url: The site URL.
+    :return: The site name.
+    """
+    return site_url.replace('https://', '').replace('.stackexchange.com', '').replace('.com', '')
