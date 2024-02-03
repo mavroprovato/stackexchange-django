@@ -23,7 +23,7 @@ class SiteDataLoader:
 
         :param site: The site name.
         """
-        self.site = site
+        self.site_id = models.Site.objects.get(name=site)
 
         downloader = dowloader.Downloader(
             filename=f"{models.Site.objects.get(name=site).url.replace('https://', '')}.7z")
