@@ -28,7 +28,7 @@ class Command(BaseCommand):
             models.Site.objects.update_or_create(pk=site['Id'], defaults={
                 'name': site['TinyName'], 'description': site['Name'], 'long_description': site['LongName'],
                 'tagline': site['Tagline'], 'url': site['Url'], 'icon_url': site['IconUrl'],
-                'badge_icon_url': site['BadgeIconUrl'], 'tag_css': site['TagCss'],
+                'badge_icon_url': site['BadgeIconUrl'], 'image_url': site['ImageUrl'], 'tag_css': site['TagCss'],
                 'total_questions': site['TotalQuestions'], 'total_answers': site['TotalAnswers'],
                 'total_users': site['TotalUsers'], 'total_comments': site['TotalComments'],
                 'total_tags': site['TotalTags'], 'last_post': site['LastPost'] + '+00:00'
