@@ -22,7 +22,9 @@ class Command(BaseCommand):
         logging.basicConfig(
             stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s %(message)s')
         downloader = services.dowloader.Downloader(filename='Sites.xml')
-        for site in services.xmlparser.XmlFileIterator(xml_file=downloader.get_file()):
+        sites_file = downloader.get_file()
+
+        for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
             models.Site.objects.update_or_create(pk=site['Id'], defaults={
                 'name': site['TinyName'], 'description': site['Name'], 'long_description': site['LongName'],
                 'tagline': site['Tagline'], 'url': site['Url'], 'icon_url': site['IconUrl'],
@@ -31,3 +33,7 @@ class Command(BaseCommand):
                 'total_users': site['TotalUsers'], 'total_comments': site['TotalComments'],
                 'total_tags': site['TotalTags'], 'last_post': site['LastPost'] + '+00:00'
             })
+
+        for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
+            if 'ParentId' in site:
+                models.Site.objects.filter(pk=site['Id']).update(parent=site['ParentId'])
