@@ -23,7 +23,10 @@ class UserManager(BaseUserManager):
         :param extra_fields: The user extra field.
         :return: The created user.
         """
-        return super()._create_user(username, email, password, is_employee=False, **extra_fields)
+        if 'display_name' not in extra_fields:
+            extra_fields['display_name'] = username
+
+        return super()._create_user(username, email, password, staff=False, **extra_fields)
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         """Create a superuser.
@@ -34,24 +37,10 @@ class UserManager(BaseUserManager):
         :param extra_fields: The user extra field.
         :return: The created superuser.
         """
-        return self._create_user(username, email, password, is_employee=True, **extra_fields)
+        if 'display_name' not in extra_fields:
+            extra_fields['display_name'] = username
 
-    def with_badge_counts(self) -> QuerySet:
-        """Annotate the queryset with the badge counts per badge type. Tree fields are added, named
-        `<badge_class>_count`.
-
-        :return: The annotated queryset.
-        """
-        return self.annotate(**{
-            f"{badge_class.name.lower()}_count": Coalesce(Subquery(
-                apps.get_model('stackexchange', 'UserBadge').objects.filter(
-                    user=OuterRef('pk'), badge__badge_class=badge_class.value
-                ).values('badge__badge_class').annotate(
-                    count=Count('pk')
-                ).values('count')
-            ), 0)
-            for badge_class in enums.BadgeClass
-        })
+        return self._create_user(username, email, password, staff=True, **extra_fields)
 
 
 class BadgeQuerySet(QuerySet):

@@ -3,6 +3,8 @@
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 
+from stackexchange import managers
+
 
 class Site(models.Model):
     """The site model
@@ -40,10 +42,14 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'username'
 
     username = models.CharField(help_text="The user name", max_length=255, unique=True)
+    email = models.EmailField(help_text="The user email", max_length=255, unique=True, blank=True)
     display_name = models.CharField(help_text="The user display name", max_length=255)
-    website_url = models.URLField(help_text="The user web site URL", null=True, blank=True)
-    location = models.CharField(help_text="The user location", max_length=255, null=True, blank=True)
-    about = models.TextField(help_text="The user about information", null=True, blank=True)
+    website_url = models.URLField(help_text="The user web site URL", blank=True)
+    location = models.CharField(help_text="The user location", max_length=255, blank=True)
+    about = models.TextField(help_text="The user about information", blank=True)
+    staff = models.BooleanField(default=False, help_text="True if the user is member of the staff")
+
+    objects = managers.UserManager()
 
     class Meta:
         db_table = 'users'
@@ -53,4 +59,24 @@ class User(AbstractBaseUser):
 
         :return: True if the user is a staff user.
         """
-        return False
+        return self.staff
+
+    def has_perm(self, *_) -> bool:
+        """Return True if the user has the specified permission. Admin users have all permissions.
+
+        :return: True if the user is an admin user.
+        """
+        return self.is_staff()
+
+    def has_perms(self, perm_list, obj=None) -> bool:
+        """Return True if the user has each of the specified permissions. If object is passed, check if the user has all
+        required perms for it.
+        """
+        return all(self.has_perm(perm, obj) for perm in perm_list)
+
+    def has_module_perms(self, *_) -> bool:
+        """Return True if the user has any permissions in the given app label. Admin users have all permissions.
+
+        :return: True if the user is an admin user.
+        """
+        return self.is_staff()

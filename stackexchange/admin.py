@@ -6,6 +6,26 @@ from django.contrib.auth.admin import UserAdmin as UserAdminBase
 from stackexchange import models
 
 
+@admin.register(models.User)
+class UserAdmin(UserAdminBase):
+    """Admin for users
+    """
+    list_display = ('username', 'email', 'display_name', 'staff')
+    list_filter = ()
+    filter_horizontal = ()
+    search_fields = ('username', 'display_name')
+
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('email', 'display_name', 'website_url', 'location', 'about')}),
+    )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'password1', 'password2'),
+        }),
+    )
+
 # @admin.register(models.Badge)
 # class BadgeAdmin(admin.ModelAdmin):
 #     """Admin for badges
@@ -16,35 +36,8 @@ from stackexchange import models
 #     ordering = ('name',)
 #
 #
-# @admin.register(models.User)
-# class UserAdmin(UserAdminBase):
-#     """Admin for users
-#     """
-#     list_display = (
-#         'display_name', 'reputation', 'creation_date', 'is_active', 'is_moderator', 'website_url', 'location',
-#         'creation_date'
-#     )
-#     list_filter = ()
-#     filter_horizontal = ()
-#     search_fields = ('display_name',)
-#     ordering = ('pk', )
-#
-#     fieldsets = (
-#         (None, {'fields': ('username', 'password')}),
-#         ('Personal info', {'fields': ('email', 'display_name', 'website_url', 'location', 'about')}),
-#         ('Important dates', {'fields': ('creation_date', 'last_modified_date', 'last_access_date')}),
-#         ('Privileges', {'fields': ('is_active', 'is_moderator', 'is_employee')}),
-#         ('Statistics', {'fields': ('views', 'up_votes', 'down_votes')}),
-#     )
-#     add_fieldsets = (
-#         (None, {
-#             'classes': ('wide',),
-#             'fields': ('username', 'password1', 'password2'),
-#         }),
-#     )
-#     readonly_fields = ('creation_date', 'last_modified_date', 'last_access_date', 'views', 'up_votes', 'down_votes')
-#
-#
+
+
 # @admin.register(models.Tag)
 # class TagAdmin(admin.ModelAdmin):
 #     """Admin for tags
