@@ -25,3 +25,13 @@ class UserAdmin(UserAdminBase):
             'fields': ('username', 'password1', 'password2'),
         }),
     )
+
+
+@admin.register(models.Site)
+class SiteAdmin(admin.ModelAdmin):
+    """Admin for sites
+    """
+    list_display = ('name', 'description', 'long_description', 'url')
+    search_fields = ('name', )
+    ordering = ('name', )
+    autocomplete_fields = ('parent', )
