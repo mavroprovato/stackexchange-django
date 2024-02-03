@@ -9,9 +9,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandParser
 from django.db import connection, utils
 from django.core.management import call_command
-import requests
 import py7zr
-import tqdm
 
 from stackexchange import services
 
