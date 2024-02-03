@@ -81,3 +81,20 @@ class Site(models.Model):
         :return: The site name.
         """
         return str(self.name)
+
+
+class SiteUser(models.Model):
+    """The site user model
+    """
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site user")
+    site_user_id = models.PositiveIntegerField(help_text="The site user id")
+    display_name = models.CharField(help_text="The site user display name", max_length=255)
+    creation_date = models.DateTimeField(help_text="The site user creation data")
+    last_access_date = models.DateTimeField(help_text="The site user last access data")
+    reputation = models.PositiveIntegerField(help_text="The site user reputation")
+    views = models.PositiveIntegerField(help_text="The site user views")
+    up_votes = models.PositiveIntegerField(help_text="The site user up votes")
+    down_votes = models.PositiveIntegerField(help_text="The site user down votes")
+
+    class Meta:
+        db_table = 'site_users'
