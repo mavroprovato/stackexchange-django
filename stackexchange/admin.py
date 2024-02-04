@@ -35,3 +35,13 @@ class SiteAdmin(admin.ModelAdmin):
     search_fields = ('name', )
     ordering = ('name', )
     autocomplete_fields = ('parent', )
+
+
+@admin.register(models.SiteUser)
+class SiteUserAdmin(admin.ModelAdmin):
+    """Admin for site users
+    """
+    list_display = ('display_name', 'site', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
+    search_fields = ('display_name', )
+    list_filter = ('site', )
+    autocomplete_fields = ('site', )
