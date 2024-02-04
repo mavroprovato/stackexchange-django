@@ -83,8 +83,8 @@ class SiteUser(models.Model):
     """The site user model
     """
     site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site user")
-    display_name = models.CharField(help_text="The site user display name", max_length=255)
     site_user_id = models.PositiveIntegerField(help_text="The site user id")
+    display_name = models.CharField(max_length=255, help_text="The site user display name")
     website_url = models.URLField(null=True, blank=True, help_text="The user web site URL")
     location = models.CharField(null=True, max_length=255, blank=True, help_text="The user location")
     about = models.TextField(null=True, blank=True, help_text="The user about information")
@@ -97,3 +97,4 @@ class SiteUser(models.Model):
 
     class Meta:
         db_table = 'site_users'
+        unique_together = ('site', 'site_user_id')

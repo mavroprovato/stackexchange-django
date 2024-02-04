@@ -6,6 +6,7 @@ import pathlib
 import tempfile
 
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from django.db import connection
 import py7zr
 
@@ -80,7 +81,10 @@ class UserLoader:
                 if 'AccountId' in row:
                     user_id = int(row['AccountId'])
                     if user_id not in self.existing_users:
-                        users_writer.writerow([user_id, f"user{row['AccountId']}", '', '<NULL>', False])
+                        users_writer.writerow([
+                            user_id, 'admin' if user_id == -1 else f"user{row['AccountId']}",
+                            make_password('admin') if user_id == -1 else '', '<NULL>', user_id == -1
+                        ])
                         self.existing_users.add(user_id)
 
         logger.info("Loading users")

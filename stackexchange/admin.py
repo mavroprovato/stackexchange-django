@@ -15,6 +15,10 @@ class UserAdmin(UserAdminBase):
     filter_horizontal = ()
     search_fields = ('username', )
 
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        ('Personal info', {'fields': ('email', )}),
+    )
     add_fieldsets = (
         (None, {
             'classes': ('wide', ),
