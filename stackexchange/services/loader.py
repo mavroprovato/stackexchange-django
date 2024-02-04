@@ -92,7 +92,7 @@ class UserLoader:
                         self.existing_users.add(user_id)
 
                     site_users_writer.writerow([
-                        self.site_id, row['Id'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
+                        self.site_id, row['Id'], user_id, row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
                         row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['CreationDate'],
                         row['LastAccessDate'], row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
                     ])
@@ -110,7 +110,7 @@ class UserLoader:
             with (self.data_dir / 'site_users.csv').open('rt') as site_users_file:
                 cursor.copy_from(
                     site_users_file, table='site_users', columns=(
-                        'site_id', 'site_user_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
-                        'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+                        'site_id', 'site_user_id', 'user_id', 'display_name', 'website_url', 'location', 'about',
+                        'creation_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
                     ),
                     sep=',', null='<NULL>')

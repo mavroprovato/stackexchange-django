@@ -44,4 +44,4 @@ class SiteUserAdmin(admin.ModelAdmin):
     list_display = ('display_name', 'site', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
     search_fields = ('display_name', )
     list_filter = ('site', )
-    autocomplete_fields = ('site', )
+    autocomplete_fields = ('site', 'user')
