@@ -75,8 +75,12 @@ class UserLoader:
         """Load the users.
         """
         logger.info("Getting user data")
-        with (self.data_dir / 'users.csv').open('wt') as users_file:
+        with (
+            (self.data_dir / 'users.csv').open('wt') as users_file,
+            (self.data_dir / 'site_users.csv').open('wt') as site_users_file
+        ):
             users_writer = csv.writer(users_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            site_users_writer = csv.writer(site_users_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Users.xml'):
                 if 'AccountId' in row:
                     user_id = int(row['AccountId'])
@@ -87,9 +91,26 @@ class UserLoader:
                         ])
                         self.existing_users.add(user_id)
 
+                    site_users_writer.writerow([
+                        self.site_id, row['Id'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
+                        row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['CreationDate'],
+                        row['LastAccessDate'], row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
+                    ])
+
         logger.info("Loading users")
-        with (self.data_dir / 'users.csv').open('rt') as users_file:
-            with connection.cursor() as cursor:
+        with connection.cursor() as cursor:
+            with (self.data_dir / 'users.csv').open('rt') as users_file:
                 cursor.copy_from(
                     users_file, table='users', columns=('id', 'username', 'password', 'email', 'staff'),
+                    sep=',', null='<NULL>')
+
+        logger.info("Loading site users")
+        models.SiteUser.objects.filter(site_id=self.site_id).delete()
+        with connection.cursor() as cursor:
+            with (self.data_dir / 'site_users.csv').open('rt') as site_users_file:
+                cursor.copy_from(
+                    site_users_file, table='site_users', columns=(
+                        'site_id', 'site_user_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
+                        'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+                    ),
                     sep=',', null='<NULL>')
