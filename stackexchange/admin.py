@@ -10,15 +10,11 @@ from stackexchange import models
 class UserAdmin(UserAdminBase):
     """Admin for users
     """
-    list_display = ('username', 'email', 'display_name', 'staff')
+    list_display = ('username', 'email', 'staff')
     list_filter = ()
     filter_horizontal = ()
-    search_fields = ('username', 'display_name')
+    search_fields = ('username', )
 
-    fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('email', 'display_name', 'website_url', 'location', 'about')}),
-    )
     add_fieldsets = (
         (None, {
             'classes': ('wide', ),

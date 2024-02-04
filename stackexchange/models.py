@@ -11,12 +11,8 @@ class User(AbstractBaseUser):
     """
     USERNAME_FIELD = 'username'
 
-    username = models.CharField(help_text="The user name", max_length=255, unique=True)
-    email = models.EmailField(help_text="The user email", max_length=255, unique=True, blank=True)
-    display_name = models.CharField(help_text="The user display name", max_length=255)
-    website_url = models.URLField(help_text="The user web site URL", blank=True)
-    location = models.CharField(help_text="The user location", max_length=255, blank=True)
-    about = models.TextField(help_text="The user about information", blank=True)
+    username = models.CharField(max_length=255, unique=True, help_text="The user name")
+    email = models.EmailField(max_length=255, unique=True, null=True, blank=True, help_text="The user email")
     staff = models.BooleanField(default=False, help_text="True if the user is member of the staff")
 
     objects = managers.UserManager()
@@ -87,8 +83,11 @@ class SiteUser(models.Model):
     """The site user model
     """
     site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site user")
-    site_user_id = models.PositiveIntegerField(help_text="The site user id")
     display_name = models.CharField(help_text="The site user display name", max_length=255)
+    site_user_id = models.PositiveIntegerField(help_text="The site user id")
+    website_url = models.URLField(null=True, blank=True, help_text="The user web site URL")
+    location = models.CharField(null=True, max_length=255, blank=True, help_text="The user location")
+    about = models.TextField(null=True, blank=True, help_text="The user about information")
     creation_date = models.DateTimeField(help_text="The site user creation data")
     last_access_date = models.DateTimeField(help_text="The site user last access data")
     reputation = models.PositiveIntegerField(help_text="The site user reputation")
