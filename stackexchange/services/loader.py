@@ -74,7 +74,7 @@ class UserLoader:
     def load(self):
         """Load the users.
         """
-        logger.info("Getting user data")
+        logger.info("Loading user data")
         with (
             (self.data_dir / 'users.csv').open('wt') as users_file,
             (self.data_dir / 'site_users.csv').open('wt') as site_users_file
@@ -82,6 +82,7 @@ class UserLoader:
             users_writer = csv.writer(users_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             site_users_writer = csv.writer(site_users_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Users.xml'):
+                user_id = None
                 if 'AccountId' in row:
                     user_id = int(row['AccountId'])
                     if user_id not in self.existing_users:
@@ -91,11 +92,12 @@ class UserLoader:
                         ])
                         self.existing_users.add(user_id)
 
-                    site_users_writer.writerow([
-                        self.site_id, row['Id'], user_id, row['DisplayName'], row.get('WebsiteUrl', '<NULL>'),
-                        row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'), row['CreationDate'],
-                        row['LastAccessDate'], row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
-                    ])
+                site_users_writer.writerow([
+                    self.site_id, row['Id'], '<NULL>' if user_id is None else user_id, row['DisplayName'],
+                    row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'),
+                    row['CreationDate'], row['LastAccessDate'], row['Reputation'], row['Views'], row['UpVotes'],
+                    row['DownVotes']
+                ])
 
         logger.info("Loading users")
         with connection.cursor() as cursor:
@@ -112,5 +114,4 @@ class UserLoader:
                     site_users_file, table='site_users', columns=(
                         'site_id', 'site_user_id', 'user_id', 'display_name', 'website_url', 'location', 'about',
                         'creation_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
-                    ),
-                    sep=',', null='<NULL>')
+                    ), sep=',', null='<NULL>')
