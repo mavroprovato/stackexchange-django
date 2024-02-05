@@ -1,5 +1,6 @@
 """Class for loading site data.
 """
+import abc
 import csv
 import logging
 import pathlib
@@ -17,55 +18,11 @@ from . import dowloader, siteinfo, xmlparser
 logger = logging.getLogger(__name__)
 
 
-class SiteDataLoader:
-    """Helper class to load site data
+class BaseFileLoader:
+    """The base class for file loading.
     """
-    def __init__(self, site: str):
-        """Create the importer.
-
-        :param site: The site name.
-        """
-        site = models.Site.objects.get(name=site)
-        self.site_id = site.id
-        # Get the latest file
-        downloader = dowloader.Downloader(filename=f"{site.url.replace('https://', '')}.7z")
-        self.site_data_file = downloader.get_file()
-
-    def load(self):
-        """Load the site data.
-        """
-        # Extract the data from the archive
-        with tempfile.TemporaryDirectory(dir=settings.TEMP_DIR) as temp_dir:
-            logger.info("Extracting data file %s", self.site_data_file)
-            with py7zr.SevenZipFile(self.site_data_file, mode='r') as dump_file:
-                dump_file.extractall(path=temp_dir)
-            logger.info("Data file extracted")
-
-            user_loader = UserLoader(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
-            user_loader.load()
-
-            badge_loader = BadgeLoader(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
-            badge_loader.load()
-
-        # Post load actions
-        self.analyze()
-        siteinfo.clear_cache()
-
-    @staticmethod
-    def analyze():
-        """Analyze the tables.
-        """
-        logger.info("Analyzing the database")
-        with connection.cursor() as cursor:
-            cursor.execute("ANALYZE")
-        logger.info("Analyze completed")
-
-
-class UserLoader:
-    """The user loader
-    """
-    def __init__(self, site_id: int, data_dir: pathlib.Path):
-        """Create the user loader.
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Create the file loader.
 
         :param site_id: The site identifier.
         :param data_dir: The data directory.
@@ -73,7 +30,16 @@ class UserLoader:
         self.site_id = site_id
         self.data_dir = data_dir
 
-    def load(self):
+    @abc.abstractmethod
+    def load(self) -> None:
+        """Load the data.
+        """
+
+
+class UserLoader(BaseFileLoader):
+    """The user loader
+    """
+    def load(self) -> None:
         """Load the users.
         """
         users = set(models.User.objects.values_list('pk', flat=True))
@@ -120,19 +86,10 @@ class UserLoader:
                     ), sep=',', null='<NULL>')
 
 
-class BadgeLoader:
+class BadgeLoader(BaseFileLoader):
     """The badge loader
     """
-    def __init__(self, site_id: int, data_dir: pathlib.Path):
-        """Create the badge loader.
-
-        :param site_id: The site identifier.
-        :param data_dir: The data directory.
-        """
-        self.site_id = site_id
-        self.data_dir = data_dir
-
-    def load(self):
+    def load(self) -> None:
         """Load the badges.
         """
         badges = {}
@@ -163,3 +120,48 @@ class BadgeLoader:
                     user_badges_file, table='user_badges', columns=(
                         'site_id', 'user_id', 'badge_id', 'date_awarded'
                     ), sep=',', null='<NULL>')
+
+
+class SiteDataLoader:
+    """Helper class to load site data
+    """
+    LOADERS = (UserLoader, BadgeLoader)
+
+    def __init__(self, site: str):
+        """Create the importer.
+
+        :param site: The site name.
+        """
+        site = models.Site.objects.get(name=site)
+        self.site_id = site.id
+        # Get the latest file
+        downloader = dowloader.Downloader(filename=f"{site.url.replace('https://', '')}.7z")
+        self.site_data_file = downloader.get_file()
+
+    def load(self):
+        """Load the site data.
+        """
+        # Extract the data from the archive
+        with tempfile.TemporaryDirectory(dir=settings.TEMP_DIR) as temp_dir:
+            logger.info("Extracting data file %s", self.site_data_file)
+            with py7zr.SevenZipFile(self.site_data_file, mode='r') as dump_file:
+                dump_file.extractall(path=temp_dir)
+            logger.info("Data file extracted")
+
+            for loader_class in self.LOADERS:
+                loader = loader_class(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
+                loader.load()
+
+        # Post load actions
+        self.analyze()
+        siteinfo.clear_cache()
+
+    @staticmethod
+    def analyze():
+        """Analyze the tables.
+        """
+        logger.info("Analyzing the database")
+        with connection.cursor() as cursor:
+            cursor.execute("ANALYZE")
+        logger.info("Analyze completed")
+
