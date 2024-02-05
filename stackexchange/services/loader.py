@@ -135,21 +135,31 @@ class BadgeLoader:
     def load(self):
         """Load the badges.
         """
-        badges = set()
-        with (self.data_dir / 'badges.csv').open('wt') as badges_file:
-            badges_writer = csv.writer(badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+        badges = {}
+        logger.info("Loading badges")
+        models.UserBadge.objects.filter(site_id=self.site_id).delete()
+        models.Badge.objects.filter(site_id=self.site_id).delete()
+        site_users = {
+            site_user['site_user_id']: site_user['pk'] for site_user in
+            models.SiteUser.objects.filter(site_id=self.site_id).values('pk', 'site_user_id')
+        }
+        with (self.data_dir / 'user_badges.csv').open('wt') as user_badges_file:
+            user_badges_writer = csv.writer(user_badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
                 if row['Name'] not in badges:
-                    badges_writer.writerow([
-                        self.site_id, row['Name'], row['Class'],
-                        enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
-                    ])
-                    badges.add(row['Name'])
+                    badge = models.Badge.objects.create(
+                        site_id=self.site_id, name=row['Name'], badge_class=row['Class'],
+                        badge_type=enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True'
+                        else enums.BadgeType.NAMED.value
+                    )
+                    badges[badge.name] = badge.pk
+                user_badges_writer.writerow([
+                    self.site_id, site_users[int(row['UserId'])], badges[row['Name']], row['Date']
+                ])
 
-        logger.info("Loading badges")
-        models.Badge.objects.filter(site_id=self.site_id).delete()
         with connection.cursor() as cursor:
-            with (self.data_dir / 'badges.csv').open('rt') as badges_file:
+            with (self.data_dir / 'user_badges.csv').open('rt') as user_badges_file:
                 cursor.copy_from(
-                    badges_file, table='badges', columns=('site_id', 'name', 'badge_class', 'badge_type'), sep=',',
-                    null='<NULL>')
+                    user_badges_file, table='user_badges', columns=(
+                        'site_id', 'user_id', 'badge_id', 'date_awarded'
+                    ), sep=',', null='<NULL>')

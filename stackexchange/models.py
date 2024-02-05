@@ -2,6 +2,7 @@
 """
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
+from django.utils import timezone
 
 from stackexchange import enums, managers
 
@@ -130,3 +131,17 @@ class Badge(models.Model):
         :return: The badge name.
         """
         return str(self.name)
+
+
+class UserBadge(models.Model):
+    """The user badge model.
+    """
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site")
+    user = models.ForeignKey(SiteUser, help_text="The user", on_delete=models.CASCADE, related_name='badges')
+    badge = models.ForeignKey(Badge, help_text="The badge", on_delete=models.CASCADE, related_name='users')
+    date_awarded = models.DateTimeField(help_text="The date awarded", default=timezone.now)
+
+    objects = managers.UserBadgeQuerySet().as_manager()
+
+    class Meta:
+        db_table = 'user_badges'
