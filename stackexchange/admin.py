@@ -6,6 +6,16 @@ from django.contrib.auth.admin import UserAdmin as UserAdminBase
 from stackexchange import models
 
 
+@admin.register(models.Site)
+class SiteAdmin(admin.ModelAdmin):
+    """Admin for sites
+    """
+    list_display = ('name', 'description', 'long_description', 'url')
+    search_fields = ('name', )
+    ordering = ('name', )
+    autocomplete_fields = ('parent', )
+
+
 @admin.register(models.User)
 class UserAdmin(UserAdminBase):
     """Admin for users
@@ -27,14 +37,12 @@ class UserAdmin(UserAdminBase):
     )
 
 
-@admin.register(models.Site)
-class SiteAdmin(admin.ModelAdmin):
-    """Admin for sites
+class SiteUserBadgeInline(admin.TabularInline):
+    """The user badge inline
     """
-    list_display = ('name', 'description', 'long_description', 'url')
-    search_fields = ('name', )
-    ordering = ('name', )
-    autocomplete_fields = ('parent', )
+    model = models.UserBadge
+    autocomplete_fields = ('site', 'badge')
+    extra = 1
 
 
 @admin.register(models.SiteUser)
@@ -45,6 +53,7 @@ class SiteUserAdmin(admin.ModelAdmin):
     search_fields = ('display_name', )
     list_filter = ('site', )
     autocomplete_fields = ('site', 'user')
+    inlines = (SiteUserBadgeInline, )
 
 
 @admin.register(models.Badge)
