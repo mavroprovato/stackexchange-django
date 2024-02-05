@@ -37,13 +37,13 @@ class BaseFileLoader:
 
 
 class UserLoader(BaseFileLoader):
-    """The user loader
+    """The user loader.
     """
     def load(self) -> None:
         """Load the users.
         """
         users = set(models.User.objects.values_list('pk', flat=True))
-        logger.info("Loading user data")
+        logger.info("Extracting users")
         with (
             (self.data_dir / 'users.csv').open('wt') as users_file,
             (self.data_dir / 'site_users.csv').open('wt') as site_users_file
@@ -87,13 +87,13 @@ class UserLoader(BaseFileLoader):
 
 
 class BadgeLoader(BaseFileLoader):
-    """The badge loader
+    """The badge loader.
     """
     def load(self) -> None:
         """Load the badges.
         """
         badges = {}
-        logger.info("Loading badges")
+        logger.info("Extracting badges")
         models.UserBadge.objects.filter(site_id=self.site_id).delete()
         models.Badge.objects.filter(site_id=self.site_id).delete()
         site_users = {
@@ -114,6 +114,7 @@ class BadgeLoader(BaseFileLoader):
                     self.site_id, site_users[int(row['UserId'])], badges[row['Name']], row['Date']
                 ])
 
+        logger.info("Loading badges")
         with connection.cursor() as cursor:
             with (self.data_dir / 'user_badges.csv').open('rt') as user_badges_file:
                 cursor.copy_from(
@@ -122,10 +123,35 @@ class BadgeLoader(BaseFileLoader):
                     ), sep=',', null='<NULL>')
 
 
+class PostLoader(BaseFileLoader):
+    """The post loader.
+    """
+    def load(self) -> None:
+        """Load the posts.
+        """
+        logger.info("Extracting posts")
+        with (self.data_dir / 'posts.csv').open('wt') as posts_file:
+            posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
+                posts_writer.writerow([
+                    self.site_id, row['Id'], row['PostTypeId'], row['Body'], row['CreationDate'],
+                    row['LastActivityDate'], row['Score'], row['ContentLicense']
+                ])
+
+        logger.info("Loading posts")
+        with connection.cursor() as cursor:
+            with (self.data_dir / 'posts.csv').open('rt') as posts_file:
+                cursor.copy_from(
+                    posts_file, table='posts', columns=(
+                        'site_id', 'site_post_id', 'type', 'body', 'creation_date', 'last_activity_date', 'score',
+                        'content_license'
+                    ), sep=',', null='<NULL>')
+
+
 class SiteDataLoader:
     """Helper class to load site data
     """
-    LOADERS = (UserLoader, BadgeLoader)
+    LOADERS = (UserLoader, BadgeLoader, PostLoader)
 
     def __init__(self, site: str):
         """Create the importer.
@@ -164,4 +190,3 @@ class SiteDataLoader:
         with connection.cursor() as cursor:
             cursor.execute("ANALYZE")
         logger.info("Analyze completed")
-

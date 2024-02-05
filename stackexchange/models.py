@@ -8,7 +8,7 @@ from stackexchange import enums, managers
 
 
 class User(AbstractBaseUser):
-    """The user model
+    """The user model.
     """
     USERNAME_FIELD = 'username'
 
@@ -50,7 +50,7 @@ class User(AbstractBaseUser):
 
 
 class Site(models.Model):
-    """The site model
+    """The site model.
     """
     name = models.CharField(max_length=32, unique=True, help_text="The site name")
     description = models.CharField(max_length=64, unique=True, help_text="The site description")
@@ -81,7 +81,7 @@ class Site(models.Model):
 
 
 class SiteUser(models.Model):
-    """The site user model
+    """The site user model.
     """
     site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site")
     user = models.ForeignKey(User, on_delete=models.CASCADE, help_text="The user", null=True, blank=True)
@@ -110,7 +110,7 @@ class SiteUser(models.Model):
 
 
 class Badge(models.Model):
-    """The badge model
+    """The badge model.
     """
     site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site")
     name = models.CharField(max_length=255, help_text="The badge name")
@@ -145,3 +145,51 @@ class UserBadge(models.Model):
 
     class Meta:
         db_table = 'user_badges'
+
+
+class Post(models.Model):
+    """The post model.
+    """
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site")
+    site_post_id = models.IntegerField(help_text="The site post id")
+    question = models.ForeignKey(
+        'Post', help_text="The post question, if the post type is ANSWER",
+        on_delete=models.CASCADE, null=True, blank=True, related_name='answers')
+    accepted_answer = models.ForeignKey(
+        'Post', help_text="The accepted answer, if the post type is QUESTION", on_delete=models.CASCADE, null=True,
+        blank=True, related_name='accepted_answers')
+    owner = models.ForeignKey(
+        SiteUser, help_text="The owner of the post", on_delete=models.CASCADE, related_name='posts', null=True,
+        blank=True)
+    last_editor = models.ForeignKey(
+        SiteUser, help_text="The last editor of the post", on_delete=models.CASCADE, related_name='last_edited_posts',
+        null=True, blank=True)
+    type = models.PositiveSmallIntegerField(
+        help_text="The post type", choices=((pt.value, pt.description) for pt in enums.PostType))
+    title = models.CharField(help_text="The post title", max_length=1000, null=True, blank=True)
+    body = models.TextField(help_text="The post body")
+    last_editor_display_name = models.CharField(
+        help_text="The last editor display name", max_length=255, null=True, blank=True)
+    creation_date = models.DateTimeField(help_text="The post creation date", default=timezone.now)
+    last_edit_date = models.DateTimeField(help_text="The post last edit date", null=True, blank=True, auto_now=True)
+    last_activity_date = models.DateTimeField(help_text="The post last activity date")
+    community_owned_date = models.DateTimeField(help_text="The post community owned date", null=True, blank=True)
+    closed_date = models.DateTimeField(help_text="The post closed date", null=True, blank=True)
+    score = models.IntegerField(help_text="The post score")
+    view_count = models.PositiveIntegerField(help_text="The post view count", null=True, blank=True)
+    answer_count = models.PositiveIntegerField(help_text="The post answer count", null=True, blank=True)
+    comment_count = models.PositiveIntegerField(help_text="The post comment count", null=True, blank=True)
+    favorite_count = models.PositiveIntegerField(help_text="The post favorite count", null=True, blank=True)
+    content_license = models.CharField(
+        help_text="The content license", max_length=max(len(cl.name) for cl in enums.ContentLicense),
+        choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name)
+
+    class Meta:
+        db_table = 'posts'
+
+    def __str__(self) -> str:
+        """Return the string representation of the post.
+
+        :return: The post title.
+        """
+        return str(self.title)
