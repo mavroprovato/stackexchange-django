@@ -106,3 +106,27 @@ class SiteUser(models.Model):
         :return: The user display name.
         """
         return str(self.display_name)
+
+
+class Badge(models.Model):
+    """The badge model
+    """
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site")
+    name = models.CharField(max_length=255, help_text="The badge name")
+    badge_class = models.PositiveSmallIntegerField(
+        choices=((bc.value, bc.description) for bc in enums.BadgeClass), help_text="The badge class")
+    badge_type = models.PositiveSmallIntegerField(
+        choices=((bt.value, bt.description) for bt in enums.BadgeType), help_text="The badge type")
+
+    objects = managers.BadgeQuerySet().as_manager()
+
+    class Meta:
+        db_table = 'badges'
+        unique_together = ('site', 'name')
+
+    def __str__(self) -> str:
+        """Return the string representation of the badge.
+
+        :return: The badge name.
+        """
+        return str(self.name)

@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import connection
 import py7zr
 
-from stackexchange import models
+from stackexchange import enums, models
 from . import dowloader, siteinfo, xmlparser
 
 # The module logger
@@ -44,6 +44,9 @@ class SiteDataLoader:
             user_loader = UserLoader(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
             user_loader.load()
 
+            badge_loader = BadgeLoader(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
+            badge_loader.load()
+
         # Post load actions
         self.analyze()
         siteinfo.clear_cache()
@@ -69,11 +72,11 @@ class UserLoader:
         """
         self.site_id = site_id
         self.data_dir = data_dir
-        self.existing_users = set(models.User.objects.values_list('pk', flat=True))
 
     def load(self):
         """Load the users.
         """
+        users = set(models.User.objects.values_list('pk', flat=True))
         logger.info("Loading user data")
         with (
             (self.data_dir / 'users.csv').open('wt') as users_file,
@@ -85,12 +88,12 @@ class UserLoader:
                 user_id = None
                 if 'AccountId' in row:
                     user_id = int(row['AccountId'])
-                    if user_id not in self.existing_users:
+                    if user_id not in users:
                         users_writer.writerow([
                             user_id, 'admin' if user_id == -1 else f"user{row['AccountId']}",
                             make_password('admin') if user_id == -1 else '', '<NULL>', user_id == -1
                         ])
-                        self.existing_users.add(user_id)
+                        users.add(user_id)
 
                 site_users_writer.writerow([
                     self.site_id, row['Id'], '<NULL>' if user_id is None else user_id, row['DisplayName'],
@@ -115,3 +118,38 @@ class UserLoader:
                         'site_id', 'site_user_id', 'user_id', 'display_name', 'website_url', 'location', 'about',
                         'creation_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
                     ), sep=',', null='<NULL>')
+
+
+class BadgeLoader:
+    """The badge loader
+    """
+    def __init__(self, site_id: int, data_dir: pathlib.Path):
+        """Create the badge loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory.
+        """
+        self.site_id = site_id
+        self.data_dir = data_dir
+
+    def load(self):
+        """Load the badges.
+        """
+        badges = set()
+        with (self.data_dir / 'badges.csv').open('wt') as badges_file:
+            badges_writer = csv.writer(badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
+                if row['Name'] not in badges:
+                    badges_writer.writerow([
+                        self.site_id, row['Name'], row['Class'],
+                        enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
+                    ])
+                    badges.add(row['Name'])
+
+        logger.info("Loading badges")
+        models.Badge.objects.filter(site_id=self.site_id).delete()
+        with connection.cursor() as cursor:
+            with (self.data_dir / 'badges.csv').open('rt') as badges_file:
+                cursor.copy_from(
+                    badges_file, table='badges', columns=('site_id', 'name', 'badge_class', 'badge_type'), sep=',',
+                    null='<NULL>')

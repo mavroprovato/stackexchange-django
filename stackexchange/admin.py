@@ -45,3 +45,13 @@ class SiteUserAdmin(admin.ModelAdmin):
     search_fields = ('display_name', )
     list_filter = ('site', )
     autocomplete_fields = ('site', 'user')
+
+
+@admin.register(models.Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    """Admin for badges
+    """
+    list_display = ('name', 'site', 'badge_class', 'badge_type')
+    list_filter = ('site', 'badge_class', 'badge_type')
+    search_fields = ('name', )
+    ordering = ('name', )
