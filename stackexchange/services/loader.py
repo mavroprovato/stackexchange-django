@@ -160,10 +160,28 @@ class PostLoader(BaseFileLoader):
                     ), sep=',', null='<NULL>')
 
 
+class TagLoader(BaseFileLoader):
+    """The tag loader.
+    """
+    def load(self) -> None:
+        """Load the tags.
+        """
+        logger.info("Extracting tags")
+        tags = set()
+        with (self.data_dir / 'tags.csv').open('wt') as tags_file:
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
+                if row['TagName'] not in tags:
+                    tag = models.Tag.objects.create(
+                        site_id=self.site_id, name=row['TagName'], award_count=row['Count'],
+                        required=row.get('IsRequired') == 'True', moderator_only=row.get('IsModeratorOnly') == 'True'
+                    )
+                    tags.add(tag.name)
+
+
 class SiteDataLoader:
     """Helper class to load site data
     """
-    LOADERS = (UserLoader, BadgeLoader, PostLoader)
+    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader)
 
     def __init__(self, site: str):
         """Create the importer.

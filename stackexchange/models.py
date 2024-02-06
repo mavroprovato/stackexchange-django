@@ -193,3 +193,28 @@ class Post(models.Model):
         :return: The post title.
         """
         return str(self.title)
+
+
+class Tag(models.Model):
+    """The tag model
+    """
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site")
+    name = models.CharField(help_text="The tag name", max_length=255)
+    award_count = models.IntegerField(help_text="The tag award count")
+    excerpt = models.ForeignKey(
+        Post, help_text="The tag excerpt", on_delete=models.CASCADE, related_name='excerpts', null=True, blank=True)
+    wiki = models.ForeignKey(
+        Post, help_text="The tag wiki", on_delete=models.CASCADE, related_name='wikis', null=True, blank=True)
+    required = models.BooleanField(help_text="True if the tag fulfills required tag constraints", default=False)
+    moderator_only = models.BooleanField(help_text="True if the tag can only be used by moderators", default=False)
+
+    class Meta:
+        db_table = 'tags'
+        unique_together = ('site', 'name')
+
+    def __str__(self) -> str:
+        """Return the string representation of the tag.
+
+        :return: The tag name.
+        """
+        return str(self.name)
