@@ -110,9 +110,10 @@ class BadgeLoader(BaseFileLoader):
                         else enums.BadgeType.NAMED.value
                     )
                     badges[badge.name] = badge.pk
-                user_badges_writer.writerow([
-                    self.site_id, site_users[int(row['UserId'])], badges[row['Name']], row['Date']
-                ])
+                if int(row['UserId']) in site_users:
+                    user_badges_writer.writerow([
+                        self.site_id, site_users[int(row['UserId'])], badges[row['Name']], row['Date']
+                    ])
 
         logger.info("Loading badges")
         with connection.cursor() as cursor:
