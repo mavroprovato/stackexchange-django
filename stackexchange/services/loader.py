@@ -168,8 +168,22 @@ class TagLoader(BaseFileLoader):
         """
         logger.info("Extracting tags")
         models.Tag.objects.filter(site_id=self.site_id).delete()
+        experts = {
+            post['site_post_id']: post['pk'] for post in models.Post.objects.filter(
+                site_id=self.site_id, type=enums.PostType.TAG_WIKI_EXPERT.value
+            ).values('pk', 'site_post_id')
+        }
+        wikis = {
+            post['site_post_id']: post['pk'] for post in models.Post.objects.filter(
+                site_id=self.site_id, type=enums.PostType.TAG_WIKI.value
+            ).values('pk', 'site_post_id')
+        }
         for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
-            models.Tag.objects.create(site_id=self.site_id, name=row['TagName'], award_count=row['Count'])
+            models.Tag.objects.create(
+                site_id=self.site_id, name=row['TagName'], award_count=row['Count'],
+                excerpt_id=experts[int(row['ExcerptPostId'])] if 'ExcerptPostId' in row else None,
+                wiki_id=wikis[int(row['WikiPostId'])] if 'WikiPostId' in row else None
+            )
 
 
 class SiteDataLoader:
