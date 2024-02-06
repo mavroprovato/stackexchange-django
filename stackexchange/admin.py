@@ -50,8 +50,9 @@ class SiteUserAdmin(admin.ModelAdmin):
     """Admin for site users.
     """
     list_display = ('display_name', 'site', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
-    search_fields = ('display_name', )
     list_filter = ('site', )
+    search_fields = ('display_name', )
+    ordering = ('site', 'display_name')
     autocomplete_fields = ('site', 'user')
     inlines = (SiteUserBadgeInline, )
 
@@ -63,14 +64,14 @@ class BadgeAdmin(admin.ModelAdmin):
     list_display = ('name', 'site', 'badge_class', 'badge_type')
     list_filter = ('site', 'badge_class', 'badge_type')
     search_fields = ('name', )
-    ordering = ('name', )
+    ordering = ('site', 'name')
 
 
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
     """Admin for tags.
     """
-    list_display = ('name', 'site', 'award_count', 'required', 'moderator_only')
-    list_filter = ('site', 'required', 'moderator_only')
+    list_display = ('name', 'site', 'award_count')
+    list_filter = ('site', )
     search_fields = ('name', )
-    ordering = ('name', )
+    ordering = ('site', 'name')

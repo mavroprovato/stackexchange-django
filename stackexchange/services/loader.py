@@ -167,15 +167,9 @@ class TagLoader(BaseFileLoader):
         """Load the tags.
         """
         logger.info("Extracting tags")
-        tags = set()
-        with (self.data_dir / 'tags.csv').open('wt') as tags_file:
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
-                if row['TagName'] not in tags:
-                    tag = models.Tag.objects.create(
-                        site_id=self.site_id, name=row['TagName'], award_count=row['Count'],
-                        required=row.get('IsRequired') == 'True', moderator_only=row.get('IsModeratorOnly') == 'True'
-                    )
-                    tags.add(tag.name)
+        models.Tag.objects.filter(site_id=self.site_id).delete()
+        for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
+            models.Tag.objects.create(site_id=self.site_id, name=row['TagName'], award_count=row['Count'])
 
 
 class SiteDataLoader:
