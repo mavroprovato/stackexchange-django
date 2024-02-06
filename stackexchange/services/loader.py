@@ -130,11 +130,17 @@ class PostLoader(BaseFileLoader):
         """Load the posts.
         """
         logger.info("Extracting posts")
+        site_users = {
+            site_user['site_user_id']: site_user['pk'] for site_user in
+            models.SiteUser.objects.filter(site_id=self.site_id).values('pk', 'site_user_id')
+        }
         with (self.data_dir / 'posts.csv').open('wt') as posts_file:
             posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
                 posts_writer.writerow([
-                    self.site_id, row['Id'], row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
+                    self.site_id, row['Id'], site_users[int(row['OwnerUserId'])] if 'OwnerUserId' in row else '<NULL>',
+                    site_users[int(row['LastEditorUserId'])] if 'LastEditorUserId' in row else '<NULL>',
+                    row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
                     row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
                     row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
                     row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
@@ -147,9 +153,10 @@ class PostLoader(BaseFileLoader):
             with (self.data_dir / 'posts.csv').open('rt') as posts_file:
                 cursor.copy_from(
                     posts_file, table='posts', columns=(
-                        'site_id', 'site_post_id', 'type', 'title', 'body', 'last_editor_display_name', 'creation_date',
-                        'last_edit_date', 'last_activity_date', 'community_owned_date', 'closed_date', 'score',
-                        'view_count', 'answer_count', 'comment_count', 'favorite_count', 'content_license'
+                        'site_id', 'site_post_id', 'owner_id', 'last_editor_id', 'type', 'title', 'body',
+                        'last_editor_display_name', 'creation_date', 'last_edit_date', 'last_activity_date',
+                        'community_owned_date', 'closed_date', 'score', 'view_count', 'answer_count', 'comment_count',
+                        'favorite_count', 'content_license'
                     ), sep=',', null='<NULL>')
 
 
