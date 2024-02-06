@@ -67,6 +67,16 @@ class BadgeAdmin(admin.ModelAdmin):
     ordering = ('site', 'name')
 
 
+@admin.register(models.Post)
+class PostAdmin(admin.ModelAdmin):
+    """Admin for posts.
+    """
+    list_display = ('title', 'site', 'type', 'score', 'creation_date', 'last_edit_date')
+    list_filter = ('site', 'type')
+    search_fields = ('title', )
+    autocomplete_fields = ('owner', 'last_editor', 'question', 'accepted_answer')
+
+
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
     """Admin for tags.
@@ -75,3 +85,4 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ('site', )
     search_fields = ('name', )
     ordering = ('site', 'name')
+    autocomplete_fields = ('excerpt', 'wiki')
