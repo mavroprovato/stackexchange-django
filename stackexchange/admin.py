@@ -8,7 +8,7 @@ from stackexchange import models
 
 @admin.register(models.Site)
 class SiteAdmin(admin.ModelAdmin):
-    """Admin for sites
+    """Admin for sites.
     """
     list_display = ('name', 'description', 'long_description', 'url')
     search_fields = ('name', )
@@ -18,7 +18,7 @@ class SiteAdmin(admin.ModelAdmin):
 
 @admin.register(models.User)
 class UserAdmin(UserAdminBase):
-    """Admin for users
+    """Admin for users.
     """
     list_display = ('username', 'email', 'staff')
     list_filter = ()
@@ -38,7 +38,7 @@ class UserAdmin(UserAdminBase):
 
 
 class SiteUserBadgeInline(admin.TabularInline):
-    """The user badge inline
+    """The user badge inline.
     """
     model = models.UserBadge
     autocomplete_fields = ('site', 'badge')
@@ -47,7 +47,7 @@ class SiteUserBadgeInline(admin.TabularInline):
 
 @admin.register(models.SiteUser)
 class SiteUserAdmin(admin.ModelAdmin):
-    """Admin for site users
+    """Admin for site users.
     """
     list_display = ('display_name', 'site', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
     search_fields = ('display_name', )
@@ -58,9 +58,19 @@ class SiteUserAdmin(admin.ModelAdmin):
 
 @admin.register(models.Badge)
 class BadgeAdmin(admin.ModelAdmin):
-    """Admin for badges
+    """Admin for badges.
     """
     list_display = ('name', 'site', 'badge_class', 'badge_type')
     list_filter = ('site', 'badge_class', 'badge_type')
+    search_fields = ('name', )
+    ordering = ('name', )
+
+
+@admin.register(models.Tag)
+class TagAdmin(admin.ModelAdmin):
+    """Admin for tags.
+    """
+    list_display = ('name', 'site', 'award_count', 'required', 'moderator_only')
+    list_filter = ('site', 'required', 'moderator_only')
     search_fields = ('name', )
     ordering = ('name', )
