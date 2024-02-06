@@ -135,6 +135,7 @@ class PostLoader(BaseFileLoader):
             site_user['site_user_id']: site_user['pk'] for site_user in
             models.SiteUser.objects.filter(site_id=self.site_id).values('pk', 'site_user_id')
         }
+        # TODO: Load question and accepted_answer
         with (self.data_dir / 'posts.csv').open('wt') as posts_file:
             posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
