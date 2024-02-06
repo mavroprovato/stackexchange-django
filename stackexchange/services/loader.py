@@ -134,17 +134,22 @@ class PostLoader(BaseFileLoader):
             posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
                 posts_writer.writerow([
-                    self.site_id, row['Id'], row['PostTypeId'], row['Body'], row['CreationDate'],
-                    row['LastActivityDate'], row['Score'], row['ContentLicense']
+                    self.site_id, row['Id'], row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
+                    row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
+                    row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
+                    row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
+                    row.get('FavoriteCount', 0), row['ContentLicense']
                 ])
 
         logger.info("Loading posts")
+        models.Post.objects.filter(site_id=self.site_id).delete()
         with connection.cursor() as cursor:
             with (self.data_dir / 'posts.csv').open('rt') as posts_file:
                 cursor.copy_from(
                     posts_file, table='posts', columns=(
-                        'site_id', 'site_post_id', 'type', 'body', 'creation_date', 'last_activity_date', 'score',
-                        'content_license'
+                        'site_id', 'site_post_id', 'type', 'title', 'body', 'last_editor_display_name', 'creation_date',
+                        'last_edit_date', 'last_activity_date', 'community_owned_date', 'closed_date', 'score',
+                        'view_count', 'answer_count', 'comment_count', 'favorite_count', 'content_license'
                     ), sep=',', null='<NULL>')
 
 

@@ -176,10 +176,10 @@ class Post(models.Model):
     community_owned_date = models.DateTimeField(help_text="The post community owned date", null=True, blank=True)
     closed_date = models.DateTimeField(help_text="The post closed date", null=True, blank=True)
     score = models.IntegerField(help_text="The post score")
-    view_count = models.PositiveIntegerField(help_text="The post view count", null=True, blank=True)
-    answer_count = models.PositiveIntegerField(help_text="The post answer count", null=True, blank=True)
-    comment_count = models.PositiveIntegerField(help_text="The post comment count", null=True, blank=True)
-    favorite_count = models.PositiveIntegerField(help_text="The post favorite count", null=True, blank=True)
+    view_count = models.PositiveIntegerField(help_text="The post view count", default=0)
+    answer_count = models.PositiveIntegerField(help_text="The post answer count", default=0)
+    comment_count = models.PositiveIntegerField(help_text="The post comment count", default=0)
+    favorite_count = models.PositiveIntegerField(help_text="The post favorite count", default=0)
     content_license = models.CharField(
         help_text="The content license", max_length=max(len(cl.name) for cl in enums.ContentLicense),
         choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name)
