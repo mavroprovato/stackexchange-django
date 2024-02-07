@@ -21,13 +21,11 @@ logger = logging.getLogger(__name__)
 class BaseFileLoader:
     """The base class for file loading.
     """
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, data_dir: pathlib.Path) -> None:
         """Create the file loader.
 
-        :param site_id: The site identifier.
         :param data_dir: The data directory.
         """
-        self.site_id = site_id
         self.data_dir = data_dir
 
     @abc.abstractmethod
@@ -62,7 +60,7 @@ class UserLoader(BaseFileLoader):
                         users.add(user_id)
 
                 site_users_writer.writerow([
-                    self.site_id, row['Id'], '<NULL>' if user_id is None else user_id, row['DisplayName'],
+                    row['Id'], '<NULL>' if user_id is None else user_id, row['DisplayName'],
                     row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'),
                     row['CreationDate'], row['LastAccessDate'], row['Reputation'], row['Views'], row['UpVotes'],
                     row['DownVotes']
@@ -76,12 +74,12 @@ class UserLoader(BaseFileLoader):
                     sep=',', null='<NULL>')
 
         logger.info("Loading site users")
-        models.SiteUser.objects.filter(site_id=self.site_id).delete()
         with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE TABLE site_users CASCADE')
             with (self.data_dir / 'site_users.csv').open('rt') as site_users_file:
                 cursor.copy_from(
                     site_users_file, table='site_users', columns=(
-                        'site_id', 'site_user_id', 'user_id', 'display_name', 'website_url', 'location', 'about',
+                        'id', 'user_id', 'display_name', 'website_url', 'location', 'about',
                         'creation_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
                     ), sep=',', null='<NULL>')
 
@@ -92,36 +90,44 @@ class BadgeLoader(BaseFileLoader):
     def load(self) -> None:
         """Load the badges.
         """
-        badges = {}
+        # First pass - load badges
         logger.info("Extracting badges")
-        models.UserBadge.objects.filter(site_id=self.site_id).delete()
-        models.Badge.objects.filter(site_id=self.site_id).delete()
-        site_users = {
-            site_user['site_user_id']: site_user['pk'] for site_user in
-            models.SiteUser.objects.filter(site_id=self.site_id).values('pk', 'site_user_id')
-        }
-        with (self.data_dir / 'user_badges.csv').open('wt') as user_badges_file:
-            user_badges_writer = csv.writer(user_badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+        badge_names = set()
+        with (self.data_dir / 'badges.csv').open('wt') as badges_file:
+            badges_writer = csv.writer(badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
-                if row['Name'] not in badges:
-                    badge = models.Badge.objects.create(
-                        site_id=self.site_id, name=row['Name'], badge_class=row['Class'],
-                        badge_type=enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True'
-                        else enums.BadgeType.NAMED.value
-                    )
-                    badges[badge.name] = badge.pk
-                if int(row['UserId']) in site_users:
-                    user_badges_writer.writerow([
-                        self.site_id, site_users[int(row['UserId'])], badges[row['Name']], row['Date']
+                if row['Name'] not in badge_names:
+                    badges_writer.writerow([
+                        row['Name'], row['Class'],
+                        enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
                     ])
+                    badge_names.add(row['Name'])
 
         logger.info("Loading badges")
         with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE TABLE badges CASCADE')
+            with (self.data_dir / 'badges.csv').open('rt') as badges_file:
+                cursor.copy_from(
+                    badges_file, table='badges', columns=('name', 'badge_class', 'badge_type'), sep=',',
+                    null='<NULL>')
+
+        # Second pass - load user badges
+        logger.info("Extracting user badges")
+        badge_ids = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
+        with (self.data_dir / 'user_badges.csv').open('wt') as user_badges_file:
+            user_badges_writer = csv.writer(user_badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
+                user_badges_writer.writerow([
+                    row['UserId'], badge_ids[row['Name']], row['Date']
+                ])
+
+        logger.info("Loading user badges")
+        with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE TABLE user_badges CASCADE')
             with (self.data_dir / 'user_badges.csv').open('rt') as user_badges_file:
                 cursor.copy_from(
-                    user_badges_file, table='user_badges', columns=(
-                        'site_id', 'user_id', 'badge_id', 'date_awarded'
-                    ), sep=',', null='<NULL>')
+                    user_badges_file, table='user_badges', columns=('user_id', 'badge_id', 'date_awarded'),
+                    sep=',', null='<NULL>')
 
 
 class PostLoader(BaseFileLoader):
@@ -131,32 +137,27 @@ class PostLoader(BaseFileLoader):
         """Load the posts.
         """
         logger.info("Extracting posts")
-        site_users = {
-            site_user['site_user_id']: site_user['pk'] for site_user in
-            models.SiteUser.objects.filter(site_id=self.site_id).values('pk', 'site_user_id')
-        }
-        # TODO: Load question and accepted_answer
         with (self.data_dir / 'posts.csv').open('wt') as posts_file:
             posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
                 posts_writer.writerow([
-                    self.site_id, row['Id'], site_users[int(row['OwnerUserId'])] if 'OwnerUserId' in row else '<NULL>',
-                    site_users[int(row['LastEditorUserId'])] if 'LastEditorUserId' in row else '<NULL>',
-                    row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
-                    row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
-                    row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
-                    row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
+                    row['Id'], row.get('ParentId', '<NULL>'), row.get('AcceptedAnswerId', '<NULL>'),
+                    row.get('OwnerUserId', '<NULL>'), row.get('LastEditorUserId', '<NULL>'), row['PostTypeId'],
+                    row.get('Title', '<NULL>'), row['Body'], row.get('LastEditorDisplayName', '<NULL>'),
+                    row['CreationDate'], row.get('LastEditDate', '<NULL>'), row['LastActivityDate'],
+                    row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'), row['Score'],
+                    row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
                     row.get('FavoriteCount', 0), row['ContentLicense']
                 ])
 
         logger.info("Loading posts")
-        models.Post.objects.filter(site_id=self.site_id).delete()
         with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE TABLE posts CASCADE')
             with (self.data_dir / 'posts.csv').open('rt') as posts_file:
                 cursor.copy_from(
                     posts_file, table='posts', columns=(
-                        'site_id', 'site_post_id', 'owner_id', 'last_editor_id', 'type', 'title', 'body',
-                        'last_editor_display_name', 'creation_date', 'last_edit_date', 'last_activity_date',
+                        'id', 'question_id', 'accepted_answer_id', 'owner_id', 'last_editor_id', 'type', 'title',
+                        'body', 'last_editor_display_name', 'creation_date', 'last_edit_date', 'last_activity_date',
                         'community_owned_date', 'closed_date', 'score', 'view_count', 'answer_count', 'comment_count',
                         'favorite_count', 'content_license'
                     ), sep=',', null='<NULL>')
@@ -169,23 +170,21 @@ class TagLoader(BaseFileLoader):
         """Load the tags.
         """
         logger.info("Extracting tags")
-        models.Tag.objects.filter(site_id=self.site_id).delete()
-        experts = {
-            post['site_post_id']: post['pk'] for post in models.Post.objects.filter(
-                site_id=self.site_id, type=enums.PostType.TAG_WIKI_EXPERT.value
-            ).values('pk', 'site_post_id')
-        }
-        wikis = {
-            post['site_post_id']: post['pk'] for post in models.Post.objects.filter(
-                site_id=self.site_id, type=enums.PostType.TAG_WIKI.value
-            ).values('pk', 'site_post_id')
-        }
-        for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
-            models.Tag.objects.create(
-                site_id=self.site_id, name=row['TagName'], award_count=row['Count'],
-                excerpt_id=experts[int(row['ExcerptPostId'])] if 'ExcerptPostId' in row else None,
-                wiki_id=wikis[int(row['WikiPostId'])] if 'WikiPostId' in row else None
-            )
+        with (self.data_dir / 'tags.csv').open('wt') as tags_file:
+            tags_writer = csv.writer(tags_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
+                tags_writer.writerow([
+                    row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId', '<NULL>'),
+                    row.get('WikiPostId', '<NULL>')
+                ])
+
+        logger.info("Loading tags")
+        with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE TABLE tags CASCADE')
+            with (self.data_dir / 'tags.csv').open('rt') as tags_file:
+                cursor.copy_from(
+                    tags_file, table='tags', columns=('id', 'name', 'award_count', 'excerpt_id', 'wiki_id'), sep=',',
+                    null='<NULL>')
 
 
 class SiteDataLoader:
@@ -215,7 +214,7 @@ class SiteDataLoader:
             logger.info("Data file extracted")
 
             for loader_class in self.LOADERS:
-                loader = loader_class(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
+                loader = loader_class(data_dir=pathlib.Path(temp_dir))
                 loader.load()
 
         # Post load actions

@@ -41,7 +41,7 @@ class SiteUserBadgeInline(admin.TabularInline):
     """The user badge inline.
     """
     model = models.UserBadge
-    autocomplete_fields = ('site', 'badge')
+    autocomplete_fields = ('badge', )
     extra = 1
 
 
@@ -49,11 +49,10 @@ class SiteUserBadgeInline(admin.TabularInline):
 class SiteUserAdmin(admin.ModelAdmin):
     """Admin for site users.
     """
-    list_display = ('display_name', 'site', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
-    list_filter = ('site', )
+    list_display = ('display_name', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
     search_fields = ('display_name', )
-    ordering = ('site', 'display_name')
-    autocomplete_fields = ('site', 'user')
+    ordering = ('display_name', )
+    autocomplete_fields = ('user', )
     inlines = (SiteUserBadgeInline, )
 
 
@@ -61,18 +60,18 @@ class SiteUserAdmin(admin.ModelAdmin):
 class BadgeAdmin(admin.ModelAdmin):
     """Admin for badges.
     """
-    list_display = ('name', 'site', 'badge_class', 'badge_type')
-    list_filter = ('site', 'badge_class', 'badge_type')
+    list_display = ('name', 'badge_class', 'badge_type')
+    list_filter = ('badge_class', 'badge_type')
     search_fields = ('name', )
-    ordering = ('site', 'name')
+    ordering = ('name', )
 
 
 @admin.register(models.Post)
 class PostAdmin(admin.ModelAdmin):
     """Admin for posts.
     """
-    list_display = ('title', 'site', 'type', 'score', 'creation_date', 'last_edit_date')
-    list_filter = ('site', 'type')
+    list_display = ('title', 'type', 'score', 'creation_date', 'last_edit_date')
+    list_filter = ('type', )
     search_fields = ('title', )
     autocomplete_fields = ('owner', 'last_editor', 'question', 'accepted_answer')
 
@@ -81,8 +80,7 @@ class PostAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     """Admin for tags.
     """
-    list_display = ('name', 'site', 'award_count')
-    list_filter = ('site', )
+    list_display = ('name', 'award_count')
     search_fields = ('name', )
-    ordering = ('site', 'name')
+    ordering = ('name', )
     autocomplete_fields = ('excerpt', 'wiki')
