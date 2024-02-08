@@ -37,14 +37,6 @@ class BadgeType(BaseEnum):
     TAG_BASED = 2
 
 
-class ContentLicense(enum.Enum):
-    """The content license enumeration
-    """
-    CC_BY_SA_2_5 = 'Attribution-ShareAlike 2.5 Generic'
-    CC_BY_SA_3_0 = 'Attribution-ShareAlike 3.0 Unported'
-    CC_BY_SA_4_0 = 'Attribution-ShareAlike 4.0 International'
-
-
 class PostType(BaseEnum):
     """Enumeration for the post type.
     """
@@ -56,6 +48,39 @@ class PostType(BaseEnum):
     MODERATOR_NOMINATION = 6
     WIKI_PLACEHOLDER = 7
     PRIVILEGE_WIKI = 8
+
+
+class ContentLicense(enum.Enum):
+    """The content license enumeration
+    """
+    CC_BY_SA_2_5 = 'Attribution-ShareAlike 2.5 Generic'
+    CC_BY_SA_3_0 = 'Attribution-ShareAlike 3.0 Unported'
+    CC_BY_SA_4_0 = 'Attribution-ShareAlike 4.0 International'
+
+
+class PostVoteType(BaseEnum):
+    """Enumeration for the post vote type.
+    """
+    ACCEPTED_BY_ORIGINATOR = 1
+    UP_MOD = 2
+    DOWN_MOD = 3
+    OFFENSIVE = 4
+    FAVORITE = 5
+    CLOSE = 6
+    REOPEN = 7
+    BOUNTY_START = 8
+    BOUNTY_CLOSE = 9
+    DELETION = 10
+    UN_DELETION = 11
+    SPAM = 12
+    INFORM_MODERATOR = 13
+
+
+class PostLinkType(BaseEnum):
+    """Enumeration for the post link type.
+    """
+    LINKED = 1
+    DUPLICATE = 3
 
 
 class PostHistoryType(BaseEnum):
@@ -113,24 +138,6 @@ class PostHistoryType(BaseEnum):
         :return: True if the post history type is a rollback.
         """
         return self in (self.ROLLBACK_TITLE, self.ROLLBACK_BODY, self.ROLLBACK_TAGS)
-
-
-class PostVoteType(BaseEnum):
-    """Enumeration for the post vote type.
-    """
-    ACCEPTED_BY_ORIGINATOR = 1
-    UP_MOD = 2
-    DOWN_MOD = 3
-    OFFENSIVE = 4
-    FAVORITE = 5
-    CLOSE = 6
-    REOPEN = 7
-    BOUNTY_START = 8
-    BOUNTY_CLOSE = 9
-    DELETION = 10
-    UN_DELETION = 11
-    SPAM = 12
-    INFORM_MODERATOR = 13
 
 
 class Privilege(enum.Enum):

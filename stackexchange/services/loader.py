@@ -224,10 +224,10 @@ class PostVoteLoader(BaseFileLoader):
                     ])
 
         logger.info("Loading post votes")
-        with (self.data_dir / 'post_votes.csv').open('rt') as f:
+        with (self.data_dir / 'post_votes.csv').open('rt') as post_votes_file:
             with connection.cursor() as cursor:
                 cursor.execute("TRUNCATE TABLE post_votes CASCADE")
-                cursor.copy_from(f, table='post_votes', columns=(
+                cursor.copy_from(post_votes_file, table='post_votes', columns=(
                     'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
                 ), sep=',', null='<NULL>')
 
@@ -248,10 +248,10 @@ class PostCommentLoader(BaseFileLoader):
                 ])
 
         logger.info("Loading post comments")
-        with (self.data_dir / 'post_comments.csv').open('rt') as f:
+        with (self.data_dir / 'post_comments.csv').open('rt') as post_comments_file:
             with connection.cursor() as cursor:
                 cursor.execute('TRUNCATE TABLE post_comments CASCADE')
-                cursor.copy_from(f, table='post_comments', columns=(
+                cursor.copy_from(post_comments_file, table='post_comments', columns=(
                     'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
                 ), sep=',', null='<NULL>')
 
@@ -273,19 +273,48 @@ class PostHistoryLoader(BaseFileLoader):
                 ])
 
         logger.info("Loading post history")
-        with (self.data_dir / 'post_history.csv').open('rt') as f:
+        with (self.data_dir / 'post_history.csv').open('rt') as post_history_file:
             with connection.cursor() as cursor:
                 cursor.execute("TRUNCATE TABLE post_history CASCADE")
-                cursor.copy_from(f, table='post_history', columns=(
+                cursor.copy_from(post_history_file, table='post_history', columns=(
                     'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
                     'comment', 'text', 'content_license'
                 ), sep=',', null='<NULL>')
 
 
+class PostLinkLoader(BaseFileLoader):
+    """The post link loader.
+    """
+    def load(self) -> None:
+        """Load the post links.
+        """
+        logger.info("Extracting post links")
+        post_ids = set(models.Post.objects.values_list('pk', flat=True))
+        with (self.data_dir / 'post_links.csv').open('wt') as post_links_file:
+            post_links_writer = csv.writer(post_links_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'PostLinks.xml'):
+                if int(row['PostId']) in post_ids and int(row['RelatedPostId']) in post_ids:
+                    post_links_writer.writerow([
+                        row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
+                    ])
+
+        logger.info("Loading post links")
+        with (self.data_dir / 'post_links.csv').open('rt') as post_links_file:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE post_links CASCADE")
+                cursor.copy_from(
+                    post_links_file, table='post_links', columns=('id', 'post_id', 'related_post_id', 'type'), sep=',',
+                    null='<NULL>'
+                )
+
+
 class SiteDataLoader:
     """Helper class to load site data
     """
-    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader, PostHistoryLoader)
+    LOADERS = (
+        UserLoader, BadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader, PostHistoryLoader,
+        PostLinkLoader
+    )
 
     def __init__(self, site: str):
         """Create the importer.

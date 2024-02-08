@@ -275,7 +275,7 @@ class PostHistory(models.Model):
     """The post history model
     """
     type = models.PositiveSmallIntegerField(
-        choices=((pht.value, pht.description) for pht in enums.PostHistoryType), help_text="The post history type", )
+        choices=((pht.value, pht.description) for pht in enums.PostHistoryType), help_text="The post history type")
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='history', help_text="The post")
     revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
     creation_date = models.DateTimeField(
@@ -297,3 +297,16 @@ class PostHistory(models.Model):
     class Meta:
         db_table = 'post_history'
         verbose_name_plural = 'post history'
+
+
+class PostLink(models.Model):
+    """The post link model
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='links', help_text="The post")
+    related_post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name='related_links', help_text="The related post")
+    type = models.PositiveSmallIntegerField(
+        choices=((pht.value, pht.description) for pht in enums.PostLinkType), help_text="The post link type")
+
+    class Meta:
+        db_table = 'post_links'
