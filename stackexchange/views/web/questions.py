@@ -52,7 +52,7 @@ class QuestionTaggedView(QuestionView):
 class QuestionDetailView(BaseDetailView):
     """The question detail view.
     """
-    # model = models.Post
+    model = models.Post
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the view.

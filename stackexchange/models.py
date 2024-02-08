@@ -175,7 +175,7 @@ class Post(models.Model):
     favorite_count = models.PositiveIntegerField(default=0, help_text="The post favorite count")
     content_license = models.CharField(
         max_length=max(len(cl.name) for cl in enums.ContentLicense),
-        choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name,
+        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name,
         help_text="The content license")
 
     class Meta:
@@ -262,7 +262,7 @@ class PostHistory(models.Model):
     text = models.TextField(null=True, blank=True, help_text="A raw version of the new value for a given revision")
     content_license = models.CharField(
        max_length=max(len(cl.name) for cl in enums.ContentLicense),
-       choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name,
+       choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name,
        null=True, blank=True, help_text="The content license")
 
     objects = managers.PostHistoryQuerySet().as_manager()
