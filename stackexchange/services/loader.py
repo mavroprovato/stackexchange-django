@@ -118,12 +118,12 @@ class BadgeLoader(BaseFileLoader):
         # Second pass - load user badges
         logger.info("Extracting user badges")
         badge_ids = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
+        user_ids = set(models.SiteUser.objects.values_list('pk', flat=True))
         with (self.data_dir / 'user_badges.csv').open('wt') as user_badges_file:
             user_badges_writer = csv.writer(user_badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
-                user_badges_writer.writerow([
-                    row['UserId'], badge_ids[row['Name']], row['Date']
-                ])
+                if int(row['UserId']) in user_ids:
+                    user_badges_writer.writerow([row['UserId'], badge_ids[row['Name']], row['Date']])
 
         logger.info("Loading user badges")
         with connection.cursor() as cursor:
@@ -141,11 +141,13 @@ class PostLoader(BaseFileLoader):
         """Load the posts.
         """
         logger.info("Extracting posts")
+        post_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
         with (self.data_dir / 'posts.csv').open('wt') as posts_file:
             posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
                 posts_writer.writerow([
-                    row['Id'], row.get('ParentId', '<NULL>'), row.get('AcceptedAnswerId', '<NULL>'),
+                    row['Id'], row.get('ParentId', '<NULL>'),
+                    row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in post_ids else '<NULL>',
                     row.get('OwnerUserId', '<NULL>'), row.get('LastEditorUserId', '<NULL>'), row['PostTypeId'],
                     row.get('Title', '<NULL>'), row['Body'], row.get('LastEditorDisplayName', '<NULL>'),
                     row['CreationDate'], row.get('LastEditDate', '<NULL>'), row['LastActivityDate'],
