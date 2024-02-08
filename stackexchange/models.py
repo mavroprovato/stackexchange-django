@@ -244,6 +244,33 @@ class PostVote(models.Model):
         indexes = (models.Index(fields=('-creation_date', '-id')),)
 
 
+class PostComment(models.Model):
+    """The post comment model
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', help_text="The post")
+    score = models.IntegerField(help_text="The comment score")
+    text = models.TextField(help_text="The comment text")
+    creation_date = models.DateTimeField(default=timezone.now, help_text="The date that the comment was created")
+    content_license = models.CharField(
+        help_text="The content license", max_length=max(len(cl.name) for cl in enums.ContentLicense),
+        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name)
+    user = models.ForeignKey(
+        SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='comments',
+        help_text="The user for the comment")
+    user_display_name = models.CharField(max_length=255, null=True, blank=True, help_text="The user display name")
+
+    class Meta:
+        db_table = 'post_comments'
+        indexes = (models.Index(fields=('-creation_date', 'id')), models.Index(fields=('-score', 'id')))
+
+    def __str__(self) -> str:
+        """Return the string representation of the post comment.
+
+        :return: The comment text.
+        """
+        return str(self.text)
+
+
 class PostHistory(models.Model):
     """The post history model
     """

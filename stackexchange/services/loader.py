@@ -232,6 +232,30 @@ class PostVoteLoader(BaseFileLoader):
                 ), sep=',', null='<NULL>')
 
 
+class PostCommentLoader(BaseFileLoader):
+    """The post comment loader.
+    """
+    def load(self) -> None:
+        """Load the post comments.
+        """
+        logger.info("Extracting post comments")
+        with (self.data_dir / 'post_comments.csv').open('wt') as post_comments_file:
+            csv_writer = csv.writer(post_comments_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Comments.xml'):
+                csv_writer.writerow([
+                    row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row['ContentLicense'],
+                    row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>')
+                ])
+
+        logger.info("Loading post comments")
+        with (self.data_dir / 'post_comments.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute('TRUNCATE TABLE post_comments CASCADE')
+                cursor.copy_from(f, table='post_comments', columns=(
+                    'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
+                ), sep=',', null='<NULL>')
+
+
 class PostHistoryLoader(BaseFileLoader):
     """The post history loader.
     """
@@ -261,7 +285,7 @@ class PostHistoryLoader(BaseFileLoader):
 class SiteDataLoader:
     """Helper class to load site data
     """
-    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostHistoryLoader)
+    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader, PostHistoryLoader)
 
     def __init__(self, site: str):
         """Create the importer.
@@ -269,8 +293,6 @@ class SiteDataLoader:
         :param site: The site name.
         """
         site = models.Site.objects.get(name=site)
-        self.site_id = site.id
-        # Get the latest file
         downloader = dowloader.Downloader(filename=f"{site.url.replace('https://', '')}.7z")
         self.site_data_file = downloader.get_file()
 
