@@ -52,6 +52,7 @@ class User(AbstractBaseUser):
 class Site(models.Model):
     """The site model.
     """
+    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text="The parent site")
     name = models.CharField(max_length=32, unique=True, help_text="The site name")
     description = models.CharField(max_length=64, help_text="The site description")
     long_description = models.CharField(max_length=128, help_text="The site long description")
@@ -67,7 +68,6 @@ class Site(models.Model):
     total_comments = models.PositiveIntegerField(default=0, help_text="The site total comment count")
     total_tags = models.PositiveIntegerField(default=0, help_text="The site total tag count")
     last_post = models.DateTimeField(help_text="The date of the last post")
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text="The parent site")
 
     class Meta:
         db_table = 'sites'
@@ -196,12 +196,12 @@ class Post(models.Model):
 class Tag(models.Model):
     """The tag model
     """
-    name = models.CharField(max_length=255, help_text="The tag name", unique=True)
-    award_count = models.IntegerField(help_text="The tag award count")
     excerpt = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='excerpts', null=True, blank=True, help_text="The tag excerpt")
     wiki = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='wikis', null=True, blank=True, help_text="The tag wiki")
+    name = models.CharField(max_length=255, help_text="The tag name", unique=True)
+    award_count = models.IntegerField(help_text="The tag award count")
 
     class Meta:
         db_table = 'tags'
@@ -229,12 +229,12 @@ class PostVote(models.Model):
     """The post vote model
     """
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='votes', help_text="The post")
-    type = models.PositiveSmallIntegerField(
-        choices=((pvt.value, pvt.description) for pvt in enums.PostVoteType), help_text="The post vote type")
-    creation_date = models.DateTimeField(help_text="The date that this vote was created", default=timezone.now)
     user = models.ForeignKey(
         SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='votes',
         help_text="The user for the post vote, if the post vote type is FAVORITE or BOUNTY_START")
+    type = models.PositiveSmallIntegerField(
+        choices=((pvt.value, pvt.description) for pvt in enums.PostVoteType), help_text="The post vote type")
+    creation_date = models.DateTimeField(help_text="The date that this vote was created", default=timezone.now)
     bounty_amount = models.PositiveSmallIntegerField(
         null=True, blank=True,
         help_text="The post bounty amount, if the post vote type is BOUNTY_START or BOUNTY_CLOSE")
@@ -248,15 +248,15 @@ class PostComment(models.Model):
     """The post comment model
     """
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', help_text="The post")
+    user = models.ForeignKey(
+        SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='comments',
+        help_text="The user for the comment")
     score = models.IntegerField(help_text="The comment score")
     text = models.TextField(help_text="The comment text")
     creation_date = models.DateTimeField(default=timezone.now, help_text="The date that the comment was created")
     content_license = models.CharField(
         help_text="The content license", max_length=max(len(cl.name) for cl in enums.ContentLicense),
         choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name)
-    user = models.ForeignKey(
-        SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='comments',
-        help_text="The user for the comment")
     user_display_name = models.CharField(max_length=255, null=True, blank=True, help_text="The user display name")
 
     class Meta:
@@ -274,15 +274,15 @@ class PostComment(models.Model):
 class PostHistory(models.Model):
     """The post history model
     """
-    type = models.PositiveSmallIntegerField(
-        choices=((pht.value, pht.description) for pht in enums.PostHistoryType), help_text="The post history type")
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='history', help_text="The post")
-    revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
-    creation_date = models.DateTimeField(
-        help_text="The date that this history record was created", default=timezone.now)
     user = models.ForeignKey(
         SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='post_history',
         help_text="The user that created this history record")
+    type = models.PositiveSmallIntegerField(
+        choices=((pht.value, pht.description) for pht in enums.PostHistoryType), help_text="The post history type")
+    revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
+    creation_date = models.DateTimeField(
+        help_text="The date that this history record was created", default=timezone.now)
     user_display_name = models.CharField(
         max_length=255, null=True, blank=True, help_text="The display name of the user that created this record")
     comment = models.TextField(null=True, blank=True, help_text="The comment of the user that has edited this post")
