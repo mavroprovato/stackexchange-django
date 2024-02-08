@@ -206,10 +206,36 @@ class TagLoader(BaseFileLoader):
                     post_tags_file, table='post_tags', columns=('post_id', 'tag_id'), sep=',',null='<NULL>')
 
 
+class PostHistoryLoader(BaseFileLoader):
+    """The post history loader.
+    """
+    def load(self) -> None:
+        """Load the post history.
+        """
+        logger.info("Extracting post history")
+        with (self.data_dir / 'post_history.csv').open('wt') as post_history_file:
+            post_history_writer = csv.writer(post_history_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'PostHistory.xml'):
+                post_history_writer.writerow([
+                    row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
+                    row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
+                    row.get('Text', '<NULL>'), row.get('ContentLicense', '<NULL>')
+                ])
+
+        logger.info("Loading post history")
+        with (self.data_dir / 'post_history.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE post_history CASCADE")
+                cursor.copy_from(f, table='post_history', columns=(
+                    'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
+                    'comment', 'text', 'content_license'
+                ), sep=',', null='<NULL>')
+
+
 class SiteDataLoader:
     """Helper class to load site data
     """
-    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader)
+    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader, PostHistoryLoader)
 
     def __init__(self, site: str):
         """Create the importer.

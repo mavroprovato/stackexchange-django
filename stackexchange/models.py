@@ -218,3 +218,31 @@ class PostTag(models.Model):
     class Meta:
         db_table = 'post_tags'
         unique_together = ('post', 'tag')
+
+
+class PostHistory(models.Model):
+    """The post history model
+    """
+    type = models.PositiveSmallIntegerField(
+        choices=((pht.value, pht.description) for pht in enums.PostHistoryType), help_text="The post history type", )
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='history', help_text="The post")
+    revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
+    creation_date = models.DateTimeField(
+        help_text="The date that this history record was created", default=timezone.now)
+    user = models.ForeignKey(
+        SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='post_history',
+        help_text="The user that created this history record")
+    user_display_name = models.CharField(
+        max_length=255, null=True, blank=True, help_text="The display name of the user that created this record")
+    comment = models.TextField(null=True, blank=True, help_text="The comment of the user that has edited this post")
+    text = models.TextField(null=True, blank=True, help_text="A raw version of the new value for a given revision")
+    content_license = models.CharField(
+       max_length=max(len(cl.name) for cl in enums.ContentLicense),
+       choices=[(cl.name, cl.value) for cl in enums.ContentLicense], default=enums.ContentLicense.CC_BY_SA_4_0.name,
+       null=True, blank=True, help_text="The content license")
+
+    objects = managers.PostHistoryQuerySet().as_manager()
+
+    class Meta:
+        db_table = 'post_history'
+        verbose_name_plural = 'post history'
