@@ -4,6 +4,7 @@ import abc
 import csv
 import logging
 import pathlib
+import re
 import tempfile
 
 from django.conf import settings
@@ -16,6 +17,9 @@ from . import dowloader, siteinfo, xmlparser
 
 # The module logger
 logger = logging.getLogger(__name__)
+
+# The regex to find tags in the posts file
+TAGS_REGEX = re.compile(r'<(?P<tag_name>.*?)>')
 
 
 class BaseFileLoader:
@@ -185,6 +189,21 @@ class TagLoader(BaseFileLoader):
                 cursor.copy_from(
                     tags_file, table='tags', columns=('id', 'name', 'award_count', 'excerpt_id', 'wiki_id'), sep=',',
                     null='<NULL>')
+
+        tag_ids = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
+        logger.info("Extracting post tags")
+        with (self.data_dir / 'post_tags.csv').open('wt') as post_tags_file:
+            post_tags_writer = csv.writer(post_tags_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
+                for match in TAGS_REGEX.finditer(row.get('Tags', '')):
+                    post_tags_writer.writerow([row['Id'], tag_ids[match.group('tag_name')]])
+
+        logger.info("Loading post tags")
+        with connection.cursor() as cursor:
+            cursor.execute('TRUNCATE TABLE post_tags CASCADE')
+            with (self.data_dir / 'post_tags.csv').open('rt') as post_tags_file:
+                cursor.copy_from(
+                    post_tags_file, table='post_tags', columns=('post_id', 'tag_id'), sep=',',null='<NULL>')
 
 
 class SiteDataLoader:

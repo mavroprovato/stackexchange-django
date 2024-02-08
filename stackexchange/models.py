@@ -207,3 +207,14 @@ class Tag(models.Model):
         :return: The tag name.
         """
         return str(self.name)
+
+
+class PostTag(models.Model):
+    """The post tag model
+    """
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='tags')
+    tag = models.ForeignKey(Tag, help_text="The tag", on_delete=models.CASCADE, related_name='posts')
+
+    class Meta:
+        db_table = 'post_tags'
+        unique_together = ('post', 'tag')
