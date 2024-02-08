@@ -37,6 +37,16 @@ class UserAdmin(UserAdminBase):
     )
 
 
+@admin.register(models.Badge)
+class BadgeAdmin(admin.ModelAdmin):
+    """Admin for badges.
+    """
+    list_display = ('name', 'badge_class', 'badge_type')
+    list_filter = ('badge_class', 'badge_type')
+    search_fields = ('name', )
+    ordering = ('name', )
+
+
 class SiteUserBadgeInline(admin.TabularInline):
     """The user badge inline.
     """
@@ -56,14 +66,12 @@ class SiteUserAdmin(admin.ModelAdmin):
     inlines = (SiteUserBadgeInline, )
 
 
-@admin.register(models.Badge)
-class BadgeAdmin(admin.ModelAdmin):
-    """Admin for badges.
+class PostTagInline(admin.TabularInline):
+    """The post tag inline.
     """
-    list_display = ('name', 'badge_class', 'badge_type')
-    list_filter = ('badge_class', 'badge_type')
-    search_fields = ('name', )
-    ordering = ('name', )
+    model = models.PostTag
+    autocomplete_fields = ('tag', )
+    extra = 1
 
 
 @admin.register(models.Post)
@@ -74,6 +82,16 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('type', )
     search_fields = ('title', )
     autocomplete_fields = ('owner', 'last_editor', 'question', 'accepted_answer')
+    inlines = (PostTagInline, )
+
+
+@admin.register(models.PostVote)
+class PostVoteAdmin(admin.ModelAdmin):
+    """Admin for post votes.
+    """
+    list_display = ('post', 'type', 'creation_date', 'user', 'bounty_amount')
+    list_filter = ('type', )
+    autocomplete_fields = ('post', 'user')
 
 
 @admin.register(models.Tag)
