@@ -203,7 +203,33 @@ class TagLoader(BaseFileLoader):
             cursor.execute('TRUNCATE TABLE post_tags CASCADE')
             with (self.data_dir / 'post_tags.csv').open('rt') as post_tags_file:
                 cursor.copy_from(
-                    post_tags_file, table='post_tags', columns=('post_id', 'tag_id'), sep=',',null='<NULL>')
+                    post_tags_file, table='post_tags', columns=('post_id', 'tag_id'), sep=',', null='<NULL>')
+
+
+class PostVoteLoader(BaseFileLoader):
+    """The post vote loader.
+    """
+    def load(self) -> None:
+        """Load the post votes.
+        """
+        logger.info("Extracting post votes")
+        post_ids = set(models.Post.objects.values_list('pk', flat=True))
+        with (self.data_dir / 'post_votes.csv').open('wt') as post_votes_file:
+            post_votes_writer = csv.writer(post_votes_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Votes.xml'):
+                if int(row['PostId']) in post_ids:
+                    post_votes_writer.writerow([
+                        row['Id'], row['PostId'], row['VoteTypeId'], row['CreationDate'], row.get('UserId', '<NULL>'),
+                        row.get('BountyAmount', '<NULL>')
+                    ])
+
+        logger.info("Loading post votes")
+        with (self.data_dir / 'post_votes.csv').open('rt') as f:
+            with connection.cursor() as cursor:
+                cursor.execute(f"TRUNCATE TABLE post_votes CASCADE")
+                cursor.copy_from(f, table='post_votes', columns=(
+                    'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
+                ), sep=',', null='<NULL>')
 
 
 class PostHistoryLoader(BaseFileLoader):
@@ -235,7 +261,7 @@ class PostHistoryLoader(BaseFileLoader):
 class SiteDataLoader:
     """Helper class to load site data
     """
-    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader, PostHistoryLoader)
+    LOADERS = (UserLoader, BadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostHistoryLoader)
 
     def __init__(self, site: str):
         """Create the importer.

@@ -139,6 +139,7 @@ class UserBadge(models.Model):
 
     class Meta:
         db_table = 'user_badges'
+        indexes = (models.Index(fields=('-date_awarded', 'id')),)
 
 
 class Post(models.Model):
@@ -179,6 +180,10 @@ class Post(models.Model):
 
     class Meta:
         db_table = 'posts'
+        indexes = (
+            models.Index(fields=('-last_activity_date', 'id')), models.Index(fields=('-creation_date', 'id')),
+            models.Index(fields=('-score', 'id'))
+        )
 
     def __str__(self) -> str:
         """Return the string representation of the post.
@@ -218,6 +223,25 @@ class PostTag(models.Model):
     class Meta:
         db_table = 'post_tags'
         unique_together = ('post', 'tag')
+
+
+class PostVote(models.Model):
+    """The post vote model
+    """
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='votes', help_text="The post")
+    type = models.PositiveSmallIntegerField(
+        choices=((pvt.value, pvt.description) for pvt in enums.PostVoteType), help_text="The post vote type")
+    creation_date = models.DateTimeField(help_text="The date that this vote was created", default=timezone.now)
+    user = models.ForeignKey(
+        SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='votes',
+        help_text="The user for the post vote, if the post vote type is FAVORITE or BOUNTY_START")
+    bounty_amount = models.PositiveSmallIntegerField(
+        null=True, blank=True,
+        help_text="The post bounty amount, if the post vote type is BOUNTY_START or BOUNTY_CLOSE")
+
+    class Meta:
+        db_table = 'post_votes'
+        indexes = (models.Index(fields=('-creation_date', '-id')),)
 
 
 class PostHistory(models.Model):
