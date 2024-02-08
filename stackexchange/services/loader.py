@@ -226,7 +226,7 @@ class PostVoteLoader(BaseFileLoader):
         logger.info("Loading post votes")
         with (self.data_dir / 'post_votes.csv').open('rt') as f:
             with connection.cursor() as cursor:
-                cursor.execute(f"TRUNCATE TABLE post_votes CASCADE")
+                cursor.execute("TRUNCATE TABLE post_votes CASCADE")
                 cursor.copy_from(f, table='post_votes', columns=(
                     'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
                 ), sep=',', null='<NULL>')
@@ -275,7 +275,7 @@ class PostHistoryLoader(BaseFileLoader):
         logger.info("Loading post history")
         with (self.data_dir / 'post_history.csv').open('rt') as f:
             with connection.cursor() as cursor:
-                cursor.execute(f"TRUNCATE TABLE post_history CASCADE")
+                cursor.execute("TRUNCATE TABLE post_history CASCADE")
                 cursor.copy_from(f, table='post_history', columns=(
                     'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
                     'comment', 'text', 'content_license'
