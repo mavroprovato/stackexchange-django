@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 'badge_icon_url': site['BadgeIconUrl'], 'image_url': site['ImageUrl'], 'tag_css': site['TagCss'],
                 'total_questions': site['TotalQuestions'], 'total_answers': site['TotalAnswers'],
                 'total_users': site['TotalUsers'], 'total_comments': site['TotalComments'],
-                'total_tags': site['TotalTags'], 'last_post': site['LastPost'] + '+00:00'
+                'total_tags': site['TotalTags'], 'last_post_date': site['LastPost'] + '+00:00'
             })
 
         for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):

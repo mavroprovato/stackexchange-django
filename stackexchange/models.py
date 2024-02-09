@@ -52,7 +52,7 @@ class User(AbstractBaseUser):
 class Site(models.Model):
     """The site model.
     """
-    parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE, help_text="The parent site")
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, help_text="The parent site")
     name = models.CharField(max_length=32, unique=True, help_text="The site name")
     description = models.CharField(max_length=64, help_text="The site description")
     long_description = models.CharField(max_length=128, help_text="The site long description")
@@ -67,7 +67,7 @@ class Site(models.Model):
     total_users = models.PositiveIntegerField(default=0, help_text="The site total user count")
     total_comments = models.PositiveIntegerField(default=0, help_text="The site total comment count")
     total_tags = models.PositiveIntegerField(default=0, help_text="The site total tag count")
-    last_post = models.DateTimeField(help_text="The date of the last post")
+    last_post_date = models.DateTimeField(null=True, blank=True, help_text="The date of the last post")
 
     class Meta:
         db_table = 'sites'
@@ -98,6 +98,7 @@ class SiteUser(models.Model):
 
     class Meta:
         db_table = 'site_users'
+        unique_together = ('user', 'site')
 
     def __str__(self) -> str:
         """Return the string representation of the site user.
