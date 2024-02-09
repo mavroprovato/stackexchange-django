@@ -25,11 +25,13 @@ TAGS_REGEX = re.compile(r'<(?P<tag_name>.*?)>')
 class BaseFileLoader:
     """The base class for file loading.
     """
-    def __init__(self, data_dir: pathlib.Path) -> None:
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Create the file loader.
 
+        :param site_id: The site identifier.
         :param data_dir: The data directory.
         """
+        self.site_id = site_id
         self.data_dir = data_dir
 
     @abc.abstractmethod
@@ -64,7 +66,7 @@ class UserLoader(BaseFileLoader):
                         users.add(user_id)
 
                 site_users_writer.writerow([
-                    row['Id'], '<NULL>' if user_id is None else user_id, row['DisplayName'],
+                    row['Id'], '<NULL>' if user_id is None else user_id, self.site_id, row['DisplayName'],
                     row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'),
                     row['CreationDate'], row['LastAccessDate'], row['Reputation'], row['Views'], row['UpVotes'],
                     row['DownVotes']
@@ -83,7 +85,7 @@ class UserLoader(BaseFileLoader):
             with (self.data_dir / 'site_users.csv').open('rt') as site_users_file:
                 cursor.copy_from(
                     site_users_file, table='site_users', columns=(
-                        'id', 'user_id', 'display_name', 'website_url', 'location', 'about',
+                        'id', 'user_id', 'site_id', 'display_name', 'website_url', 'location', 'about',
                         'creation_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
                     ), sep=',', null='<NULL>')
 
@@ -324,6 +326,7 @@ class SiteDataLoader:
         :param site: The site name.
         """
         site = models.Site.objects.get(name=site)
+        self.site_id = site.pk
         downloader = dowloader.Downloader(filename=f"{site.url.replace('https://', '')}.7z")
         self.site_data_file = downloader.get_file()
 
@@ -338,7 +341,7 @@ class SiteDataLoader:
             logger.info("Data file extracted")
 
             for loader_class in self.LOADERS:
-                loader = loader_class(data_dir=pathlib.Path(temp_dir))
+                loader = loader_class(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
                 loader.load()
 
         # Post load actions

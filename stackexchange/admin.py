@@ -59,10 +59,11 @@ class SiteUserBadgeInline(admin.TabularInline):
 class SiteUserAdmin(admin.ModelAdmin):
     """Admin for site users.
     """
-    list_display = ('display_name', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
+    list_display = ('display_name', 'site', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes')
+    list_filter = ('site', )
     search_fields = ('display_name', )
-    ordering = ('display_name', )
-    autocomplete_fields = ('user', )
+    ordering = ('site', 'display_name')
+    autocomplete_fields = ('user', 'site')
     inlines = (SiteUserBadgeInline, )
 
 
