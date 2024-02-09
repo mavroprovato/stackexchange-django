@@ -5,7 +5,7 @@ import pytz
 
 from stackexchange import enums, models
 from .tags import TagFactory
-from .users import UserFactory
+from .users import SiteUserFactory
 
 
 class PostFactory(factory.django.DjangoModelFactory):
@@ -24,7 +24,7 @@ class PostFactory(factory.django.DjangoModelFactory):
     answer_count = factory.Faker('pyint')
     comment_count = factory.Faker('pyint')
     favorite_count = factory.Faker('pyint')
-    owner = factory.SubFactory(UserFactory)
+    owner = factory.SubFactory(SiteUserFactory)
 
 
 class QuestionAnswerFactory(PostFactory):
@@ -67,7 +67,7 @@ class PostHistoryFactory(factory.django.DjangoModelFactory):
     post = factory.SubFactory(PostFactory)
     revision_guid = factory.Faker('uuid4')
     creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
-    user = factory.SubFactory(UserFactory)
+    user = factory.SubFactory(SiteUserFactory)
     user_display_name = factory.Faker('user_name')
     comment = factory.Faker('sentence')
     text = factory.Faker('sentence')

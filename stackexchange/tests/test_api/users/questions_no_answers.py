@@ -17,15 +17,16 @@ class UserQuestionNoAnswersTests(BaseQuestionTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=100)
-        for user in users:
-            factories.QuestionFactory.create_batch(size=3, owner=user, answer_count=random.randint(0, 2))
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=100)
+        for site_user in site_users:
+            factories.QuestionFactory.create_batch(size=3, owner=site_user, answer_count=random.randint(0, 2))
 
     def test(self):
         """Test user questions no answers endpoint
         """
-        user = random.sample(list(models.User.objects.all()), 1)[0]
-        response = self.client.get(reverse('api-user-questions-no-answers', kwargs={'pk': user.pk}))
+        site_user = random.sample(list(models.SiteUser.objects.all()), 1)[0]
+        response = self.client.get(reverse('api-user-questions-no-answers', kwargs={'pk': site_user.pk}))
         self.assert_items_equal(response)
         self.assertTrue(row['answer_count'] == 0 for row in response.json()['items'])
 

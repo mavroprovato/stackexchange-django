@@ -37,7 +37,7 @@ class UserView(BaseListView):
         """
         tab = UserViewTab[self.request.GET.get('tab', UserViewTab.REPUTATION.name).upper()]
 
-        return models.User.objects.order_by(tab.sort_field)
+        return models.SiteUser.objects.order_by(tab.sort_field)
 
 
 class UserDetailView(BaseDetailView):

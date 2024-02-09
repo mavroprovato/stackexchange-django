@@ -89,16 +89,19 @@ class SiteUser(models.Model):
     website_url = models.URLField(null=True, blank=True, help_text="The user web site URL")
     location = models.CharField(null=True, max_length=255, blank=True, help_text="The user location")
     about = models.TextField(null=True, blank=True, help_text="The user about information")
-    creation_date = models.DateTimeField(help_text="The site user creation data")
+    creation_date = models.DateTimeField(auto_now_add=True, help_text="The site user creation data")
+    last_modified_date = models.DateTimeField(auto_now=True, help_text="The site user last access data")
     last_access_date = models.DateTimeField(help_text="The site user last access data")
     reputation = models.PositiveIntegerField(help_text="The site user reputation")
     views = models.PositiveIntegerField(help_text="The site user views")
     up_votes = models.PositiveIntegerField(help_text="The site user up votes")
     down_votes = models.PositiveIntegerField(help_text="The site user down votes")
 
+    objects = managers.SiteUserManager.as_manager()
+
     class Meta:
         db_table = 'site_users'
-        unique_together = ('user', 'site')
+        indexes = (models.Index(fields=('user', 'site')), )
 
     def __str__(self) -> str:
         """Return the string representation of the site user.
@@ -198,11 +201,11 @@ class Post(models.Model):
 class Tag(models.Model):
     """The tag model
     """
+    name = models.CharField(max_length=255, unique=True, help_text="The tag name")
     excerpt = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='excerpts', null=True, blank=True, help_text="The tag excerpt")
     wiki = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='wikis', null=True, blank=True, help_text="The tag wiki")
-    name = models.CharField(max_length=255, help_text="The tag name", unique=True)
     award_count = models.IntegerField(help_text="The tag award count")
 
     class Meta:

@@ -43,6 +43,27 @@ class UserManager(BaseUserManager):
         return self._create_user(username, email, password, staff=True, **extra_fields)
 
 
+class SiteUserManager(QuerySet):
+    """The site user manager.
+    """
+    def with_badge_counts(self) -> QuerySet:
+        """Annotate the queryset with the badge counts per badge type. Tree fields are added, named
+        `<badge_class>_count`.
+
+        :return: The annotated queryset.
+        """
+        return self.annotate(**{
+            f"{badge_class.name.lower()}_count": Coalesce(Subquery(
+                apps.get_model('stackexchange', 'UserBadge').objects.filter(
+                    user=OuterRef('pk'), badge__badge_class=badge_class.value
+                ).values('badge__badge_class').annotate(
+                    count=Count('pk')
+                ).values('count')
+            ), 0)
+            for badge_class in enums.BadgeClass
+        })
+
+
 class BadgeQuerySet(QuerySet):
     """The badge queryset
     """

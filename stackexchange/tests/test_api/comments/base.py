@@ -7,7 +7,7 @@ from ..base import BaseTestCase
 class BaseCommentTestCase(BaseTestCase):
     """Base comment API test case
     """
-    def assert_items_equal(self, response, model_class=models.Comment, obj_filter: str|dict = 'comment_id',
+    def assert_items_equal(self, response, model_class=models.PostComment, obj_filter: str | dict = 'comment_id',
                            multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """

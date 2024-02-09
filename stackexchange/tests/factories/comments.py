@@ -7,11 +7,11 @@ from .posts import QuestionAnswerFactory
 from .users import UserFactory
 
 
-class CommentFactory(factory.django.DjangoModelFactory):
-    """The comments factory
+class PostCommentFactory(factory.django.DjangoModelFactory):
+    """The post comment factory
     """
     class Meta:
-        model = models.Comment
+        model = models.PostComment
 
     post = factory.SubFactory(QuestionAnswerFactory)
     score = factory.Faker('pyint')

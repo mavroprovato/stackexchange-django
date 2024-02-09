@@ -8,27 +8,28 @@ from stackexchange import enums, models
 from .base import BaseSerializer
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
-    """The base user serializer.
+class BaseSiteUserSerializer(serializers.ModelSerializer):
+    """The base site user serializer.
     """
     user_id = fields.IntegerField(source="pk", help_text="The user identifier")
     user_type = fields.SerializerMethodField(help_text="The user type")
 
     class Meta:
-        model = models.User
+        model = models.SiteUser
         fields = ('reputation', 'user_id', 'display_name', 'user_type')
 
     @staticmethod
-    def get_user_type(user: models.User) -> str:
-        """Return the user type.
+    def get_user_type(site_user: models.SiteUser) -> str:
+        """Return the site user type.
 
-        :param user: The user
-        :return: The user type
+        :param site_user: The user.
+        :return: The user type.
         """
-        if not user.pk:
+        if not site_user.pk:
             return 'does_not_exist'
 
-        return 'moderator' if user.is_moderator else 'registered'
+        return 'moderator' if site_user.reputation >= enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation \
+            else 'registered'
 
 
 class UserBadgeCountSerializer(BaseSerializer):
@@ -47,17 +48,17 @@ class UserBadgeCountSerializer(BaseSerializer):
         return serializer_fields
 
 
-class UserSerializer(serializers.ModelSerializer):
+class SiteUserSerializer(serializers.ModelSerializer):
     """The user serializer.
     """
     badge_counts = UserBadgeCountSerializer(source="*", help_text="The user badge counts")
     user_id = fields.IntegerField(source="pk", help_text="The user identifier")
 
     class Meta:
-        model = models.User
+        model = models.SiteUser
         fields = (
-            'badge_counts', 'is_employee', 'last_modified_date', 'last_access_date', 'reputation', 'creation_date',
-            'user_id', 'location', 'website_url', 'display_name'
+            'badge_counts', 'last_access_date', 'last_modified_date',  'reputation', 'creation_date', 'user_id',
+            'location', 'website_url', 'display_name'
         )
 
 
@@ -77,17 +78,17 @@ class UserBadgeDetailSerializer(BaseSerializer):
         :param user_badge: The user badge info.
         :return: The user.
         """
-        return BaseUserSerializer(self.get_user_by_id(user_badge['user'])).data
+        return BaseSiteUserSerializer(self.get_user_by_id(user_badge['user'])).data
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
-    def get_user_by_id(user_id: int) -> models.User:
+    def get_user_by_id(user_id: int) -> models.SiteUser:
         """Get a user by id. The result of this method is cached.
 
         :param user_id: The user id.
         :return: The user.
         """
-        return models.User.objects.get(pk=user_id)
+        return models.SiteUser.objects.get(pk=user_id)
 
     @staticmethod
     def get_badge_type(user_badge: dict) -> str:

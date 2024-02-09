@@ -6,6 +6,7 @@ import unittest
 
 from django.urls import reverse
 
+from stackexchange import enums
 from stackexchange.tests import factories
 from .base import BaseUserTestCase
 
@@ -17,10 +18,11 @@ class UserModeratorsTests(BaseUserTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=10)
         badges = factories.BadgeFactory.create_batch(size=50)
         for _ in range(100):
-            factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
+            factories.UserBadgeFactory.create(user=random.choice(site_users), badge=random.choice(badges))
 
     def test(self):
         """Test users list endpoint
@@ -111,8 +113,9 @@ class UserModeratorsTests(BaseUserTestCase):
         """Test the in name filter for the user list endpoint.
         """
         # Create a user that will surely be returned
-        user = factories.UserFactory.create(display_name='John Doe', is_moderator=True)
+        site_user = factories.SiteUserFactory.create(
+            display_name='John Doe', reputation=enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation + 1)
         query = 'oh'
         response = self.client.get(reverse('api-user-moderators'), data={'inname': query})
         self.assert_in_string(response, 'display_name', query=query)
-        self.assertIn(user.id, [int(row['user_id']) for row in response.json()['items']])
+        self.assertIn(site_user.id, [int(row['user_id']) for row in response.json()['items']])

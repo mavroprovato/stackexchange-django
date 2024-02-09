@@ -17,9 +17,10 @@ class UserPostTests(BasePostTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=100)
-        for user in users:
-            factories.PostFactory.create_batch(size=2, owner=user)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=100)
+        for site_user in site_users:
+            factories.PostFactory.create_batch(size=2, owner=site_user)
 
     def test(self):
         """Test the user posts list endpoint

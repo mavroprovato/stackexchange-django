@@ -4,7 +4,7 @@ import factory
 import pytz
 
 from stackexchange import enums, models
-from .users import UserFactory
+from .users import SiteUserFactory
 
 
 class BadgeFactory(factory.django.DjangoModelFactory):
@@ -25,6 +25,6 @@ class UserBadgeFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.UserBadge
 
-    user = factory.SubFactory(UserFactory)
+    user = factory.SubFactory(SiteUserFactory)
     badge = factory.SubFactory(BadgeFactory)
     date_awarded = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)

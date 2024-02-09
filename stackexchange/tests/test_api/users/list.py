@@ -17,10 +17,11 @@ class UserListTests(BaseUserTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=10)
         badges = factories.BadgeFactory.create_batch(size=50)
         for _ in range(100):
-            factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
+            factories.UserBadgeFactory.create(user=random.choice(site_users), badge=random.choice(badges))
 
     def test(self):
         """Test users list endpoint
@@ -111,7 +112,8 @@ class UserListTests(BaseUserTestCase):
         """Test the in name filter for the user list endpoint.
         """
         # Create a user that will surely be returned
-        user = factories.UserFactory.create(display_name='John Doe')
+        site = factories.SiteFactory.create()
+        user = factories.SiteUserFactory.create(site=site, display_name='John Doe')
         query = 'oh'
         response = self.client.get(reverse('api-user-list'), data={'inname': query})
         self.assert_in_string(response, 'display_name', query=query)

@@ -2,6 +2,7 @@
 """
 import abc
 import csv
+import datetime
 import logging
 import pathlib
 import re
@@ -68,8 +69,8 @@ class UserLoader(BaseFileLoader):
                 site_users_writer.writerow([
                     row['Id'], '<NULL>' if user_id is None else user_id, self.site_id, row['DisplayName'],
                     row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'),
-                    row['CreationDate'], row['LastAccessDate'], row['Reputation'], row['Views'], row['UpVotes'],
-                    row['DownVotes']
+                    row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'], row['Reputation'],
+                    row['Views'], row['UpVotes'], row['DownVotes']
                 ])
 
         logger.info("Loading users")
@@ -86,7 +87,8 @@ class UserLoader(BaseFileLoader):
                 cursor.copy_from(
                     site_users_file, table='site_users', columns=(
                         'id', 'user_id', 'site_id', 'display_name', 'website_url', 'location', 'about',
-                        'creation_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+                        'creation_date', 'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes',
+                        'down_votes'
                     ), sep=',', null='<NULL>')
 
 

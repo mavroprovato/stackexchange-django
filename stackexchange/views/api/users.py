@@ -163,13 +163,14 @@ class UserViewSet(BaseViewSet):
         if self.action == 'badges':
             return models.UserBadge.objects.per_user_and_badge()
         if self.action == 'comments':
-            return models.Comment.objects.select_related('post', 'user')
+            return models.PostComment.objects.select_related('post', 'user')
         if self.action == 'favorites':
             return models.Post.objects.filter(
                 Exists(models.PostVote.objects.filter(user=OuterRef('owner'), type=enums.PostVoteType.FAVORITE))
             ).select_related('owner').prefetch_related('tags')
         if self.action == 'moderators':
-            return models.User.objects.with_badge_counts().filter(is_moderator=True)
+            return models.SiteUser.objects.with_badge_counts().filter(
+                reputation__gt=enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation)
         if self.action == 'posts':
             return models.Post.objects.filter(
                 type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
@@ -235,7 +236,7 @@ class UserViewSet(BaseViewSet):
                 ), 0),
             ).order_by('-question_score')
 
-        return models.User.objects.with_badge_counts()
+        return models.SiteUser.objects.with_badge_counts()
 
     def get_serializer_class(self):
         """Return the serializer class for the action.
@@ -247,7 +248,7 @@ class UserViewSet(BaseViewSet):
         if self.action == 'badges':
             return serializers.UserBadgeDetailSerializer
         if self.action == 'comments':
-            return serializers.CommentSerializer
+            return serializers.PostCommentSerializer
         if self.action == 'posts':
             return serializers.PostSerializer
         if self.action == 'privileges':
@@ -259,7 +260,7 @@ class UserViewSet(BaseViewSet):
         if self.action in ('top_answer_tags', 'top_question_tags'):
             return serializers.TopTags
 
-        return serializers.UserSerializer
+        return serializers.SiteUserSerializer
 
     @property
     def ordering_fields(self):
@@ -305,9 +306,9 @@ class UserViewSet(BaseViewSet):
         if self.action == 'badges':
             return 'user', 'badge'
         if self.action == 'top_answer_tags':
-            return ('-answer_score',)
+            return ('-answer_score', )
         if self.action == 'top_question_tags':
-            return ('-question_score',)
+            return ('-question_score', )
 
     @property
     def detail_field(self) -> str | None:
@@ -410,9 +411,9 @@ class UserViewSet(BaseViewSet):
         :param request: The request.
         :return: The response.
         """
-        user = get_object_or_404(models.User, pk=kwargs['pk'])
+        site_user = get_object_or_404(models.SiteUser, pk=kwargs['pk'])
         privileges = self.paginate_queryset(
-            [privilege for privilege in enums.Privilege if user.reputation >= privilege.reputation]
+            [privilege for privilege in enums.Privilege if site_user.reputation >= privilege.reputation]
         )
         serializer = self.get_serializer(privileges, many=True)
 

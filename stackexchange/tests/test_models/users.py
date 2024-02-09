@@ -130,15 +130,6 @@ class UserModelTests(TestCase):
         self.assertEqual(self.user._meta.get_field('is_active').null, False)
         self.assertEqual(self.user._meta.get_field('is_active').default, True)
 
-    def test_is_moderator(self):
-        """Test the is moderator field
-        """
-        self.assertEqual(self.user._meta.get_field('is_moderator').verbose_name, 'is moderator')
-        self.assertEqual(self.user._meta.get_field('is_moderator').help_text, 'True if the user is a moderator')
-        self.assertEqual(self.user._meta.get_field('is_moderator').unique, False)
-        self.assertEqual(self.user._meta.get_field('is_moderator').null, False)
-        self.assertEqual(self.user._meta.get_field('is_moderator').default, False)
-
     def test_is_employee(self):
         """Test the is employee field
         """
