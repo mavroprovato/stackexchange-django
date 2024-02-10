@@ -61,7 +61,7 @@ class AnswerViewSet(BaseViewSet):
         :return: The queryset for the action.
         """
         if self.action == 'comments':
-            return models.Comment.objects.select_related('user')
+            return models.PostComment.objects.select_related('user')
         if self.action == 'questions':
             return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
                 'tags')
@@ -75,7 +75,7 @@ class AnswerViewSet(BaseViewSet):
         :return: The serializer class for the action.
         """
         if self.action == 'comments':
-            return serializers.CommentSerializer
+            return serializers.PostCommentSerializer
         if self.action == 'questions':
             return serializers.QuestionSerializer
 

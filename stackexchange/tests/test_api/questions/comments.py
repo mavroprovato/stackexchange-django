@@ -17,12 +17,13 @@ class QuestionCommentsTests(BaseCommentTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=100)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=100)
         questions = []
-        for user in users:
-            questions += factories.QuestionFactory.create_batch(size=3, owner=user)
+        for site_user in site_users:
+            questions += factories.QuestionFactory.create_batch(size=3, owner=site_user)
         for _ in range(1000):
-            factories.CommentFactory.create(post=random.choice(questions), user=random.choice(users))
+            factories.PostCommentFactory.create(post=random.choice(questions), user=random.choice(site_users))
 
     def test(self):
         """Test comment list endpoint

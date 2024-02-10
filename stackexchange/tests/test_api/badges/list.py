@@ -17,10 +17,11 @@ class BadgeListTests(BadgeWithAwardCountTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=100)
         badges = factories.BadgeFactory.create_batch(size=25)
         for _ in range(1000):
-            factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
+            factories.UserBadgeFactory.create(user=random.choice(site_users), badge=random.choice(badges))
 
     def test(self):
         """Test badges list endpoint

@@ -16,10 +16,10 @@ class PostRevisionsTests(BasePostRevisionTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=100)
+        site_users = factories.SiteUserFactory.create_batch(size=100)
         posts = []
-        for user in users:
-            posts += factories.PostFactory.create_batch(size=3, owner=user)
+        for site_user in site_users:
+            posts += factories.PostFactory.create_batch(size=3, owner=site_user)
         for post in posts:
             factories.PostHistoryFactory.create_batch(size=3, post=post)
 

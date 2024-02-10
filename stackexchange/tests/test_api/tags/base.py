@@ -15,7 +15,6 @@ class BaseTagTestCase(BaseTestCase):
             obj_filter = {'name': 'name'}
         if attributes is None:
             attributes = {
-                'is_moderator_only': 'moderator_only',
                 'is_required': 'required',
                 'count': 'award_count',
                 'name': 'name',

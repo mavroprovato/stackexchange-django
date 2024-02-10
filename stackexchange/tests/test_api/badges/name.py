@@ -17,10 +17,11 @@ class BadgeNamedTests(BadgeWithAwardCountTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=10)
         badges = factories.BadgeFactory.create_batch(size=25)
         for _ in range(1000):
-            factories.UserBadgeFactory.create(user=random.choice(users), badge=random.choice(badges))
+            factories.UserBadgeFactory.create(user=random.choice(site_users), badge=random.choice(badges))
 
     def assert_items_equal(self, response, model_class=models.Badge, obj_filter: str | dict = 'badge_id',
                            multiple: bool = False, attributes: dict = None):

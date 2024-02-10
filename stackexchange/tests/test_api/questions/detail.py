@@ -17,9 +17,10 @@ class QuestionRetrieveTests(BaseQuestionTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
-        for user in users:
-            factories.QuestionFactory.create_batch(size=2, owner=user)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=100)
+        for site_user in site_users:
+            factories.QuestionFactory.create_batch(size=2, owner=site_user)
 
     def test(self):
         """Test the question detail endpoint

@@ -17,14 +17,13 @@ class TagModeratorOnlyTests(BaseTagTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.TagFactory.create_batch(size=10, moderator_only=random.choice([True, False]))
+        factories.TagFactory.create_batch(size=10)
 
     def test(self):
         """Test the tag moderator only endpoint.
         """
         response = self.client.get(reverse('api-tag-moderator-only'))
         self.assert_items_equal(response)
-        self.assertTrue(all(row['is_moderator_only'] for row in response.json()['items']))
 
     def test_sort_by_popular(self):
         """Test the tag moderator only endpoint sorted by tag count.

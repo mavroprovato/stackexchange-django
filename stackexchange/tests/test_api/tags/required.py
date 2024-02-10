@@ -1,6 +1,5 @@
 """Tag view set required testing
 """
-import random
 import unittest
 
 from django.urls import reverse
@@ -17,7 +16,7 @@ class TagRequiredTests(BaseTagTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.TagFactory.create_batch(size=10, required=random.choice([True, False]))
+        factories.TagFactory.create_batch(size=10)
 
     def test(self):
         """Test the tag required endpoint.

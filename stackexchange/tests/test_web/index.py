@@ -15,9 +15,9 @@ class IndexViewTests(TestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
-        for user in users:
-            factories.QuestionFactory.create_batch(size=3, owner=user)
+        site_users = factories.SiteUserFactory.create_batch(size=10)
+        for site_user in site_users:
+            factories.QuestionFactory.create_batch(size=3, owner=site_user)
 
     def test(self):
         """Test the index view

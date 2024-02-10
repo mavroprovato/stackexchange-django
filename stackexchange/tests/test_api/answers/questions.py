@@ -19,11 +19,12 @@ class AnswerQuestionListTests(BaseQuestionTestCase):
         """Set up the test data.
         """
         tags = factories.TagFactory.create_batch(size=100)
-        users = factories.UserFactory.create_batch(size=100)
-        for user in users:
-            questions = factories.QuestionFactory.create_batch(size=2, owner=user)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=100)
+        for site_user in site_users:
+            questions = factories.QuestionFactory.create_batch(size=2, owner=site_user)
             for question in questions:
-                factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(users))
+                factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(site_users))
                 for tag in random.sample(tags, 3):
                     factories.QuestionTagFactory.create(post=question, tag=tag)
 

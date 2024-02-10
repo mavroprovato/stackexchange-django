@@ -17,11 +17,12 @@ class SearchTests(BaseQuestionTestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=10)
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=10)
         tags = factories.TagFactory.create_batch(size=5)
         cls.tags = tags
-        for user in users:
-            questions = factories.QuestionFactory.create_batch(size=3, owner=user)
+        for site_user in site_users:
+            questions = factories.QuestionFactory.create_batch(size=3, owner=site_user)
             for question in questions:
                 for _ in range(3):
                     factories.QuestionTagFactory(post=question, tag=random.choice(tags))

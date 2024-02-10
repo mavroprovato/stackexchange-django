@@ -16,15 +16,16 @@ class QuestionDetailTests(TestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        users = factories.UserFactory.create_batch(size=20)
-        question = factories.QuestionFactory.create(owner=random.choice(users))
+        site = factories.SiteFactory.create()
+        site_users = factories.SiteUserFactory.create_batch(site=site, size=20)
+        question = factories.QuestionFactory.create(owner=random.choice(site_users))
         cls.question = question
         for _ in range(5):
-            factories.CommentFactory.create(post=question, user=random.choice(users))
+            factories.PostCommentFactory.create(post=question, user=random.choice(site_users))
         answers = factories.AnswerFactory.create_batch(size=10, question=question)
         for answer in answers:
             for _ in range(5):
-                factories.CommentFactory.create(post=answer, user=random.choice(users))
+                factories.PostCommentFactory.create(post=answer, user=random.choice(site_users))
 
     def test_by_id(self):
         """Test the detail by id
