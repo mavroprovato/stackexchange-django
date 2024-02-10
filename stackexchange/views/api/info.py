@@ -26,6 +26,7 @@ class InfoViewSet(BaseListViewSet):
         :param request: The request.
         :return: The site statistics.
         """
-        queryset = self.paginate_queryset([self.serializer_class(services.get_site_info()).data])
+        # TODO: Get the site from the parameters
+        queryset = self.paginate_queryset([])
 
         return self.get_paginated_response(queryset)
