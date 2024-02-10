@@ -62,7 +62,7 @@ class PostViewSet(BaseViewSet):
         :return: The queryset for the action.
         """
         if self.action == 'comments':
-            return models.Comment.objects.select_related('post', 'user')
+            return models.PostComment.objects.select_related('post', 'user')
 
         return models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related(
             'owner')
@@ -73,7 +73,7 @@ class PostViewSet(BaseViewSet):
         :return: The serializer class for the action.
         """
         if self.action == 'comments':
-            return serializers.CommentSerializer
+            return serializers.PostCommentSerializer
         if self.action == 'revisions':
             return serializers.PostRevisionSerializer
 
