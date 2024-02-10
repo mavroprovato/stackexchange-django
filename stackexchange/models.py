@@ -3,6 +3,7 @@
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 from django.utils import timezone
+from django.utils.text import slugify
 
 from stackexchange import enums, managers
 
@@ -89,13 +90,13 @@ class SiteUser(models.Model):
     website_url = models.URLField(null=True, blank=True, help_text="The user web site URL")
     location = models.CharField(null=True, max_length=255, blank=True, help_text="The user location")
     about = models.TextField(null=True, blank=True, help_text="The user about information")
-    creation_date = models.DateTimeField(auto_now_add=True, help_text="The site user creation data")
-    last_modified_date = models.DateTimeField(auto_now=True, help_text="The site user last access data")
-    last_access_date = models.DateTimeField(help_text="The site user last access data")
-    reputation = models.PositiveIntegerField(help_text="The site user reputation")
-    views = models.PositiveIntegerField(help_text="The site user views")
-    up_votes = models.PositiveIntegerField(help_text="The site user up votes")
-    down_votes = models.PositiveIntegerField(help_text="The site user down votes")
+    creation_date = models.DateTimeField(auto_now_add=True, help_text="The site user creation date")
+    last_modified_date = models.DateTimeField(auto_now=True, help_text="The site user last modified date")
+    last_access_date = models.DateTimeField(help_text="The site user last access date")
+    reputation = models.PositiveIntegerField(default=0, help_text="The site user reputation")
+    views = models.PositiveIntegerField(default=0, help_text="The site user views")
+    up_votes = models.PositiveIntegerField(default=0, help_text="The site user up votes")
+    down_votes = models.PositiveIntegerField(default=0, help_text="The site user down votes")
 
     objects = managers.SiteUserManager.as_manager()
 
@@ -196,6 +197,14 @@ class Post(models.Model):
         :return: The post title.
         """
         return str(self.title)
+
+    def slug(self) -> str | None:
+        """Return the slug for the post. Only set if the post is an answer.
+
+        :return: The slug for the post.
+        """
+        if self.type == enums.PostType.QUESTION:
+            return slugify(self.title)
 
 
 class Tag(models.Model):

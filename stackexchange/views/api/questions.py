@@ -89,7 +89,7 @@ class QuestionViewSet(BaseViewSet):
         if self.action == 'answers':
             return serializers.AnswerSerializer
         if self.action == 'comments':
-            return serializers.CommentSerializer
+            return serializers.PostCommentSerializer
 
         return serializers.QuestionSerializer
 
