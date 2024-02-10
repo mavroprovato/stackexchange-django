@@ -69,7 +69,7 @@ class QuestionViewSet(BaseViewSet):
         if self.action == 'answers':
             return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner')
         if self.action == 'comments':
-            return models.Comment.objects.select_related('user')
+            return models.PostComment.objects.select_related('user')
         if self.action == 'no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')

@@ -14,7 +14,7 @@ class UserModelTests(TestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        cls.user = factories.UserFactory.create()
+        cls.user = factories.SiteUserFactory.create()
 
     def test_username(self):
         """Test the username field
