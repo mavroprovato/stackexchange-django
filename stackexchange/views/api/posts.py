@@ -137,7 +137,7 @@ class PostViewSet(BaseViewSet):
         result = models.PostHistory.objects.group_by_revision(post_ids=post_ids)
         page = self.paginate_queryset(result)
         if page is not None:
-            users = {user.pk: user for user in models.User.objects.filter(pk__in={row['user_id'] for row in page})}
+            users = {user.pk: user for user in models.SiteUser.objects.filter(pk__in={row['user_id'] for row in page})}
             for row in page:
                 row['owner'] = users[row['user_id']] if row['user_id'] else models.SiteUser(
                     reputation=None, display_name=row['user_display_name'])
