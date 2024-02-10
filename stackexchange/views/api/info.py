@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from stackexchange import serializers, services
+from stackexchange import serializers
 from .base import BaseListViewSet
 
 
