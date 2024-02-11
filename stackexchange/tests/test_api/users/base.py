@@ -7,7 +7,7 @@ from ..base import BaseTestCase
 class BaseUserTestCase(BaseTestCase):
     """Base user API test case
     """
-    def assert_items_equal(self, response, model_class=models.User, obj_filter: str | dict = 'user_id',
+    def assert_items_equal(self, response, model_class=models.SiteUser, obj_filter: str | dict = 'user_id',
                            multiple: bool = False, attributes: dict = None):
         """Assert that the items returned by the response are the same as the database items.
         """
@@ -22,7 +22,6 @@ class BaseUserTestCase(BaseTestCase):
                 'badge_counts.gold': lambda x: models.UserBadge.objects.filter(
                     user=x, badge__badge_class=enums.BadgeClass.GOLD.value
                 ).count(),
-                'is_employee': 'is_employee',
                 'reputation': 'reputation',
                 'creation_date': lambda x: x.creation_date.isoformat().replace('+00:00', 'Z'),
                 'last_modified_date': lambda x: x.last_modified_date.isoformat().replace('+00:00', 'Z'),
