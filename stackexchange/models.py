@@ -1,7 +1,9 @@
 """The application models
 """
 from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.postgres import indexes, search
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -183,12 +185,14 @@ class Post(models.Model):
         max_length=max(len(cl.name) for cl in enums.ContentLicense),
         choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name,
         help_text="The content license")
+    tags = models.ManyToManyField('Tag', related_name='posts', through='PostTag', help_text="The post tags")
+    title_search = search.SearchVectorField(null=True, help_text="The title search vector")
 
     class Meta:
         db_table = 'posts'
         indexes = (
             models.Index(fields=('-last_activity_date', 'id')), models.Index(fields=('-creation_date', 'id')),
-            models.Index(fields=('-score', 'id'))
+            models.Index(fields=('-score', 'id')), indexes.GinIndex(fields=('title_search',))
         )
 
     def __str__(self) -> str:
@@ -203,8 +207,16 @@ class Post(models.Model):
 
         :return: The slug for the post.
         """
-        if self.type == enums.PostType.QUESTION:
+        if self.type == enums.PostType.QUESTION.value:
             return slugify(self.title)
+
+    def get_absolute_url(self) -> str | None:
+        """Get the absolute URL for the post.
+
+        :return: The absolute URL for the post.
+        """
+        if self.type == enums.PostType.QUESTION.value:
+            return reverse('web-question-detail-slug', args=(str(self.id), self.slug()))
 
 
 class Tag(models.Model):
@@ -233,8 +245,8 @@ class Tag(models.Model):
 class PostTag(models.Model):
     """The post tag model
     """
-    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='tags')
-    tag = models.ForeignKey(Tag, help_text="The tag", on_delete=models.CASCADE, related_name='posts')
+    post = models.ForeignKey(Post, help_text="The post", on_delete=models.CASCADE, related_name='post_tags')
+    tag = models.ForeignKey(Tag, help_text="The tag", on_delete=models.CASCADE, related_name='post_tags')
 
     class Meta:
         db_table = 'post_tags'

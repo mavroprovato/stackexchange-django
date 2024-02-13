@@ -41,7 +41,7 @@ class UserTopQuestionTagTests(BaseTestCase):
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
             reverse(
-                'api-user-top-question-tags', kwargs={'pk': ';'.join(str(site_users.pk) for site_user in site_users)}
+                'api-user-top-question-tags', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}
             )
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
