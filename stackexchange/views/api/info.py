@@ -2,11 +2,9 @@
 """
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework.request import Request
-from rest_framework.response import Response
 
-from stackexchange import serializers
-from .base import BaseListViewSet
+from stackexchange import filters, models, serializers
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -15,18 +13,9 @@ from .base import BaseListViewSet
         description=render_to_string('doc/info/list.md'),
     )
 )
-class InfoViewSet(BaseListViewSet):
+class InfoViewSet(BaseViewSet):
     """The info view set
     """
+    queryset = models.Site.objects
     serializer_class = serializers.InfoSerializer
-
-    def list(self, request: Request, *args, **kwargs) -> Response:
-        """The list endpoint. Returns statistics about the site.
-
-        :param request: The request.
-        :return: The site statistics.
-        """
-        # TODO: Get the site from the parameters
-        queryset = self.paginate_queryset([])
-
-        return self.get_paginated_response(queryset)
+    filter_backends = (filters.SiteFilter, )
