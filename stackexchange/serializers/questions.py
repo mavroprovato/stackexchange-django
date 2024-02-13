@@ -1,7 +1,5 @@
 """The question serializers
 """
-from collections.abc import Iterable
-
 from rest_framework import fields, serializers
 
 from stackexchange import models

@@ -308,7 +308,7 @@ class PostLinkLoader(BaseFileLoader):
         logger.info("Loading post links")
         with (self.data_dir / 'post_links.csv').open('rt') as post_links_file:
             with connection.cursor() as cursor:
-                cursor.execute(f"TRUNCATE TABLE post_links CASCADE")
+                cursor.execute("TRUNCATE TABLE post_links CASCADE")
                 cursor.copy_from(
                     post_links_file, table='post_links', columns=('id', 'post_id', 'related_post_id', 'type'), sep=',',
                     null='<NULL>'

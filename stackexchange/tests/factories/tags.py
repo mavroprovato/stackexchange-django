@@ -14,3 +14,5 @@ class TagFactory(factory.django.DjangoModelFactory):
 
     name = factory.Faker('slug')
     award_count = factory.Faker('pyint')
+    moderator_only = factory.Faker('boolean')
+    required = factory.Faker('boolean')

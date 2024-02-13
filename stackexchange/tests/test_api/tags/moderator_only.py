@@ -1,6 +1,5 @@
 """Tag view set moderator only testing
 """
-import random
 import unittest
 
 from django.urls import reverse
