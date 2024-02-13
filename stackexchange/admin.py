@@ -99,7 +99,8 @@ class PostVoteAdmin(admin.ModelAdmin):
 class TagAdmin(admin.ModelAdmin):
     """Admin for tags.
     """
-    list_display = ('name', 'award_count')
+    list_display = ('name', 'award_count', 'moderator_only', 'required')
+    list_filter = ('moderator_only', 'required')
     search_fields = ('name', )
     ordering = ('name', )
     autocomplete_fields = ('excerpt', 'wiki')

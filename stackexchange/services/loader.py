@@ -185,7 +185,7 @@ class TagLoader(BaseFileLoader):
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
                 tags_writer.writerow([
                     row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId', '<NULL>'),
-                    row.get('WikiPostId', '<NULL>')
+                    row.get('WikiPostId', '<NULL>'), row.get('IsRequired') == 'True', row.get('ModeratorOnly') == 'True'
                 ])
 
         logger.info("Loading tags")
@@ -193,8 +193,9 @@ class TagLoader(BaseFileLoader):
             cursor.execute('TRUNCATE TABLE tags CASCADE')
             with (self.data_dir / 'tags.csv').open('rt') as tags_file:
                 cursor.copy_from(
-                    tags_file, table='tags', columns=('id', 'name', 'award_count', 'excerpt_id', 'wiki_id'), sep=',',
-                    null='<NULL>')
+                    tags_file, table='tags', columns=(
+                        'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
+                    ), sep=',', null='<NULL>')
 
         tag_ids = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
         logger.info("Extracting post tags")

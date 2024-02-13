@@ -216,6 +216,8 @@ class Tag(models.Model):
     wiki = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name='wikis', null=True, blank=True, help_text="The tag wiki")
     award_count = models.IntegerField(help_text="The tag award count")
+    moderator_only = models.BooleanField(default=False, help_text="Tag is for moderators only")
+    required = models.BooleanField(default=False, help_text="Tag is required")
 
     class Meta:
         db_table = 'tags'
