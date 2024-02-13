@@ -48,7 +48,7 @@ Another prerequisite before running the application is to create an `.env` file 
 the environment variables that will configure the application. A sample file that you can use as a template exists in
 the root directory of the application and is named `.env.example`. The environment variables that can be set are:
 
-* `SECRET_KEY` is the value of the [Django secret key](https://docs.djangoproject.com/en/4.0/ref/settings/#std:setting-SECRET_KEY).
+* `SECRET_KEY` is the value of the [Django secret key](https://docs.djangoproject.com/en/4.2/ref/settings/#std:setting-SECRET_KEY).
   The key is used to provide cryptographic signing, and should be set to a unique, unpredictable value. You can generate
   one by running `python -c 'from django.core.management.utils import get_random_secret_key;print(get_random_secret_key())'` 
 * `DB_HOST` is the name of the host where the database is located. The default value is `localhost`.
@@ -62,12 +62,18 @@ the root directory of the application and is named `.env.example`. The environme
 
 ### Loading data
 
-StackExchange data dumps are published regularly at [archive.org](https://archive.org/details/stackexchange). You can
-load data to the database by running the `loaddata` Django command, depending on the site you wish to load. For example,
-in order to load the data for the `dba.stackexckange.com` site, run the following command:
+StackExchange data dumps are published regularly at [archive.org](https://archive.org/details/stackexchange). First,
+you must load the available stackexchange site by running the command:
 
 ```
-$ python manage.py loaddata dba.stackexckange.com
+$ python manage.py loaddsites
+```
+
+Then you can load data for a specific site to the database by running the `loaddata` Django command. For example, in
+order to load the data for the `superuser.com` site, run the following command:
+
+```
+$ python manage.py loaddata superuser
 ```
 
 ### Running the application
@@ -78,7 +84,7 @@ Now everything should be ready to launch the application by running:
 $ python manage.py runserver
 ```
 
-The application should now be available at http://127.0.0.1:8000/. The API documentation is built with Swagger, and you
+The application should now be available at http://127.0.0.1:8000. The API documentation is built with Swagger, and you
 can access it by opening http://127.0.0.1:8000/api/doc. It documents all the endpoints that you can use in order to
 access the data.
 
