@@ -14,7 +14,7 @@ from django.db import connection
 import py7zr
 
 from stackexchange import enums, models
-from . import dowloader, siteinfo, xmlparser
+from . import dowloader, xmlparser
 
 # The module logger
 logger = logging.getLogger(__name__)
@@ -349,7 +349,6 @@ class SiteDataLoader:
 
         # Post load actions
         self.analyze()
-        siteinfo.clear_cache()
 
     @staticmethod
     def analyze():
