@@ -6,7 +6,7 @@ from stackexchange import views
 
 
 urls = [
-    path('', views.IndexView.as_view(), name='web-index'),
+    path('', views.QuestionView.as_view(), name='web-index'),
     path('questions', views.QuestionView.as_view(), name='web-question-list'),
     path('questions/tagged/<str:tag>', views.QuestionTaggedView.as_view(), name='web-question-tagged'),
     path('questions/<int:pk>', views.QuestionDetailView.as_view(), name='web-question-detail'),
