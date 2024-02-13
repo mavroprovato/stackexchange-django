@@ -14,7 +14,4 @@ def comment_user_display(comment: models.PostComment) -> dict:
     :param comment: The comment.
     :return: The context for displaying the user for a comment.
     """
-    return {
-        'user': comment.user,
-        'user_display_name': comment.user_display_name
-    }
+    return {'user': comment.user, 'user_display_name': comment.user_display_name}
