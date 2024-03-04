@@ -3,8 +3,8 @@
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
-from stackexchange import filters, models, serializers
-from .base import BaseViewSet
+from stackexchange import serializers, services
+from .base import BaseListViewSet
 
 
 @extend_schema_view(
@@ -13,9 +13,14 @@ from .base import BaseViewSet
         description=render_to_string('doc/info/list.md'),
     )
 )
-class InfoViewSet(BaseViewSet):
+class InfoViewSet(BaseListViewSet):
     """The info view set
     """
-    queryset = models.Site.objects
     serializer_class = serializers.InfoSerializer
-    filter_backends = (filters.SiteFilter, )
+
+    def get_queryset(self) -> list[dict]:
+        """Return the site info.
+
+        :return: The site info.
+        """
+        return [self.serializer_class(services.siteinfo.get_site_info()).data]

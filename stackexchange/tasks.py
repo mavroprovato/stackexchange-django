@@ -11,4 +11,4 @@ def set_site_info() -> dict:
 
     :return: The calculated site information.
     """
-    return services.set_site_info()
+    return services.siteinfo.set_site_info()

@@ -13,7 +13,7 @@ from django.contrib.auth.hashers import make_password
 from django.db import connection
 import py7zr
 
-from stackexchange import enums, models
+from stackexchange import enums, models, services
 from . import dowloader, xmlparser
 
 # The module logger
@@ -349,6 +349,7 @@ class SiteDataLoader:
 
         # Post load actions
         self.analyze()
+        services.siteinfo.set_site_info()
 
     @staticmethod
     def analyze():
