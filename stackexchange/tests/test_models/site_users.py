@@ -1,4 +1,4 @@
-"""User model tests
+"""Site user model tests
 """
 from django.test import TestCase
 

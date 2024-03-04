@@ -51,6 +51,13 @@ class User(AbstractBaseUser):
         """
         return self.is_staff()
 
+    def __str__(self) -> str:
+        """Return the string representation of the user.
+
+        :return: The username.
+        """
+        return str(self.username)
+
 
 class Site(models.Model):
     """The site model.
