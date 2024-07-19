@@ -5,7 +5,7 @@ description = ""
 authors = ["Kostas Kokkoros"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 celery = "^5.3.0"
 Django = "^4.2.0"
 defusedxml = "^0.7.0"
@@ -14,7 +14,7 @@ django-environ = "^0.11.0"
 djangorestframework = "^3.14.0"
 drf-spectacular = "^0.27.0"
 psycopg2 = "^2.9.9"
-py7zr = "^0.20.0"
+py7zr = "^0.21.0"
 requests = "^2.31.0"
 tqdm = "^4.66.0"
 
