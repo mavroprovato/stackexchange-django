@@ -50,7 +50,7 @@ the root directory of the application and is named `.env.example`. The environme
 
 * `SECRET_KEY` is the value of the [Django secret key](https://docs.djangoproject.com/en/4.2/ref/settings/#std:setting-SECRET_KEY).
   The key is used to provide cryptographic signing, and should be set to a unique, unpredictable value. You can generate
-  one by running `python -c 'from django.core.management.utils import get_random_secret_key;print(get_random_secret_key())'` 
+  one by running `python -c 'from django.core.management.utils import get_random_secret_key;print(get_random_secret_key())'`
 * `DB_HOST` is the name of the host where the database is located. The default value is `localhost`.
 * `DB_PORT` is the port on which the database is running. The default value is `5432`.
 * `DB_NAME` is the name of the database that is used to store the data. The default value is `stackexchange`. It should
