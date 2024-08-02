@@ -325,7 +325,7 @@ class PostHistory(models.Model):
     content_license = models.CharField(
        max_length=max(len(cl.value) for cl in enums.ContentLicense),
        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name,
-       null=True, blank=True, help_text="The content license")
+       help_text="The content license")
 
     objects = managers.PostHistoryQuerySet().as_manager()
 

@@ -146,18 +146,20 @@ class PostLoader(BaseFileLoader):
         """
         logger.info("Extracting posts")
         post_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
+        user_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Users.xml')}
         with (self.data_dir / 'posts.csv').open('wt') as posts_file:
             posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
                 posts_writer.writerow([
                     row['Id'], row.get('ParentId', '<NULL>'),
                     row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in post_ids else '<NULL>',
-                    row.get('OwnerUserId', '<NULL>'), row.get('LastEditorUserId', '<NULL>'), row['PostTypeId'],
-                    row.get('Title', '<NULL>'), row['Body'], row.get('LastEditorDisplayName', '<NULL>'),
-                    row['CreationDate'], row.get('LastEditDate', '<NULL>'), row['LastActivityDate'],
-                    row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'), row['Score'],
-                    row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
-                    row.get('FavoriteCount', 0), row['ContentLicense']
+                    row.get('OwnerUserId', '<NULL>') if row.get('OwnerUserId') in user_ids else '<NULL>',
+                    row.get('LastEditorUserId', '<NULL>') if row.get('LastEditorUserId') in user_ids else '<NULL>',
+                    row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
+                    row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
+                    row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
+                    row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
+                    row.get('FavoriteCount', 0), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
                 ])
 
         logger.info("Loading posts")
@@ -250,8 +252,9 @@ class PostCommentLoader(BaseFileLoader):
             csv_writer = csv.writer(post_comments_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Comments.xml'):
                 csv_writer.writerow([
-                    row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'], row['ContentLicense'],
-                    row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>')
+                    row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'],
+                    row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value), row.get('UserId', '<NULL>'),
+                    row.get('UserDisplayName', '<NULL>')
                 ])
 
         logger.info("Loading post comments")
@@ -271,13 +274,15 @@ class PostHistoryLoader(BaseFileLoader):
         """
         logger.info("Extracting post history")
         with (self.data_dir / 'post_history.csv').open('wt') as post_history_file:
+            post_ids = set(models.Post.objects.values_list('pk', flat=True))
             post_history_writer = csv.writer(post_history_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'PostHistory.xml'):
-                post_history_writer.writerow([
-                    row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
-                    row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
-                    row.get('Text', '<NULL>'), row.get('ContentLicense', '<NULL>')
-                ])
+                if int(row['PostId']) in post_ids:
+                    post_history_writer.writerow([
+                        row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
+                        row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
+                        row.get('Text', '<NULL>'), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
+                    ])
 
         logger.info("Loading post history")
         with (self.data_dir / 'post_history.csv').open('rt') as post_history_file:
