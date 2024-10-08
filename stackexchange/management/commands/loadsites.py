@@ -24,6 +24,7 @@ class Command(BaseCommand):
         downloader = services.dowloader.Downloader(filename='Sites.xml')
         sites_file = downloader.get_file()
 
+        logging.info("Loading sites")
         for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
             models.Site.objects.update_or_create(pk=site['Id'], defaults={
                 'name': get_site_name(site['Url']), 'description': site['Name'], 'long_description': site['LongName'],

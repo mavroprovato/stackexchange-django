@@ -1,10 +1,10 @@
 """The users factory
 """
+import datetime
+
 import factory
-import pytz
 
 from stackexchange import models
-
 from .sites import SiteFactory
 
 
@@ -32,8 +32,8 @@ class SiteUserFactory(factory.django.DjangoModelFactory):
     website_url = factory.Faker('url')
     location = factory.Faker('city')
     about = factory.Faker('sentence')
-    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
-    last_access_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
+    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
+    last_access_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
     reputation = factory.Faker('pyint')
     views = factory.Faker('pyint')
     up_votes = factory.Faker('pyint')

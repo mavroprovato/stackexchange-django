@@ -27,7 +27,7 @@ environ.Env.read_env(env_file=str(BASE_DIR / '.env'))
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', True)
 
 ALLOWED_HOSTS = []
 
@@ -45,21 +45,24 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'django_celery_results',
-    'drf_spectacular',
-    'debug_toolbar',
-    'django_extensions'
+    'drf_spectacular'
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar', 'django_extensions']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'config.urls'
 

@@ -66,7 +66,7 @@ StackExchange data dumps are published regularly at [archive.org](https://archiv
 you must load the available stackexchange site by running the command:
 
 ```
-$ python manage.py loaddsites
+$ python manage.py loadsites
 ```
 
 Then you can load data for a specific site to the database by running the `loaddata` Django command. For example, in
@@ -84,9 +84,45 @@ Now everything should be ready to launch the application by running:
 $ python manage.py runserver
 ```
 
-The application should now be available at http://127.0.0.1:8000. The API documentation is built with Swagger, and you
-can access it by opening http://127.0.0.1:8000/api/doc. It documents all the endpoints that you can use in order to
-access the data.
+The application should now be available at http://127.0.0.1:8000. The API documentation is built with
+[Swagger](https://swagger.io/), and you can access it by opening http://127.0.0.1:8000/api/doc. It documents all the
+endpoints that you can use in order to access the data.
 
 You can also access the Django admin interface at http://127.0.0.1:8000/admin. The credentials to access the interface
 are admin/password.
+
+### Development
+
+In order to run the application tests, run
+
+```shell
+python manage.py test
+```
+
+To get an HTML coverage report, run
+
+```shell
+coverage run manage.py test --no-input
+coverage html
+```
+
+The report will be available in the `htmlcov` directory.
+
+In order to get a linting report with [Pylint](https://www.pylint.org/), run
+
+```shell
+pylint stackexchange
+```
+
+In order to get a security report with [Bandit](https://bandit.readthedocs.io), run
+
+```shell
+bandit -r .
+```
+
+In order to get a vulnerability report for the project dependencies with
+[Safety](https://safetycli.com/product/safety-cli), run
+
+```shell
+safety scan
+```

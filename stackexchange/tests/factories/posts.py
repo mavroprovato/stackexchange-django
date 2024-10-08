@@ -1,7 +1,8 @@
 """The posts factory
 """
+import datetime
+
 import factory
-import pytz
 
 from stackexchange import enums, models
 from .tags import TagFactory
@@ -17,8 +18,8 @@ class PostFactory(factory.django.DjangoModelFactory):
     title = factory.Faker('sentence')
     body = factory.Faker('paragraph')
     type = factory.Faker('random_element', elements=[pt.value for pt in enums.PostType])
-    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
-    last_activity_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
+    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
+    last_activity_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
     score = factory.Faker('pyint')
     view_count = factory.Faker('pyint')
     answer_count = factory.Faker('pyint')
@@ -66,7 +67,7 @@ class PostHistoryFactory(factory.django.DjangoModelFactory):
     type = factory.Faker('random_element', elements=[pt.value for pt in enums.PostHistoryType])
     post = factory.SubFactory(PostFactory)
     revision_guid = factory.Faker('uuid4')
-    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=pytz.UTC)
+    creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
     user = factory.SubFactory(SiteUserFactory)
     user_display_name = factory.Faker('user_name')
     comment = factory.Faker('sentence')

@@ -275,4 +275,12 @@ class Migration(migrations.Migration):
             model_name='post',
             index=django.contrib.postgres.indexes.GinIndex(fields=['title_search'], name='posts_title_s_2e0242_gin'),
         ),
+        migrations.RunSQL(
+            sql='''
+                CREATE TRIGGER title_search_trigger
+                BEFORE INSERT OR UPDATE OF title ON posts
+                FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(title_search, 'pg_catalog.english', title);
+            ''',
+            reverse_sql='DROP TRIGGER IF EXISTS title_search_trigger ON posts;'
+        )
     ]

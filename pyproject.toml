@@ -1,34 +1,36 @@
 [tool.poetry]
-name = "stackexchange_django"
+name = "stackexchange-django"
 version = "0.1.0"
-description = ""
-authors = ["Kostas Kokkoros"]
+description = "Stachexchange API implemented in Django"
+authors = ["Kostas Kokkoros <mavroprovato@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
-celery = "^5.3.0"
-Django = "^4.2.0"
-defusedxml = "^0.7.0"
-django-celery-results = "^2.5.0"
-django-environ = "^0.11.0"
-djangorestframework = "^3.14.0"
-drf-spectacular = "^0.27.0"
+celery = "^5.4.0"
+defusedxml = "^0.7.1"
+django = "^5.1.1"
+django-celery-results = "^2.5.1"
+django-environ = "^0.11.2"
+djangorestframework = "^3.15.2"
+drf-spectacular = "^0.27.2"
 psycopg2 = "^2.9.9"
-py7zr = "^0.21.0"
-requests = "^2.31.0"
-tqdm = "^4.66.0"
+py7zr = "^0.22.0"
+requests = "^2.32.3"
+tqdm = "^4.66.5"
+coverage = "^7.6.1"
 
-[tool.poetry.dev-dependencies]
-bandit = "^1.7.0"
-coverage = "^7.4.0"
-django-debug-toolbar = "^4.3.0"
-django-extensions = "^3.2.0"
-factory-boy = "^3.3.0"
-pylint = "^3.0.0"
-pylint-django = "^2.5.0"
-safety = "^3.0.0"
-Werkzeug = "^3.0.0"
+[tool.poetry.group.dev.dependencies]
+bandit = "^1.7.10"
+django-debug-toolbar = "^4.4.6"
+django-extensions = "^3.2.3"
+factory-boy = "^3.3.1"
+pylint = "^3.3.1"
+pylint-django = "^2.5.5"
+safety = "^3.2.8"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
