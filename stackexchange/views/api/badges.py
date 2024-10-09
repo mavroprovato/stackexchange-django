@@ -1,11 +1,14 @@
 """The badges view set.
 """
+from collections.abc import Sequence
+
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 
 from stackexchange import enums, filters, models, serializers
 from .base import BaseViewSet
@@ -69,7 +72,7 @@ class BadgeViewSet(BaseViewSet):
 
         return models.Badge.objects.with_award_count()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type[Serializer]:
         """Get the serializer class for the action.
 
         :return: The serializer class for the action.
@@ -99,6 +102,8 @@ class BadgeViewSet(BaseViewSet):
         if self.action in ('recipients', 'recipients_detail'):
             return 'date_awarded'
 
+        return None
+
     @property
     def name_field(self) -> str | None:
         """Return the field used for in name filtering.
@@ -108,8 +113,10 @@ class BadgeViewSet(BaseViewSet):
         if self.action in ('list', 'named', 'tags'):
             return 'name'
 
+        return None
+
     @property
-    def ordering_fields(self):
+    def ordering_fields(self) -> Sequence[filters.OrderingField] | None:
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
@@ -125,6 +132,8 @@ class BadgeViewSet(BaseViewSet):
                 filters.OrderingField('rank', 'badge_class', type=enums.BadgeClass),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
             )
+
+        return None
 
     @action(detail=False, url_path='name')
     def named(self, request: Request, *args, **kwargs) -> Response:

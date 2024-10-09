@@ -1,6 +1,6 @@
 """The ordering filter
 """
-import collections.abc
+from collections.abc import Sequence
 import dataclasses
 import datetime
 import enum
@@ -55,7 +55,7 @@ class OrderingFilter(BaseFilterBackend):
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
-    def get_ordering_fields(view: View) -> collections.abc.Sequence[OrderingField]:
+    def get_ordering_fields(view: View) -> Sequence[OrderingField]:
         """Get the ordering fields from the view.
 
         :param view: The view.
@@ -74,7 +74,7 @@ class OrderingFilter(BaseFilterBackend):
 
     @staticmethod
     @functools.lru_cache(maxsize=None)
-    def get_stable_ordering(view: View) -> collections.abc.Sequence[str]:
+    def get_stable_ordering(view: View) -> Sequence[str]:
         """Get the ordering fields from the view.
 
         :param view: The view.
@@ -121,6 +121,8 @@ class OrderingFilter(BaseFilterBackend):
                     pass
 
             return ordering_field, ordering_direction
+
+        return None
 
     def order_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Order the queryset based on the ordering parameters from the request.
@@ -187,6 +189,8 @@ class OrderingFilter(BaseFilterBackend):
                     ) from exception
 
             return value_str
+
+        return None
 
     def get_schema_operation_parameters(self, view: View) -> list[dict]:
         """Get the schema operation parameters.

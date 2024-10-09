@@ -1,10 +1,12 @@
 """The search view set
 """
+from collections.abc import Sequence
 import datetime
 
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from rest_framework.serializers import Serializer
 
 from stackexchange import enums, filters, models, serializers
 from .base import BaseListViewSet
@@ -32,7 +34,7 @@ class SearchViewSet(BaseListViewSet):
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
             'tags')
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type[Serializer]:
         """Get the serializer class for the action.
 
         :return: The serializer class for the action.
@@ -40,7 +42,7 @@ class SearchViewSet(BaseListViewSet):
         return serializers.QuestionSerializer
 
     @property
-    def ordering_fields(self):
+    def ordering_fields(self) -> Sequence[filters.OrderingField] | None:
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.

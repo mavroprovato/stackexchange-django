@@ -38,7 +38,7 @@ class DateRangeFilter(BaseFilterBackend):
         return queryset
 
     @staticmethod
-    def get_date(request: Request, param_name: str) -> datetime.datetime:
+    def get_date(request: Request, param_name: str) -> datetime.datetime | None:
         """Get a date to filter from the request parameters. The date should be contained in the `param_name` query
         parameter.
 
@@ -52,6 +52,8 @@ class DateRangeFilter(BaseFilterBackend):
                 return timezone.make_aware(datetime.datetime.strptime(request.query_params.get(param_name), '%Y-%m-%d'))
             except ValueError as exception:
                 raise ValidationError({param_name: 'Invalid date'}) from exception
+
+        return None
 
     def get_schema_operation_parameters(self, view: View) -> list[dict]:
         """Get the schema operation parameters.

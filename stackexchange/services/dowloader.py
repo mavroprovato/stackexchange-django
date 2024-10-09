@@ -19,6 +19,8 @@ class Downloader:
     """
     # The base URL
     BASE_URL = 'https://archive.org/download/stackexchange'
+    # Timeout in seconds
+    TIMEOUT = 5
 
     def __init__(self, filename: str):
         """Create the file downloader.
@@ -34,14 +36,14 @@ class Downloader:
 
         :return: The file.
         """
-        if self._should_download():
-            self._download()
+        if self.should_download():
+            self.download()
         else:
             logger.info("File %s is up to date", self.filename)
 
         return self._cache_dir / self.filename
 
-    def _should_download(self) -> bool:
+    def should_download(self) -> bool:
         """Check if the file should be downloaded.
 
         :return: True if the file should be downloaded, false otherwise.
@@ -49,18 +51,18 @@ class Downloader:
         if not (self._cache_dir / self.filename).exists():
             logger.info("File %s does not exist in cache", self.filename)
             return True
-        if self._file_changed():
+        if self.file_changed():
             return True
 
         return False
 
-    def _file_changed(self) -> bool:
+    def file_changed(self) -> bool:
         """Check if the dump file has changed.
 
         :return: True if the dump file has changed, False otherwise.
         """
         # Get the latest file etag
-        response = requests.head(f"{self.BASE_URL}/{self.filename}", allow_redirects=True)
+        response = requests.head(f"{self.BASE_URL}/{self.filename}", allow_redirects=True, timeout=self.TIMEOUT)
         response.raise_for_status()
         remote_etag = response.headers['Etag'].strip('"')
 
@@ -81,22 +83,22 @@ class Downloader:
 
         return False
 
-    def _download(self) -> None:
+    def download(self) -> None:
         """Download the dump file.
         """
         logger.info("Downloading file %s", self.filename)
 
         # Download file
-        with requests.get(f"{self.BASE_URL}/{self.filename}", stream=True) as response:
+        with requests.get(f"{self.BASE_URL}/{self.filename}", stream=True, timeout=self.TIMEOUT) as response:
             response.raise_for_status()
             total = int(response.headers.get('content-length', 0))
             with (
                 (self._cache_dir / f"{self.filename}").open('wb') as f,
-                tqdm.tqdm(desc=self.filename, total=total, unit='iB', unit_scale=True) as bar
+                tqdm.tqdm(desc=self.filename, total=total, unit='iB', unit_scale=True) as progress_bar
             ):
                 for data in response.iter_content(chunk_size=1024):
                     size = f.write(data)
-                    bar.update(size)
+                    progress_bar.update(size)
 
         # Write the cache information
         with (self._cache_dir / f"{self.filename}.etag").open('wt') as f:

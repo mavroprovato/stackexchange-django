@@ -1,5 +1,6 @@
 """The question views
 """
+from collections.abc import Sequence
 import datetime
 
 from django.db.models import QuerySet, Exists, OuterRef
@@ -8,6 +9,7 @@ from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiPara
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 
 from stackexchange import enums, filters, models, serializers
 from .base import BaseViewSet
@@ -81,7 +83,7 @@ class QuestionViewSet(BaseViewSet):
         return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
             'tags')
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type[Serializer]:
         """Get the serializer class for the action.
 
         :return: The serializer class for the action.
@@ -94,7 +96,7 @@ class QuestionViewSet(BaseViewSet):
         return serializers.QuestionSerializer
 
     @property
-    def ordering_fields(self):
+    def ordering_fields(self) -> Sequence[filters.OrderingField] | None:
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
@@ -110,6 +112,8 @@ class QuestionViewSet(BaseViewSet):
                 filters.OrderingField('creation', 'creation_date', type=datetime.date),
                 filters.OrderingField('votes', 'score', type=int)
             )
+
+        return None
 
     @property
     def detail_field(self) -> str | None:

@@ -217,6 +217,8 @@ class Post(models.Model):
         if self.type == enums.PostType.QUESTION.value:
             return slugify(self.title)
 
+        return None
+
     def get_absolute_url(self) -> str | None:
         """Get the absolute URL for the post.
 
@@ -224,6 +226,8 @@ class Post(models.Model):
         """
         if self.type == enums.PostType.QUESTION.value:
             return reverse('web-question-detail-slug', args=(str(self.id), self.slug()))
+
+        return None
 
 
 class Tag(models.Model):

@@ -57,6 +57,8 @@ class BaseListViewSet(GenericViewSet):
         if self.action == 'retrieve':
             return 'pk'
 
+        return None
+
 
 class BaseViewSet(BaseListViewSet):
     """Base view set

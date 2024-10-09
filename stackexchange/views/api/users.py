@@ -1,6 +1,6 @@
 """The users view set.
 """
-import collections.abc
+from collections.abc import Sequence
 import datetime
 
 from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F, Subquery
@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 
 from stackexchange import enums, filters, models, serializers
 from .base import BaseViewSet
@@ -238,7 +239,7 @@ class UserViewSet(BaseViewSet):
 
         return models.SiteUser.objects.with_badge_counts()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type[Serializer]:
         """Return the serializer class for the action.
 
         :return: The serializer class for the action.
@@ -263,7 +264,7 @@ class UserViewSet(BaseViewSet):
         return serializers.SiteUserSerializer
 
     @property
-    def ordering_fields(self):
+    def ordering_fields(self) -> Sequence[filters.OrderingField] | None:
         """Return the ordering fields for the action.
 
         :return: The ordering fields for the action.
@@ -297,8 +298,10 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('votes', 'score', type=int),
             )
 
+        return None
+
     @property
-    def stable_ordering(self) -> collections.abc.Sequence[str] | None:
+    def stable_ordering(self) -> Sequence[str] | None:
         """Get the stable ordering for the view.
 
         :return: An iterable of strings that define the stable ordering.
@@ -309,6 +312,8 @@ class UserViewSet(BaseViewSet):
             return ('-answer_score', )
         if self.action == 'top_question_tags':
             return ('-question_score', )
+
+        return None
 
     @property
     def detail_field(self) -> str | None:
@@ -349,6 +354,8 @@ class UserViewSet(BaseViewSet):
         """
         if self.action == 'list':
             return 'display_name'
+
+        return None
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:

@@ -26,8 +26,8 @@ class SiteFilter(BaseFilterBackend):
         if site_param:
             try:
                 site = models.Site.objects.get(name=site_param)
-            except models.Site.DoesNotExist:
-                raise APIException(detail=f"No site found for name `{site_param}`", code=400)
+            except models.Site.DoesNotExist as exc:
+                raise APIException(detail=f"No site found for name {site_param}", code=400) from exc
 
             queryset = queryset.filter(pk=site.pk)
         else:
