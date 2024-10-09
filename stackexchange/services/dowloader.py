@@ -20,7 +20,7 @@ class Downloader:
     # The base URL
     BASE_URL = 'https://archive.org/download/stackexchange'
     # Timeout in seconds
-    TIMEOUT = 5
+    TIMEOUT = 60
 
     def __init__(self, filename: str):
         """Create the file downloader.
