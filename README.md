@@ -3,7 +3,7 @@
 This project implements an API for a StackExchange-like site. The API tries to be as faithful as possible to the 
 [official stackexchange API](https://api.stackexchange.com/docs).
 
-The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) 3.12+ and
+The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) and
 [Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used as the
 project database. [RabbitMQ](https://www.rabbitmq.com/) is used for background application tasks, and
 [Redis](https://redis.io/) is used for caching.
@@ -48,7 +48,7 @@ Another prerequisite before running the application is to create an `.env` file 
 the environment variables that will configure the application. A sample file that you can use as a template exists in
 the root directory of the application and is named `.env.example`. The environment variables that can be set are:
 
-* `SECRET_KEY` is the value of the [Django secret key](https://docs.djangoproject.com/en/4.2/ref/settings/#std:setting-SECRET_KEY).
+* `SECRET_KEY` is the value of the [Django secret key](https://docs.djangoproject.com/en/5.1/ref/settings/#std-setting-SECRET_KEY).
   The key is used to provide cryptographic signing, and should be set to a unique, unpredictable value. You can generate
   one by running `python -c 'from django.core.management.utils import get_random_secret_key;print(get_random_secret_key())'`
 * `DB_HOST` is the name of the host where the database is located. The default value is `localhost`.
