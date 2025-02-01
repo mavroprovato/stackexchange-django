@@ -63,7 +63,7 @@ class AnswerViewSet(BaseViewSet):
         :return: The queryset for the action.
         """
         if self.action == 'comments':
-            return models.PostComment.objects.select_related('user')
+            return models.PostComment.objects.select_related('user', 'post')
         if self.action == 'questions':
             return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
                 'tags')
