@@ -5,7 +5,6 @@ import csv
 import datetime
 import logging
 import pathlib
-import re
 import tempfile
 
 from django.conf import settings
@@ -18,9 +17,6 @@ from . import dowloader, siteinfo, xmlparser
 
 # The module logger
 logger = logging.getLogger(__name__)
-
-# The regex to find tags in the posts file
-TAGS_REGEX = re.compile(r'<(?P<tag_name>.*?)>')
 
 
 class BaseFileLoader:
@@ -204,8 +200,9 @@ class TagLoader(BaseFileLoader):
         with (self.data_dir / 'post_tags.csv').open('wt') as post_tags_file:
             post_tags_writer = csv.writer(post_tags_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
-                for match in TAGS_REGEX.finditer(row.get('Tags', '')):
-                    post_tags_writer.writerow([row['Id'], tag_ids[match.group('tag_name')]])
+                for tag_name in row.get('Tags', '').split('|'):
+                    if tag_name and tag_name in tag_ids:
+                        post_tags_writer.writerow([row['Id'], tag_ids[tag_name]])
 
         logger.info("Loading post tags")
         with connection.cursor() as cursor:
