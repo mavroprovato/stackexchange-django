@@ -102,7 +102,7 @@ class BadgeLoader(BaseFileLoader):
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
                 if row['Name'] not in badge_names:
                     badges_writer.writerow([
-                        row['Name'], row['Class'],
+                        row['Id'], row['Name'], row['Class'],
                         enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
                     ])
                     badge_names.add(row['Name'])
@@ -112,7 +112,7 @@ class BadgeLoader(BaseFileLoader):
             cursor.execute('TRUNCATE TABLE badges CASCADE')
             with (self.data_dir / 'badges.csv').open('rt') as badges_file:
                 cursor.copy_from(
-                    badges_file, table='badges', columns=('name', 'badge_class', 'badge_type'), sep=',',
+                    badges_file, table='badges', columns=('id', 'name', 'badge_class', 'badge_type'), sep=',',
                     null='<NULL>')
 
         # Second pass - load user badges
