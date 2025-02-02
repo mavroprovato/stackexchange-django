@@ -52,6 +52,8 @@ class TagViewSet(BaseListViewSet):
     """The tag view set
     """
     filter_backends = (filters.OrderingFilter, filters.InNameFilter)
+    detail_field = 'name'
+    detail_field_integer = False
 
     def get_queryset(self) -> QuerySet | None:
         """Return the queryset for the action.
@@ -90,14 +92,6 @@ class TagViewSet(BaseListViewSet):
             )
 
         return None
-
-    @property
-    def detail_field(self) -> str | None:
-        """Return the field used to filter detail actions.
-
-        :return: The fields used to filter detail actions.
-        """
-        return 'name'
 
     @property
     def name_field(self) -> str | None:
