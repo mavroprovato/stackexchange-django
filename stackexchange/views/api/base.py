@@ -1,9 +1,10 @@
 """The users view set.
 """
-from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+
+from stackexchange.exceptions import ValidationError
 
 
 class BaseListViewSet(GenericViewSet):
@@ -30,7 +31,7 @@ class BaseListViewSet(GenericViewSet):
                 try:
                     object_ids.append(int(object_id) if self.detail_field_integer else object_id)
                 except ValueError:
-                    raise ValidationError("Invalid object id")
+                    raise ValidationError(lookup_url_kwarg)
             queryset = queryset.filter(**{f"{self.detail_field}__in": object_ids})
 
         page = self.paginate_queryset(queryset)
