@@ -150,6 +150,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'stackexchange.pagination.Pagination',
     'DEFAULT_SCHEMA_CLASS': 'stackexchange.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'stackexchange.exceptions.application_exception_handler',
 }
 
 # Celery configuration
