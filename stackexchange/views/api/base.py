@@ -1,5 +1,6 @@
 """The users view set.
 """
+from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -24,12 +25,13 @@ class BaseListViewSet(GenericViewSet):
         if lookup_url_kwarg in self.kwargs:
             if self.detail_field is None:
                 raise AssertionError(f'Detail field for action {self.action} should not be None')
-            if self.single_object:
-                queryset = queryset.filter(**{self.detail_field: self.kwargs[lookup_url_kwarg]})
-            else:
-                queryset = queryset.filter(**{
-                    f"{self.detail_field}__in": self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]
-                })
+            object_ids = []
+            for object_id in self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]:
+                try:
+                    object_ids.append(int(object_id) if self.detail_field_integer else object_id)
+                except ValueError:
+                    raise ValidationError("Invalid object id")
+            queryset = queryset.filter(**{f"{self.detail_field}__in": object_ids})
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -41,12 +43,12 @@ class BaseListViewSet(GenericViewSet):
         return Response(serializer.data)
 
     @property
-    def single_object(self) -> bool:
-        """Return true if the action is for a single object.
+    def detail_field_integer(self) -> bool:
+        """Return true if the detail field is an integer, otherwise return false.
 
-        :return: True if the action is for a single object.
+        :return: The fields used to filter detail actions.
         """
-        return False
+        return True
 
     @property
     def detail_field(self) -> str | None:
