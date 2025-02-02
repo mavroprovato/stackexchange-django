@@ -167,7 +167,7 @@ class UserViewSet(BaseViewSet):
             return models.PostComment.objects.select_related('post', 'user')
         if self.action == 'favorites':
             return models.Post.objects.filter(
-                Exists(models.PostVote.objects.filter(user=OuterRef('owner'), type=enums.PostVoteType.FAVORITE))
+                Exists(models.PostVote.objects.filter(type=enums.PostVoteType.FAVORITE))
             ).select_related('owner').prefetch_related('tags')
         if self.action == 'moderators':
             return models.SiteUser.objects.with_badge_counts().filter(
