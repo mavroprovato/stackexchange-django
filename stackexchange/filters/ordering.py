@@ -98,13 +98,7 @@ class OrderingFilter(BaseFilterBackend):
         ordering_fields = self.get_ordering_fields(view)
 
         # Get the ordering field parameter from the request
-        ordering_name = request.query_params.get(self.ordering_name_param, '').strip()
-        ordering_field = None
-        if ordering_name:
-            for field in ordering_fields:
-                if field.name == ordering_name:
-                    ordering_field = field
-                    break
+        ordering_field = self.get_ordering_field_from_request(ordering_fields, request)
         # If not provided in the request, use the first ordering field if it exists
         if ordering_field is None and len(ordering_fields) > 0:
             ordering_field = ordering_fields[0]
@@ -123,6 +117,27 @@ class OrderingFilter(BaseFilterBackend):
             return ordering_field, ordering_direction
 
         return None
+
+    def get_ordering_field_from_request(
+            self, ordering_fields: Sequence[OrderingField], request: Request
+    ) -> OrderingField | None:
+        """Get the ordering field from the request.
+
+        :param ordering_fields: The available ordering fields for the view.
+        :param request: The request.
+        :return: The ordering field or None.
+        """
+        ordering_field = None
+        ordering_field_name = request.query_params.get(self.ordering_name_param, '').strip()
+        if ordering_field_name:
+            for field in ordering_fields:
+                if field.name == ordering_field_name:
+                    ordering_field = field
+                    break
+            if not ordering_field:
+                raise ValidationError(self.ordering_name_param)
+
+        return ordering_field
 
     def order_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Order the queryset based on the ordering parameters from the request.
