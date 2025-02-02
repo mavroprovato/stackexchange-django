@@ -2,9 +2,8 @@
 """
 import collections.abc
 
-from django.core.paginator import InvalidPage, PageNotAnInteger, EmptyPage
+from django.core.paginator import InvalidPage
 from django.views import View
-from django.utils.translation import gettext_lazy as _
 from rest_framework import pagination
 from rest_framework.exceptions import NotFound
 from rest_framework.request import Request
@@ -82,20 +81,18 @@ class Paginator:
         return Page(self.queryset[bottom:top+1], self.page_size, self)
 
     @staticmethod
-    def validate_number(number: str) -> int:
+    def validate_number(number_str: str) -> int:
         """Validate the given 1-based page number.
 
-        :param number: The given number.
+        :param number_str: The given page number.
         :return: The page number as an integer.
         """
-        try:
-            if isinstance(number, float) and not number.is_integer():
-                raise ValueError
-            number = int(number)
-        except (TypeError, ValueError) as exception:
-            raise PageNotAnInteger(_('That page number is not an integer')) from exception
-        if number < 1:
-            raise EmptyPage(_('That page number is less than 1'))
+        number = 1
+        if number_str:
+            try:
+                number = int(number_str)
+            except ValueError:
+                raise ValidationError('page')
 
         return number
 
