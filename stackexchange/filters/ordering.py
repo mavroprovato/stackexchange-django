@@ -9,11 +9,11 @@ import functools
 from django.db.models import QuerySet
 from django.utils import timezone
 from django.views import View
-from rest_framework.exceptions import ValidationError
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
 
 from stackexchange import enums
+from stackexchange.exceptions import ValidationError
 
 
 @dataclasses.dataclass
@@ -117,8 +117,8 @@ class OrderingFilter(BaseFilterBackend):
             if direction_value:
                 try:
                     ordering_direction = enums.OrderingDirection(direction_value)
-                except ValueError:
-                    pass
+                except ValueError as ex:
+                    raise ValidationError(self.ordering_sort_param) from ex
 
             return ordering_field, ordering_direction
 
@@ -173,20 +173,17 @@ class OrderingFilter(BaseFilterBackend):
                 try:
                     return int(value_str)
                 except ValueError as exception:
-                    raise ValidationError({param_name: 'Expected integer'}) from exception
+                    raise ValidationError(param_name) from exception
             if ordering_field.type == datetime.date:
                 try:
-                    return timezone.make_aware(
-                        datetime.datetime.strptime(value_str, '%Y-%m-%d'))
+                    return timezone.make_aware(datetime.datetime.strptime(value_str, '%Y-%m-%d'))
                 except ValueError as exception:
-                    raise ValidationError({param_name: 'Expected date'}) from exception
+                    raise ValidationError(param_name) from exception
             if issubclass(ordering_field.type, enum.Enum):
                 try:
                     return ordering_field.type[value_str.upper()].value
                 except KeyError as exception:
-                    raise ValidationError(
-                        {param_name: f'Expected one of {",".join(f.name.lower() for f in ordering_field.type)}'}
-                    ) from exception
+                    raise ValidationError(param_name) from exception
 
             return value_str
 
