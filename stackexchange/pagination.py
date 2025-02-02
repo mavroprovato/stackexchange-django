@@ -159,11 +159,13 @@ class Pagination(pagination.PageNumberPagination):
         """
         page_size = self.max_page_size
         if self.page_size_query_param in request.query_params:
-            try:
-                page_size = int(request.query_params[self.page_size_query_param])
-                if page_size > self.max_page_size:
+            value = request.query_params[self.page_size_query_param]
+            if value:
+                try:
+                    page_size = int(value)
+                    if page_size > self.max_page_size:
+                        raise ValidationError('pagesize')
+                except ValueError:
                     raise ValidationError('pagesize')
-            except ValueError:
-                raise ValidationError('pagesize')
 
         return page_size
