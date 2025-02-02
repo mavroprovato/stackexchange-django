@@ -1,7 +1,7 @@
 """Module containing custom application exceptions
 """
 from rest_framework.views import exception_handler
-from rest_framework.exceptions import ValidationError as DRFValidationError, APIException
+from rest_framework.exceptions import ValidationError as DRFValidationError
 
 
 def application_exception_handler(ex: Exception, context: dict):

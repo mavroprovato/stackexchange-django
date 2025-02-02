@@ -91,8 +91,8 @@ class Paginator:
         if number_str:
             try:
                 number = int(number_str)
-            except ValueError:
-                raise ValidationError('page')
+            except ValueError as ex:
+                raise ValidationError('page') from ex
 
         return number
 
@@ -162,7 +162,7 @@ class Pagination(pagination.PageNumberPagination):
                     page_size = int(value)
                     if page_size > self.max_page_size:
                         raise ValidationError('pagesize')
-                except ValueError:
-                    raise ValidationError('pagesize')
+                except ValueError as ex:
+                    raise ValidationError('pagesize') from ex
 
         return page_size
