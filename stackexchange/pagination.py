@@ -10,6 +10,8 @@ from rest_framework.exceptions import NotFound
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from stackexchange.exceptions import ValidationError
+
 
 class Page(collections.abc.Sequence):
     """The default page implementation.
@@ -111,8 +113,9 @@ class Pagination(pagination.PageNumberPagination):
         """
         self.page = None
 
-    def paginate_queryset(self, queryset: collections.abc.Collection, request: Request, view: View = None
-                          ) -> collections.abc.Collection:
+    def paginate_queryset(
+            self, queryset: collections.abc.Collection, request: Request, view: View = None
+    ) -> collections.abc.Collection:
         """Paginate a queryset if required, either returning a page object, or `None` if pagination is not configured
         for this view.
 
@@ -147,3 +150,20 @@ class Pagination(pagination.PageNumberPagination):
             ('items', data),
             ('has_more', self.page.has_next()),
         ]))
+
+    def get_page_size(self, request: Request) -> int | None:
+        """Return the page size. Raise a ValidationError if the page size is invalid.
+
+        :param request: The request.
+        :return: The page size.
+        """
+        page_size = self.max_page_size
+        if self.page_size_query_param in request.query_params:
+            try:
+                page_size = int(request.query_params[self.page_size_query_param])
+                if page_size > self.max_page_size:
+                    raise ValidationError('pagesize')
+            except ValueError:
+                raise ValidationError('pagesize')
+
+        return page_size
