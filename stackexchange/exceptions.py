@@ -1,7 +1,7 @@
 """Module containing custom application exceptions
 """
 from rest_framework.views import exception_handler
-from rest_framework.exceptions import ValidationError as DRFValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError, APIException
 
 
 def application_exception_handler(ex: Exception, context: dict):
@@ -19,6 +19,12 @@ def application_exception_handler(ex: Exception, context: dict):
               "error_id": response.status_code,
               "error_message": ex.detail,
               "error_name": 'bad_parameter'
+            }
+        elif isinstance(ex, DRFValidationError):
+            response.data = {
+                "error_id": response.status_code,
+                "error_message": next(iter(ex.detail)),
+                "error_name": 'bad_parameter'
             }
 
     return response
