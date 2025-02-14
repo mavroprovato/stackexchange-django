@@ -40,8 +40,8 @@ class CommentRetrieveTests(BaseCommentTestCase):
         """Test the comment retrieve endpoint date range.
         """
         comments = random.sample(list(models.PostComment.objects.all()), 3)
-        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-badge-recipients-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}),
             data={'fromdate': from_value, 'todate': to_value}

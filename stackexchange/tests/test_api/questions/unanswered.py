@@ -62,8 +62,8 @@ class QuestionUnansweredTests(BaseQuestionTestCase):
     def test_range_by_activity(self):
         """Test the question unanswered endpoint range by activity.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-question-unanswered'), data={
             'sort': 'activity', 'min': min_value, 'max': max_value
         })
@@ -72,8 +72,8 @@ class QuestionUnansweredTests(BaseQuestionTestCase):
     def test_range_by_creation_date(self):
         """Test the question unanswered endpoint range by user creation date.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-question-unanswered'), data={
             'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })

@@ -80,8 +80,8 @@ class UserListTests(BaseUserTestCase):
     def test_range_by_creation(self):
         """Test the user list endpoint range by user creation date.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-user-list'), data={
             'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })
@@ -101,8 +101,8 @@ class UserListTests(BaseUserTestCase):
     def test_range_by_modified(self):
         """Test the user list endpoint range by user modified date.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-user-list'), data={
             'sort': 'modified', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })

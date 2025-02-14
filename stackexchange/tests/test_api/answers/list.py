@@ -61,8 +61,8 @@ class AnswerListTests(BaseAnswerTestCase):
     def test_range_by_activity(self):
         """Test the answer list endpoint range by activity.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-answer-list'), data={
             'sort': 'activity', 'min': min_value, 'max': max_value
         })
@@ -71,8 +71,8 @@ class AnswerListTests(BaseAnswerTestCase):
     def test_range_by_creation_date(self):
         """Test the answer list endpoint range by user creation date.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-answer-list'), data={
             'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })
@@ -91,8 +91,8 @@ class AnswerListTests(BaseAnswerTestCase):
     def test_date_range(self):
         """Test the answer list endpoint date range.
         """
-        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-answer-list'), data={
             'fromdate': from_value, 'todate': to_value
         })

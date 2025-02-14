@@ -88,8 +88,8 @@ class UserPostTests(BasePostTestCase):
         """Test the answer list endpoint range by activity.
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-user-posts', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'activity', 'min': min_value, 'max': max_value}
@@ -100,8 +100,8 @@ class UserPostTests(BasePostTestCase):
         """Test the answer list endpoint range by user creation date.
         """
         users = random.sample(list(models.User.objects.all()), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-user-posts', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}

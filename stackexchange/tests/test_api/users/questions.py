@@ -89,8 +89,8 @@ class UserQuestionTests(BaseQuestionTestCase):
         """Test the user questions endpoint range by activity.
         """
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-user-questions', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
             data={'sort': 'activity', 'min': min_value, 'max': max_value}
@@ -101,8 +101,8 @@ class UserQuestionTests(BaseQuestionTestCase):
         """Test the user questions endpoint range by user creation date.
         """
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-user-questions', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}

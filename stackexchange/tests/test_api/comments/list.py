@@ -52,8 +52,8 @@ class CommentListTests(BaseCommentTestCase):
     def test_range_by_creation(self):
         """Test the comments list endpoint range by creation date.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-comment-list'), data={
             'sort': 'creation', 'min': min_value, 'max': max_value
         })
@@ -72,8 +72,8 @@ class CommentListTests(BaseCommentTestCase):
     def test_date_range(self):
         """Test the comments list endpoint date range.
         """
-        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-comment-list'), data={
             'fromdate': from_value, 'todate': to_value
         })

@@ -36,7 +36,7 @@ class TagView(BaseListView):
         :return: The queryset for the view.
         """
         tab = TagViewTab[self.request.GET.get('tab', TagViewTab.POPULAR.name).upper()]
-        start_of_day = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).replace(
+        start_of_day = datetime.datetime.now(datetime.UTC).replace(tzinfo=datetime.timezone.utc).replace(
             hour=0, minute=0, second=0, microsecond=0)
         start_of_week = start_of_day - datetime.timedelta(days=start_of_day.isoweekday())
         start_of_month = start_of_day.replace(day=1)

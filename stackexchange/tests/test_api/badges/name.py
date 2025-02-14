@@ -83,8 +83,8 @@ class BadgeNamedTests(BadgeWithAwardCountTestCase):
     def test_date_range(self):
         """Test the badges named endpoint date range.
         """
-        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-badge-named'), data={
             'fromdate': from_value, 'todate': to_value
         })
