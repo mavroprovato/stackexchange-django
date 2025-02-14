@@ -63,18 +63,18 @@ class QuestionListTests(BaseQuestionTestCase):
     def test_range_by_activity(self):
         """Test the question list endpoint range by activity.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-question-list'), data={
-            'sort': 'name', 'min': min_value, 'max': max_value
+            'sort': 'activity', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 
     def test_range_by_creation_date(self):
         """Test the question list endpoint range by user creation date.
         """
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-question-list'), data={
             'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })

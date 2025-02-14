@@ -93,11 +93,11 @@ class AnswerRetrieveTests(BaseAnswerTestCase):
         """Test the question detail endpoint range by activity.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
-            data={'sort': 'name', 'min': min_value, 'max': max_value}
+            data={'sort': 'activity', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 
@@ -105,8 +105,8 @@ class AnswerRetrieveTests(BaseAnswerTestCase):
         """Test the question detail endpoint range by user creation date.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
@@ -129,8 +129,8 @@ class AnswerRetrieveTests(BaseAnswerTestCase):
         """Test the question detail list endpoint date range.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
-        from_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        to_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}), data={
                 'fromdate': from_value, 'todate': to_value

@@ -93,11 +93,11 @@ class PostRetrieveTests(BasePostTestCase):
         """
         posts = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
-            data={'sort': 'name', 'min': min_value, 'max': max_value}
+            data={'sort': 'activity', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 
@@ -106,8 +106,8 @@ class PostRetrieveTests(BasePostTestCase):
         """
         posts = random.sample(
             list(models.Post.objects.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-post-detail', kwargs={'pk': ';'.join(str(post.pk) for post in posts)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}

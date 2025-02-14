@@ -69,8 +69,8 @@ class QuestionCommentsTests(BaseCommentTestCase):
         """Test the comments list endpoint range by creation date.
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}),
             data={'sort': 'creation', 'min': min_value, 'max': max_value}

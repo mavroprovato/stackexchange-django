@@ -110,12 +110,12 @@ class UserQuestionUnacceptedTests(BaseQuestionTestCase):
         """Test the user questions unaccepted endpoint range by activity.
         """
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse(
                 'api-user-questions-unaccepted', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}
-            ), data={'sort': 'name', 'min': min_value, 'max': max_value}
+            ), data={'sort': 'activity', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 
@@ -123,8 +123,8 @@ class UserQuestionUnacceptedTests(BaseQuestionTestCase):
         """Test the user questions unaccepted endpoint range by user creation date.
         """
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
-        min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse(
                 'api-user-questions-unaccepted', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}
