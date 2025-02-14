@@ -83,7 +83,7 @@ class AnswerQuestionListTests(BaseQuestionTestCase):
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
-            data={'sort': 'name', 'min': min_value, 'max': max_value}
+            data={'sort': 'activity', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 

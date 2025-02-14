@@ -97,7 +97,7 @@ class UserFavoriteTests(BaseQuestionTestCase):
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(
             reverse('api-user-favorites', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
-            data={'sort': 'name', 'min': min_value, 'max': max_value}
+            data={'sort': 'activity', 'min': min_value, 'max': max_value}
         )
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 

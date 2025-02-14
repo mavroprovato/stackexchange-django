@@ -59,7 +59,7 @@ class QuestionNoAnswerTests(BaseQuestionTestCase):
         min_value = (datetime.datetime.utcnow() - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-question-no-answers'), data={
-            'sort': 'name', 'min': min_value, 'max': max_value
+            'sort': 'activity', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 
