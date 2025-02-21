@@ -6,7 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    default_settings = 'config.settings_test' if 'test' in sys.argv else 'config.settings'
+    default_settings = 'config.settings.test' if 'test' in sys.argv else 'config.settings.default'
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', default_settings)
     try:
         from django.core.management import execute_from_command_line

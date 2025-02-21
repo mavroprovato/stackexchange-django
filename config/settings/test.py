@@ -1,6 +1,6 @@
 """Settings for tests
 """
-from .settings import *
+from .default import *
 
 # Disable throttling for test
 REST_FRAMEWORK['DEFAULT_THROTTLE_CLASSES'] = ()
