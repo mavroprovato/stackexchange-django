@@ -9,7 +9,7 @@ from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework.serializers import Serializer
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseListViewSet
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -18,7 +18,7 @@ from .base import BaseListViewSet
         description=render_to_string('doc/search/list.md'),
     ),
 )
-class SearchViewSet(BaseListViewSet):
+class SearchViewSet(BaseViewSet):
     """The search view set
     """
     filter_backends = (

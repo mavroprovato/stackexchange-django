@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
 from stackexchange import enums, filters, models, serializers
-from .base import BaseListViewSet
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -48,7 +48,7 @@ from .base import BaseListViewSet
         ]
     )
 )
-class TagViewSet(BaseListViewSet):
+class TagViewSet(BaseViewSet):
     """The tag view set
     """
     filter_backends = (filters.OrderingFilter, filters.InNameFilter)

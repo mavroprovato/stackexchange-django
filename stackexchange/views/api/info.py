@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from stackexchange import serializers, services
-from .base import BaseListViewSet
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -13,7 +13,7 @@ from .base import BaseListViewSet
         description=render_to_string('doc/info/list.md'),
     )
 )
-class InfoViewSet(BaseListViewSet):
+class InfoViewSet(BaseViewSet):
     """The info view set
     """
     serializer_class = serializers.InfoSerializer

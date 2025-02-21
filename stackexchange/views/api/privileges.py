@@ -6,7 +6,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from stackexchange import enums, serializers
-from .base import BaseListViewSet
+from .base import BaseViewSet
 
 
 @extend_schema_view(
@@ -15,7 +15,7 @@ from .base import BaseListViewSet
         description=render_to_string('doc/privileges/list.md'),
     )
 )
-class PrivilegesViewSet(BaseListViewSet):
+class PrivilegesViewSet(BaseViewSet):
     """The privileges view set
     """
     serializer_class = serializers.PrivilegeSerializer
