@@ -1,5 +1,7 @@
 """The users view set.
 """
+from collections.abc import Iterable
+
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -75,3 +77,17 @@ class BaseViewSet(BaseListViewSet):
         :return: The response.
         """
         return self.list(request, *args, **kwargs)
+
+    def get_paginated_response(self, data: Iterable) -> Response:
+        """Override the paginated response in order to add usage quota data.
+
+        :param data: The data to paginate.
+        :return: The paginated response.
+        """
+        response = super().get_paginated_response(data)
+
+        # TODO: replace this with real values
+        response.data['quota_max'] = 10000
+        response.data['quota_remaining'] = 10000
+
+        return response
