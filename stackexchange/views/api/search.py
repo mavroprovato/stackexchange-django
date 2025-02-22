@@ -1,7 +1,6 @@
 """The search view set
 """
 from collections.abc import Sequence
-import datetime
 
 from django.db.models import QuerySet
 from django.template.loader import render_to_string

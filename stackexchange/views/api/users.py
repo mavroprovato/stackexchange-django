@@ -1,7 +1,6 @@
 """The users view set.
 """
 from collections.abc import Sequence
-import datetime
 
 from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F, Subquery
 from django.db.models.functions import Coalesce
