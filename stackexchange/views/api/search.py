@@ -48,7 +48,7 @@ class SearchViewSet(BaseListViewSet):
         :return: The ordering fields for the action.
         """
         return (
-            filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
-            filters.OrderingField('creation', 'creation_date', type=datetime.date),
-            filters.OrderingField('votes', 'score', type=int)
+            filters.OrderingField('activity', 'last_activity_date', type=enums.OrderingFieldType.DATE),
+            filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
+            filters.OrderingField('votes', 'score', type=enums.OrderingFieldType.INTEGER)
         )

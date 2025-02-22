@@ -87,7 +87,7 @@ class TagViewSet(BaseListViewSet):
         """
         if self.action in ('list', 'info', 'moderator_only', 'required'):
             return (
-                filters.OrderingField('popular', 'award_count', type=int),
+                filters.OrderingField('popular', 'award_count', type=enums.OrderingFieldType.INTEGER),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC)
             )
 

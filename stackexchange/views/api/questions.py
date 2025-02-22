@@ -1,7 +1,6 @@
 """The question views
 """
 from collections.abc import Sequence
-import datetime
 
 from django.db.models import QuerySet, Exists, OuterRef
 from django.template.loader import render_to_string
@@ -103,14 +102,14 @@ class QuestionViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'answers', 'linked', 'no_answers', 'unanswered'):
             return (
-                filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
-                filters.OrderingField('creation', 'creation_date', type=datetime.date),
-                filters.OrderingField('votes', 'score', type=int)
+                filters.OrderingField('activity', 'last_activity_date', type=enums.OrderingFieldType.DATE),
+                filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
+                filters.OrderingField('votes', 'score', type=enums.OrderingFieldType.INTEGER)
             )
         if self.action == 'comments':
             return (
-                filters.OrderingField('creation', 'creation_date', type=datetime.date),
-                filters.OrderingField('votes', 'score', type=int)
+                filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
+                filters.OrderingField('votes', 'score', type=enums.OrderingFieldType.INTEGER)
             )
 
         return None
