@@ -3,7 +3,6 @@
 from collections.abc import Sequence
 import dataclasses
 import datetime
-import enum
 import functools
 
 from django.db.models import QuerySet
