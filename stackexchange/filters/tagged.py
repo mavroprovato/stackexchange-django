@@ -14,11 +14,11 @@ from stackexchange import models
 class TaggedFilter(BaseFilterBackend):
     """The questions tagged filter
     """
-    tagged_param = 'tagged'
+    param_name = 'tagged'
 
     def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Filter questions that are tagged with any of the provided tags. The tags are a semicolon separated list that
-        is provided by the `TaggedFilter.tagged_param` parameter.
+        is provided by the `TaggedFilter.param_name` parameter.
 
         :param request: The request.
         :param queryset: The queryset.
@@ -29,7 +29,7 @@ class TaggedFilter(BaseFilterBackend):
             Exists(
                 models.PostTag.objects.filter(post=OuterRef('pk'), tag__name=tag_name.strip())
             )
-            for tag_name in request.query_params.get(self.tagged_param, '').split(';') if tag_name.strip()
+            for tag_name in request.query_params.get(self.param_name, '').split(';') if tag_name.strip()
         ]
         if conditions:
             queryset = queryset.filter(functools.reduce(operator.and_, conditions))
@@ -44,7 +44,7 @@ class TaggedFilter(BaseFilterBackend):
         """
         return [
             {
-                'name': self.tagged_param,
+                'name': self.param_name,
                 'required': False,
                 'in': 'query',
                 'description': 'Include questions that are tagged with any of the semicolon seperated list of tags',

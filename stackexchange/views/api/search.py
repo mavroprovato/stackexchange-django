@@ -5,9 +5,11 @@ from collections.abc import Sequence
 from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from drf_spectacular.utils import extend_schema_view, extend_schema
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
-from stackexchange import enums, filters, models, serializers
+from stackexchange import enums, exceptions, filters, models, serializers
 from .base import BaseListViewSet
 
 
@@ -51,3 +53,21 @@ class SearchViewSet(BaseListViewSet):
             filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
             filters.OrderingField('votes', 'score', type=enums.OrderingFieldType.INTEGER)
         )
+
+    def list(self, request: Request, *args, **kwargs) -> Response:
+        """Override the list method in order to raise a validation error if the required parameters are missing.
+
+        :param request: The request.
+        :param args: The arguments.
+        :param kwargs: The keyword arguments.
+        :return: The response.
+        """
+        if not (
+            request.query_params.get(filters.TaggedFilter.param_name) or
+            request.query_params.get(filters.InTitleFilter.param_name)
+        ):
+            raise exceptions.ValidationError(
+                f"one of {filters.TaggedFilter.param_name} or {filters.InTitleFilter.param_name} must be set"
+            )
+
+        return super().list(request, *args, **kwargs)
