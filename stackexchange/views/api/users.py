@@ -1,7 +1,6 @@
 """The users view set.
 """
 from collections.abc import Sequence
-import datetime
 
 from django.db.models import QuerySet, Exists, OuterRef, Count, Sum, F, Subquery
 from django.db.models.functions import Coalesce
@@ -271,31 +270,31 @@ class UserViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve', 'moderators'):
             return (
-                filters.OrderingField('reputation', type=int),
-                filters.OrderingField('creation', 'creation_date', type=datetime.date),
+                filters.OrderingField('reputation', type=enums.OrderingFieldType.INTEGER),
+                filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
                 filters.OrderingField('name', 'display_name', enums.OrderingDirection.ASC),
-                filters.OrderingField('modified', 'last_modified_date', type=datetime.date),
+                filters.OrderingField('modified', 'last_modified_date', type=enums.OrderingFieldType.DATE)
             )
         if self.action in (
             'answers', 'favorites', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted',
             'questions_unanswered'
         ):
             return (
-                filters.OrderingField('activity', 'last_activity_date', type=datetime.date),
-                filters.OrderingField('creation', 'creation_date', type=datetime.date),
-                filters.OrderingField('votes', 'score', type=int),
+                filters.OrderingField('activity', 'last_activity_date', type=enums.OrderingFieldType.DATE),
+                filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
+                filters.OrderingField('votes', 'score', type=enums.OrderingFieldType.INTEGER)
             )
         if self.action == 'badges':
             return (
-                filters.OrderingField('rank', 'badge__badge_class', type=enums.BadgeClass),
+                filters.OrderingField('rank', 'badge__badge_class', type=enums.OrderingFieldType.BADGE_CLASS),
                 filters.OrderingField('name', 'badge__name', enums.OrderingDirection.ASC),
-                filters.OrderingField('type', 'badge__badge_type', type=enums.BadgeType),
-                filters.OrderingField('awarded', 'date_awarded', type=datetime.date),
+                filters.OrderingField('type', 'badge__badge_type', type=enums.OrderingFieldType.BADGE_TYPE),
+                filters.OrderingField('awarded', 'date_awarded', type=enums.OrderingFieldType.DATE)
             )
         if self.action == 'comments':
             return (
-                filters.OrderingField('creation', 'creation_date', type=datetime.date),
-                filters.OrderingField('votes', 'score', type=int),
+                filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
+                filters.OrderingField('votes', 'score', type=enums.OrderingFieldType.INTEGER)
             )
 
         return None

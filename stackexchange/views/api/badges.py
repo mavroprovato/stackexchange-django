@@ -123,14 +123,14 @@ class BadgeViewSet(BaseViewSet):
         """
         if self.action in ('list', 'retrieve'):
             return (
-                filters.OrderingField('rank', 'badge_class', type=enums.BadgeClass),
+                filters.OrderingField('rank', 'badge_class', type=enums.OrderingFieldType.BADGE_CLASS),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
-                filters.OrderingField('type', 'badge_type', type=enums.BadgeType)
+                filters.OrderingField('type', 'badge_type', type=enums.OrderingFieldType.BADGE_TYPE)
             )
         if self.action in ('named', 'tags'):
             return (
-                filters.OrderingField('rank', 'badge_class', type=enums.BadgeClass),
-                filters.OrderingField('name', direction=enums.OrderingDirection.ASC),
+                filters.OrderingField('rank', 'badge_class', type=enums.OrderingFieldType.BADGE_CLASS),
+                filters.OrderingField('name', direction=enums.OrderingDirection.ASC)
             )
 
         return None

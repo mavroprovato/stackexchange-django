@@ -32,8 +32,8 @@ class BaseListViewSet(GenericViewSet):
             for object_id in self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]:
                 try:
                     object_ids.append(int(object_id) if self.detail_field_integer else object_id)
-                except ValueError:
-                    raise ValidationError(lookup_url_kwarg)
+                except ValueError as e:
+                    raise ValidationError(lookup_url_kwarg) from e
             queryset = queryset.filter(**{f"{self.detail_field}__in": object_ids})
 
         page = self.paginate_queryset(queryset)

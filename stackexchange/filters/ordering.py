@@ -3,7 +3,6 @@
 from collections.abc import Sequence
 import dataclasses
 import datetime
-import enum
 import functools
 
 from django.db.models import QuerySet
@@ -23,7 +22,7 @@ class OrderingField:
     name: str
     field: str = None
     direction: enums.OrderingDirection = enums.OrderingDirection.DESC
-    type: type = str
+    type: enums.OrderingFieldType = enums.OrderingFieldType.STRING
 
     def __post_init__(self):
         """Post init method. Sets the database field to sort by to the field name if the database field name is not set.
@@ -184,23 +183,31 @@ class OrderingFilter(BaseFilterBackend):
         """
         value_str = request.query_params.get(param_name, '').strip()
         if value_str:
-            if ordering_field.type == int:
-                try:
-                    return int(value_str)
-                except ValueError as exception:
-                    raise ValidationError(param_name) from exception
-            if ordering_field.type == datetime.date:
-                try:
-                    return timezone.make_aware(datetime.datetime.strptime(value_str, '%Y-%m-%d'))
-                except ValueError as exception:
-                    raise ValidationError(param_name) from exception
-            if issubclass(ordering_field.type, enum.Enum):
-                try:
-                    return ordering_field.type[value_str.upper()].value
-                except KeyError as exception:
-                    raise ValidationError(param_name) from exception
-
-            return value_str
+            match ordering_field.type:
+                case enums.OrderingFieldType.STRING:
+                    return value_str
+                case enums.OrderingFieldType.INTEGER:
+                    try:
+                        return int(value_str)
+                    except ValueError as exception:
+                        raise ValidationError(param_name) from exception
+                case enums.OrderingFieldType.DATE:
+                    try:
+                        return timezone.make_aware(datetime.datetime.strptime(value_str, '%Y-%m-%d'))
+                    except ValueError as exception:
+                        raise ValidationError(param_name) from exception
+                case enums.OrderingFieldType.BADGE_CLASS:
+                    try:
+                        return enums.BadgeClass[value_str.upper()].value
+                    except KeyError as exception:
+                        raise ValidationError(param_name) from exception
+                case enums.OrderingFieldType.BADGE_TYPE:
+                    try:
+                        return enums.BadgeType[value_str.upper()].value
+                    except KeyError as exception:
+                        raise ValidationError(param_name) from exception
+                case _:
+                    return value_str
 
         return None
 

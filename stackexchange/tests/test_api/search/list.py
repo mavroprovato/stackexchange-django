@@ -30,63 +30,76 @@ class SearchTests(BaseQuestionTestCase):
     def test(self):
         """Test search endpoint
         """
-        response = self.client.get(reverse('api-search-list'))
+        tag = random.choice(self.tags)
+        response = self.client.get(reverse('api-search-list'), data={'tagged': tag.name})
         self.assert_items_equal(response)
 
     def test_sort_by_activity(self):
         """Test the search endpoint sorted by activity date.
         """
-        response = self.client.get(reverse('api-search-list'), data={'sort': 'activity', 'order': 'asc'})
+        tag = random.choice(self.tags)
+        response = self.client.get(
+            reverse('api-search-list'), data={'tagged': tag.name, 'sort': 'activity', 'order': 'asc'})
         self.assert_sorted(response, 'last_activity_date')
 
-        response = self.client.get(reverse('api-search-list'), data={'sort': 'activity', 'order': 'desc'})
+        response = self.client.get(
+            reverse('api-search-list'), data={'tagged': tag.name, 'sort': 'activity', 'order': 'desc'})
         self.assert_sorted(response, 'last_activity_date', reverse=True)
 
     def test_sort_by_creation_date(self):
         """Test the search endpoint sorted by creation date.
         """
-        response = self.client.get(reverse('api-search-list'), data={'sort': 'creation', 'order': 'asc'})
+        tag = random.choice(self.tags)
+        response = self.client.get(
+            reverse('api-search-list'), data={'tagged': tag.name, 'sort': 'creation', 'order': 'asc'})
         self.assert_sorted(response, 'creation_date')
 
-        response = self.client.get(reverse('api-search-list'), data={'sort': 'creation', 'order': 'desc'})
+        response = self.client.get(
+            reverse('api-search-list'), data={'tagged': tag.name, 'sort': 'creation', 'order': 'desc'})
         self.assert_sorted(response, 'creation_date', reverse=True)
 
     def test_sort_by_votes(self):
         """Test the search endpoint sorted by votes.
         """
-        response = self.client.get(reverse('api-search-list'), data={'sort': 'votes', 'order': 'asc'})
+        tag = random.choice(self.tags)
+        response = self.client.get(
+            reverse('api-search-list'), data={'tagged': tag.name, 'sort': 'votes', 'order': 'asc'})
         self.assert_sorted(response, 'score')
 
-        response = self.client.get(reverse('api-search-list'), data={'sort': 'votes', 'order': 'desc'})
+        response = self.client.get(
+            reverse('api-search-list'), data={'tagged': tag.name, 'sort': 'votes', 'order': 'desc'})
         self.assert_sorted(response, 'score', reverse=True)
 
     def test_range_by_activity(self):
         """Test the search endpoint range by activity.
         """
+        tag = random.choice(self.tags)
         min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-search-list'), data={
-            'sort': 'activity', 'min': min_value, 'max': max_value
+            'tagged': tag.name, 'sort': 'activity', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'last_activity_date', min_value, max_value)
 
     def test_range_by_creation_date(self):
         """Test the search endpoint range by user creation date.
         """
+        tag = random.choice(self.tags)
         min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
         max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
         response = self.client.get(reverse('api-search-list'), data={
-            'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
+            'tagged': tag.name, 'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })
         self.assert_range(response, 'creation_date', min_value, max_value)
 
     def test_range_by_votes(self):
         """Test the search endpoint range by votes.
         """
+        tag = random.choice(self.tags)
         min_value = 3000
         max_value = 6000
         response = self.client.get(reverse('api-search-list'), data={
-            'sort': 'votes', 'min': min_value, 'max': max_value
+            'tagged': tag, 'sort': 'votes', 'min': min_value, 'max': max_value
         })
         self.assert_range(response, 'score', min_value, max_value)
 
@@ -113,7 +126,7 @@ class SearchTests(BaseQuestionTestCase):
         """Test the search endpoint filter by not tagged.
         """
         tag = random.choice(self.tags)
-        response = self.client.get(reverse('api-search-list'), data={'nottagged': tag.name})
+        response = self.client.get(reverse('api-search-list'), data={'tagged': tag.name, 'nottagged': tag.name})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for row in response.json()['items']:
             self.assertNotIn(tag.name, row['tags'])

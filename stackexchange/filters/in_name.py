@@ -9,7 +9,7 @@ from rest_framework.request import Request
 class InNameFilter(BaseFilterBackend):
     """The in name filter
     """
-    in_name_param = 'inname'
+    param_name = 'inname'
 
     def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Filter the queryset based on the in name parameter. If the view defines a `name_field` parameter, then the
@@ -23,7 +23,7 @@ class InNameFilter(BaseFilterBackend):
         """
         name_field = getattr(view, 'name_field', None)
         if name_field:
-            value = request.query_params.get(self.in_name_param, '').strip()
+            value = request.query_params.get(self.param_name, '').strip()
             if value:
                 return queryset.filter(**{f'{name_field}__icontains': value})
 
@@ -40,7 +40,7 @@ class InNameFilter(BaseFilterBackend):
 
         return [
             {
-                'name': self.in_name_param,
+                'name': self.param_name,
                 'required': False,
                 'in': 'query',
                 'description': 'Filter the results down to just those with a certain substring in their name',

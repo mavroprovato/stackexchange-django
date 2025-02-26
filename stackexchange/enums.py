@@ -3,8 +3,18 @@
 import enum
 
 
+class OrderingFieldType(enum.Enum):
+    """The ordering field type enumeration.
+    """
+    STRING = 'string'
+    INTEGER = 'integer'
+    DATE = 'date'
+    BADGE_CLASS = 'badge_class'
+    BADGE_TYPE = 'badge_type'
+
+
 class OrderingDirection(enum.Enum):
-    """The ordering direction enum
+    """The ordering direction enumeration.
     """
     DESC = 'desc'
     ASC = 'asc'

@@ -14,11 +14,11 @@ from stackexchange import models
 class NotTaggedFilter(BaseFilterBackend):
     """The questions not tagged filter
     """
-    nottagged_param = 'nottagged'
+    param_name = 'nottagged'
 
     def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Filter questions that are not tagged with any of the provided tags. The tags are a semicolon separated list
-        that is provided by the `NotTaggedFilter.nottagged_param` parameter.
+        that is provided by the `NotTaggedFilter.param_name` parameter.
 
         :param request: The request.
         :param queryset: The queryset.
@@ -29,7 +29,7 @@ class NotTaggedFilter(BaseFilterBackend):
             ~Exists(
                 models.PostTag.objects.filter(post=OuterRef('pk'), tag__name=tag_name.strip())
             )
-            for tag_name in request.query_params.get(self.nottagged_param, '').split(';') if tag_name.strip()
+            for tag_name in request.query_params.get(self.param_name, '').split(';') if tag_name.strip()
         ]
         if conditions:
             queryset = queryset.filter(functools.reduce(operator.and_, conditions))
@@ -44,7 +44,7 @@ class NotTaggedFilter(BaseFilterBackend):
         """
         return [
             {
-                'name': self.nottagged_param,
+                'name': self.param_name,
                 'required': False,
                 'in': 'query',
                 'description': 'Include questions that are not tagged with the semicolon seperated list of tags',

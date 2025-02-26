@@ -9,7 +9,7 @@ from rest_framework.request import Request
 class InTitleFilter(BaseFilterBackend):
     """The questions in title filter
     """
-    in_title_param = 'intitle'
+    param_name = 'intitle'
 
     def filter_queryset(self, request: Request, queryset: QuerySet, view: View) -> QuerySet:
         """Filter questions based on the title.
@@ -19,7 +19,7 @@ class InTitleFilter(BaseFilterBackend):
         :param view: The view.
         :return: The filtered queryset.
         """
-        in_title = request.query_params.get(self.in_title_param)
+        in_title = request.query_params.get(self.param_name)
         if in_title:
             queryset = queryset.filter(title_search=in_title)
 
@@ -33,7 +33,7 @@ class InTitleFilter(BaseFilterBackend):
         """
         return [
             {
-                'name': self.in_title_param,
+                'name': self.param_name,
                 'required': False,
                 'in': 'query',
                 'description': 'Include questions that contain the ',
