@@ -6,6 +6,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from stackexchange import throttles
 from stackexchange.exceptions import ValidationError
 
 
@@ -86,8 +87,9 @@ class BaseViewSet(BaseListViewSet):
         """
         response = super().get_paginated_response(data)
 
-        # TODO: replace this with real values
-        response.data['quota_max'] = 10000
-        response.data['quota_remaining'] = 10000
+        for throttle in self.get_throttles():
+            if isinstance(throttle, throttles.Sustained):
+                response.data['quota_max'] = throttle.get_max_quota()
+                response.data['quota_remaining'] = throttle.get_remaining_quota(self)
 
         return response

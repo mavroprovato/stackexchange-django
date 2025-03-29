@@ -1,27 +1,34 @@
 """Throttling configuration module
 """
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from django.views import View
+from rest_framework.throttling import UserRateThrottle
 
 
-class BurstAnon(AnonRateThrottle):
-    """The burst anonymous user throttle
+class Burst(UserRateThrottle):
+    """The burst user throttle
     """
     scope = 'burst'
 
 
-class BurstUser(UserRateThrottle):
-    """The burst authenticated user throttle
-    """
-    scope = 'burst'
-
-
-class SustainedAnon(AnonRateThrottle):
-    """The sustained anonymous user throttle
+class Sustained(UserRateThrottle):
+    """The sustained user throttle
     """
     scope = 'sustained'
 
+    def get_max_quota(self) -> int:
+        """Get the maximum quota allowed for the user
 
-class SustainedUser(UserRateThrottle):
-    """The sustained authenticated user throttle
-    """
-    scope = 'sustained'
+        :return: The maximum quota allowed for the user.
+        """
+        return self.parse_rate(self.get_rate())[0]
+
+    def get_remaining_quota(self, view: View) -> int:
+        """Get the remaining quota allowed for the user
+
+        :param view: The view.
+        :return: The remaining quota allowed for the user.
+        """
+        key = self.get_cache_key(view.request, view)
+        history = self.cache.get(key, [])
+
+        return self.get_max_quota() - len(history)

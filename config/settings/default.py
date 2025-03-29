@@ -152,10 +152,8 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'stackexchange.openapi.AutoSchema',
     'EXCEPTION_HANDLER': 'stackexchange.exceptions.application_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': (
-        'stackexchange.throttles.BurstAnon',
-        'stackexchange.throttles.SustainedAnon',
-        'stackexchange.throttles.BurstUser',
-        'stackexchange.throttles.SustainedUser'
+        'stackexchange.throttles.Burst',
+        'stackexchange.throttles.Sustained'
     ),
     'DEFAULT_THROTTLE_RATES': {
         'burst': '30/sec',
