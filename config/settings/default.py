@@ -31,11 +31,9 @@ DEBUG = env.bool('DEBUG', True)
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
-    'stackexchange.apps.StackExchangeConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,10 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'django_celery_results',
-    'drf_spectacular'
+    'drf_spectacular',
+    'stackexchange.apps.StackExchangeConfig'
 ]
 
 if DEBUG:
+    # Add apps needed for development
     INSTALLED_APPS += ['debug_toolbar', 'django_extensions']
 
 MIDDLEWARE = [
@@ -63,6 +63,10 @@ MIDDLEWARE = [
 
 if DEBUG:
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    # Debug toolbar configuration
+    INTERNAL_IPS = ['127.0.0.1']
+    # Display full SQL for runserver plus
+    RUNSERVER_PLUS_PRINT_SQL_TRUNCATE = None
 
 ROOT_URLCONF = 'config.urls'
 
@@ -84,7 +88,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -98,7 +101,6 @@ DATABASES = {
         'PORT': env('DB_PORT', default=5432),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -117,23 +119,16 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 AUTH_USER_MODEL = 'stackexchange.User'
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -161,10 +156,6 @@ REST_FRAMEWORK = {
     }
 }
 
-# Celery configuration
-
-CELERY_RESULT_BACKEND = 'django-db'
-
 # DRF Spectacular configuration
 
 SPECTACULAR_SETTINGS = {
@@ -173,25 +164,26 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '2.3',
 }
 
-# Debug toolbar configuration
-
-INTERNAL_IPS = ['127.0.0.1']
-
-# Display full SQL for runserver plus
-
-RUNSERVER_PLUS_PRINT_SQL_TRUNCATE = None
-
 # Temporary directory in which the dump files will be extracted
 
 TEMP_DIR = env('TEMP_DIR', default=None)
 
-# Cache settings
+# Redis configuration
 
 REDIS_URL = env('REDIS_URL', default="redis://127.0.0.1:6379")
 
+# Celery configuration
+
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default="redis://127.0.0.1:6379/1")
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+# Cache settings
+
+CACHE_LOCATION = env('CACHE_LOCATION', default="redis://127.0.0.1:6379/0")
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': REDIS_URL,
+        'LOCATION': CACHE_LOCATION,
     }
 }
