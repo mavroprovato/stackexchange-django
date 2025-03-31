@@ -165,7 +165,6 @@ REST_FRAMEWORK = {
 
 CELERY_RESULT_BACKEND = 'django-db'
 
-
 # DRF Spectacular configuration
 
 SPECTACULAR_SETTINGS = {
@@ -185,3 +184,14 @@ RUNSERVER_PLUS_PRINT_SQL_TRUNCATE = None
 # Temporary directory in which the dump files will be extracted
 
 TEMP_DIR = env('TEMP_DIR', default=None)
+
+# Cache settings
+
+REDIS_URL = env('REDIS_URL', default="redis://127.0.0.1:6379")
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL,
+    }
+}
