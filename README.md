@@ -7,16 +7,14 @@ used to be updated regularly, but it seems that since April 2024, no new dumps a
 
 The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) and
 [Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used as the
-project database. [RabbitMQ](https://www.rabbitmq.com/) is used for background application tasks, and
-[Redis](https://redis.io/) is used for caching.
+project database. [Redis](https://redis.io/) is used as a broker for background application tasks and as the caching
+backend.
 
 ## Installation
 
 Before running these installation instructions, make sure you have [Python](https://www.python.org/downloads/),
-[Poetry](https://python-poetry.org/docs/#installation), [PostgreSQL](https://www.postgresql.org/download/),
-[RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/) installed.
-
-To install all dependencies needed for the application run:
+[Poetry](https://python-poetry.org/docs/#installation), [PostgreSQL](https://www.postgresql.org/download/), and
+[Redis](https://redis.io/) installed.
 
 ```
 $ poetry install
