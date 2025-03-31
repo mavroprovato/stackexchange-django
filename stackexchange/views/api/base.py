@@ -9,6 +9,8 @@ from rest_framework.viewsets import GenericViewSet
 from stackexchange import throttles
 from stackexchange.exceptions import ValidationError
 
+type ObjectIdList = list[str | int]
+
 
 class BaseListViewSet(GenericViewSet):
     """Base list view set
@@ -25,16 +27,8 @@ class BaseListViewSet(GenericViewSet):
         :return: The response.
         """
         queryset = self.filter_queryset(self.get_queryset())
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-        if lookup_url_kwarg in self.kwargs:
-            if self.detail_field is None:
-                raise AssertionError(f'Detail field for action {self.action} should not be None')
-            object_ids = []
-            for object_id in self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]:
-                try:
-                    object_ids.append(int(object_id) if self.detail_field_integer else object_id)
-                except ValueError as e:
-                    raise ValidationError(lookup_url_kwarg) from e
+        object_ids = self.get_object_ids()
+        if object_ids:
             queryset = queryset.filter(**{f"{self.detail_field}__in": object_ids})
 
         page = self.paginate_queryset(queryset)
@@ -64,6 +58,24 @@ class BaseListViewSet(GenericViewSet):
             return 'pk'
 
         return None
+
+    def get_object_ids(self) -> ObjectIdList:
+        """Return the list of object ids, if the action is a detail action.
+
+        :return: The list of object ids. If the action is not a detail action, an empty list is returned.
+        """
+        object_ids = []
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        if lookup_url_kwarg in self.kwargs:
+            if self.detail_field is None:
+                raise AssertionError(f'Detail field for action {self.action} should not be None')
+            for object_id in self.kwargs[lookup_url_kwarg].split(';')[:self.MAX_RETRIEVE_OBJECTS]:
+                try:
+                    object_ids.append(int(object_id) if self.detail_field_integer else object_id)
+                except ValueError as e:
+                    raise ValidationError(lookup_url_kwarg) from e
+
+        return object_ids
 
 
 class BaseViewSet(BaseListViewSet):
