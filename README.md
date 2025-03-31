@@ -1,7 +1,9 @@
 # StackExchange Django
 
-This project implements an API for a StackExchange-like site. The API tries to be as faithful as possible to the 
-[official stackexchange API](https://api.stackexchange.com/docs).
+This project implements an API for a [StackExchange](https://stackexchange.com/)-like site. The API tries to be as
+faithful as possible to the [official stackexchange API](https://api.stackexchange.com/docs). Data for the application
+can be loaded with the data dump available at [archive.org](https://archive.org/details/stackexchange). Those dumps
+used to be updated regularly, but it seems that since April 2024, no new dumps are uploaded.
 
 The application is built with [Django](https://www.djangoproject.com/), using [Python](https://www.python.org) and
 [Poetry](https://python-poetry.org/) for dependency management. [PostgreSQL](https://www.postgresql.org/) is used as the
@@ -62,8 +64,7 @@ the root directory of the application and is named `.env.example`. The environme
 
 ### Loading data
 
-StackExchange data dumps are published regularly at [archive.org](https://archive.org/details/stackexchange). First,
-you must load the available stackexchange site by running the command:
+First, you must load the available stackexchange sites by running the command:
 
 ```
 $ python manage.py loadsites
