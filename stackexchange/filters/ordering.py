@@ -182,34 +182,34 @@ class OrderingFilter(BaseFilterBackend):
         :return: The value, converted to the correct class.
         """
         value_str = request.query_params.get(param_name, '').strip()
-        if value_str:
-            match ordering_field.type:
-                case enums.OrderingFieldType.STRING:
-                    return value_str
-                case enums.OrderingFieldType.INTEGER:
-                    try:
-                        return int(value_str)
-                    except ValueError as exception:
-                        raise ValidationError(param_name) from exception
-                case enums.OrderingFieldType.DATE:
-                    try:
-                        return timezone.make_aware(datetime.datetime.strptime(value_str, '%Y-%m-%d'))
-                    except ValueError as exception:
-                        raise ValidationError(param_name) from exception
-                case enums.OrderingFieldType.BADGE_CLASS:
-                    try:
-                        return enums.BadgeClass[value_str.upper()].value
-                    except KeyError as exception:
-                        raise ValidationError(param_name) from exception
-                case enums.OrderingFieldType.BADGE_TYPE:
-                    try:
-                        return enums.BadgeType[value_str.upper()].value
-                    except KeyError as exception:
-                        raise ValidationError(param_name) from exception
-                case _:
-                    return value_str
+        if not value_str:
+            return None
 
-        return None
+        match ordering_field.type:
+            case enums.OrderingFieldType.STRING:
+                return value_str
+            case enums.OrderingFieldType.INTEGER:
+                try:
+                    return int(value_str)
+                except ValueError as exception:
+                    raise ValidationError(param_name) from exception
+            case enums.OrderingFieldType.DATE:
+                try:
+                    return timezone.make_aware(datetime.datetime.strptime(value_str, '%Y-%m-%d'))
+                except ValueError as exception:
+                    raise ValidationError(param_name) from exception
+            case enums.OrderingFieldType.BADGE_CLASS:
+                try:
+                    return enums.BadgeClass[value_str.upper()].value
+                except KeyError as exception:
+                    raise ValidationError(param_name) from exception
+            case enums.OrderingFieldType.BADGE_TYPE:
+                try:
+                    return enums.BadgeType[value_str.upper()].value
+                except KeyError as exception:
+                    raise ValidationError(param_name) from exception
+            case _:
+                return value_str
 
     def get_schema_operation_parameters(self, view: View) -> list[dict]:
         """Get the schema operation parameters.
