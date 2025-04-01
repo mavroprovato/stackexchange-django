@@ -6,10 +6,6 @@
 from django.conf import settings
 from django.contrib.postgres import indexes, search
 from django.db import migrations, models
-<<<<<<< HEAD
-from django.contrib.postgres import indexes, search
-=======
->>>>>>> origin/master
 import django.utils.timezone
 
 import stackexchange.managers
