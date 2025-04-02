@@ -319,7 +319,7 @@ class PostHistory(models.Model):
         help_text="The user that created this history record")
     type = models.PositiveSmallIntegerField(
         choices=((pht.value, pht.description) for pht in enums.PostHistoryType), help_text="The post history type")
-    revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record")
+    revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record", db_index=True)
     creation_date = models.DateTimeField(
         help_text="The date that this history record was created", default=timezone.now)
     user_display_name = models.CharField(
