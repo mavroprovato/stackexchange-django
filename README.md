@@ -59,14 +59,14 @@ the root directory of the application and is named `.env.example`. The environme
 First, you must load the available stackexchange sites by running the command:
 
 ```
-$ uv run manage.py loadsites
+$ uv run manage.py load_sites
 ```
 
 Then you can load data for a specific site to the database by running the `loaddata` Django command. For example, in
 order to load the data for the `superuser.com` site, run the following command:
 
 ```
-$ uv run manage.py loaddata superuser
+$ uv run manage.py load_data superuser
 ```
 
 ## Running the application
