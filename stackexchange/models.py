@@ -107,7 +107,7 @@ class SiteUser(models.Model):
     up_votes = models.PositiveIntegerField(default=0, help_text="The site user up votes")
     down_votes = models.PositiveIntegerField(default=0, help_text="The site user down votes")
 
-    objects = managers.SiteUserManager.as_manager()
+    objects = managers.SiteUserQuerySet.as_manager()
 
     class Meta:
         db_table = 'site_users'
@@ -130,7 +130,7 @@ class Badge(models.Model):
     badge_type = models.PositiveSmallIntegerField(
         choices=((bt.value, bt.description) for bt in enums.BadgeType), help_text="The badge type")
 
-    objects = managers.BadgeQuerySet().as_manager()
+    objects = managers.BadgeQuerySet.as_manager()
 
     class Meta:
         db_table = 'badges'
@@ -150,7 +150,7 @@ class UserBadge(models.Model):
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name='users', help_text="The badge")
     date_awarded = models.DateTimeField(default=timezone.now, help_text="The date awarded")
 
-    objects = managers.UserBadgeQuerySet().as_manager()
+    objects = managers.UserBadgeQuerySet.as_manager()
 
     class Meta:
         db_table = 'user_badges'
@@ -331,7 +331,7 @@ class PostHistory(models.Model):
        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name,
        help_text="The content license")
 
-    objects = managers.PostHistoryQuerySet().as_manager()
+    objects = managers.PostHistoryQuerySet.as_manager()
 
     class Meta:
         db_table = 'post_history'

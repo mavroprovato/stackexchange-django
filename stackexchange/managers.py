@@ -43,7 +43,7 @@ class UserManager(BaseUserManager):
         return self._create_user(username, email, password, staff=True, **extra_fields)
 
 
-class SiteUserManager(QuerySet):
+class SiteUserQuerySet(QuerySet):
     """The site user manager.
     """
     def with_badge_counts(self) -> QuerySet:
