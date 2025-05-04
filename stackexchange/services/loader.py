@@ -10,6 +10,7 @@ import tempfile
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.db import connection
+import requests
 import py7zr
 
 from stackexchange import enums, models
@@ -195,6 +196,18 @@ class TagLoader(BaseFileLoader):
                         'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
                     ), sep=',', null='<NULL>')
 
+        logger.info("Loading tag flags")
+        data = self.load_tag_data()
+        tags_to_update = []
+        for tag in models.Tag.objects.all():
+            if tag.name not in data:
+                logger.warning(f"Tag '{tag.name}' not found in data")
+                continue
+            tag.required = data[tag.name]['is_required']
+            tag.moderator_only = data[tag.name]['is_moderator_only']
+            tags_to_update.append(tag)
+        models.Tag.objects.bulk_update(tags_to_update, ['required', 'moderator_only'])
+
         tag_ids = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
         logger.info("Extracting post tags")
         with (self.data_dir / 'post_tags.csv').open('wt') as post_tags_file:
@@ -210,6 +223,26 @@ class TagLoader(BaseFileLoader):
             with (self.data_dir / 'post_tags.csv').open('rt') as post_tags_file:
                 cursor.copy_from(
                     post_tags_file, table='post_tags', columns=('post_id', 'tag_id'), sep=',', null='<NULL>')
+
+    def load_tag_data(self):
+        """Load the tag data from the stackexchange API.
+        """
+        site = models.Site.objects.get(pk=self.site_id)
+        page = 1
+        data = []
+        while True:
+            response = requests.get("https://api.stackexchange.com/2.3/tags", params={'page': page, 'site': site.name})
+            response.raise_for_status()
+            response_data = response.json()
+            data += response_data['items']
+            if not response_data['has_more']:
+                break
+            page += 1
+
+        return {
+            row['name']: {'is_moderator_only': row['is_moderator_only'], 'is_required': row['is_required']}
+            for row in data
+        }
 
 
 class PostVoteLoader(BaseFileLoader):
