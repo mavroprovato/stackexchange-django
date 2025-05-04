@@ -1,6 +1,7 @@
 """Class for loading site data.
 """
 import abc
+from collections.abc import Iterable
 import csv
 import datetime
 import logging
@@ -36,6 +37,23 @@ class BaseFileLoader:
     def load(self) -> None:
         """Load the data.
         """
+        raise NotImplementedError
+
+    def load_table_data(self, filename: str, table_name: str, columns: Iterable[str], truncate: bool = True) -> None:
+        """Load data for a table from a CSV file.
+
+        :param filename: The name of the CSV file.
+        :param table_name: The name of the table to load.
+        :param columns: The table columns.
+        :param truncate: True to truncate data before loading.
+        """
+        logger.info("Loading table %s", table_name)
+
+        with connection.cursor() as cursor:
+            if truncate:
+                cursor.execute(f"TRUNCATE TABLE {table_name} CASCADE")
+            with (self.data_dir / filename).open('rt') as f:
+                cursor.copy_from(f, table=table_name, columns=columns, sep=',', null='<NULL>')
 
 
 class UserLoader(BaseFileLoader):
@@ -70,23 +88,16 @@ class UserLoader(BaseFileLoader):
                     row['Views'], row['UpVotes'], row['DownVotes']
                 ])
 
-        logger.info("Loading users")
-        with connection.cursor() as cursor:
-            with (self.data_dir / 'users.csv').open('rt') as users_file:
-                cursor.copy_from(
-                    users_file, table='users', columns=('id', 'username', 'password', 'email', 'staff'),
-                    sep=',', null='<NULL>')
-
-        logger.info("Loading site users")
-        with connection.cursor() as cursor:
-            cursor.execute('TRUNCATE TABLE site_users CASCADE')
-            with (self.data_dir / 'site_users.csv').open('rt') as site_users_file:
-                cursor.copy_from(
-                    site_users_file, table='site_users', columns=(
-                        'id', 'user_id', 'site_id', 'display_name', 'website_url', 'location', 'about',
-                        'creation_date', 'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes',
-                        'down_votes'
-                    ), sep=',', null='<NULL>')
+        self.load_table_data(
+            filename='users.csv', table_name='users', columns=('id', 'username', 'password', 'email', 'staff'),
+            truncate=False
+        )
+        self.load_table_data(
+            filename='site_users.csv', table_name='site_users', columns=(
+                'id', 'user_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
+                'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+            )
+        )
 
 
 class BadgeLoader(BaseFileLoader):
@@ -107,14 +118,9 @@ class BadgeLoader(BaseFileLoader):
                         enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
                     ])
                     badge_names.add(row['Name'])
-
-        logger.info("Loading badges")
-        with connection.cursor() as cursor:
-            cursor.execute('TRUNCATE TABLE badges CASCADE')
-            with (self.data_dir / 'badges.csv').open('rt') as badges_file:
-                cursor.copy_from(
-                    badges_file, table='badges', columns=('id', 'name', 'badge_class', 'badge_type'), sep=',',
-                    null='<NULL>')
+        self.load_table_data(
+            filename='badges.csv', table_name='badges', columns=('id', 'name', 'badge_class', 'badge_type')
+        )
 
         # Second pass - load user badges
         logger.info("Extracting user badges")
@@ -125,14 +131,9 @@ class BadgeLoader(BaseFileLoader):
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
                 if int(row['UserId']) in user_ids:
                     user_badges_writer.writerow([row['UserId'], badge_ids[row['Name']], row['Date']])
-
-        logger.info("Loading user badges")
-        with connection.cursor() as cursor:
-            cursor.execute('TRUNCATE TABLE user_badges CASCADE')
-            with (self.data_dir / 'user_badges.csv').open('rt') as user_badges_file:
-                cursor.copy_from(
-                    user_badges_file, table='user_badges', columns=('user_id', 'badge_id', 'date_awarded'),
-                    sep=',', null='<NULL>')
+        self.load_table_data(
+            filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
+        )
 
 
 class PostLoader(BaseFileLoader):
@@ -159,17 +160,14 @@ class PostLoader(BaseFileLoader):
                     row.get('FavoriteCount', 0), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
                 ])
 
-        logger.info("Loading posts")
-        with connection.cursor() as cursor:
-            cursor.execute('TRUNCATE TABLE posts CASCADE')
-            with (self.data_dir / 'posts.csv').open('rt') as posts_file:
-                cursor.copy_from(
-                    posts_file, table='posts', columns=(
-                        'id', 'question_id', 'accepted_answer_id', 'owner_id', 'last_editor_id', 'type', 'title',
-                        'body', 'last_editor_display_name', 'creation_date', 'last_edit_date', 'last_activity_date',
-                        'community_owned_date', 'closed_date', 'score', 'view_count', 'answer_count', 'comment_count',
-                        'favorite_count', 'content_license'
-                    ), sep=',', null='<NULL>')
+        self.load_table_data(
+            filename='posts.csv', table_name='posts', columns=(
+                'id', 'question_id', 'accepted_answer_id', 'owner_id', 'last_editor_id', 'type', 'title', 'body',
+                'last_editor_display_name', 'creation_date', 'last_edit_date', 'last_activity_date',
+                'community_owned_date', 'closed_date', 'score', 'view_count', 'answer_count', 'comment_count',
+                'favorite_count', 'content_license'
+            )
+        )
 
 
 class TagLoader(BaseFileLoader):
@@ -186,15 +184,11 @@ class TagLoader(BaseFileLoader):
                     row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId', '<NULL>'),
                     row.get('WikiPostId', '<NULL>'), row.get('IsRequired') == 'True', row.get('ModeratorOnly') == 'True'
                 ])
-
-        logger.info("Loading tags")
-        with connection.cursor() as cursor:
-            cursor.execute('TRUNCATE TABLE tags CASCADE')
-            with (self.data_dir / 'tags.csv').open('rt') as tags_file:
-                cursor.copy_from(
-                    tags_file, table='tags', columns=(
-                        'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
-                    ), sep=',', null='<NULL>')
+        self.load_table_data(
+            filename='tags.csv', table_name='tags', columns=(
+                'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
+            )
+        )
 
         logger.info("Loading tag flags")
         data = self.load_tag_data()
@@ -206,7 +200,7 @@ class TagLoader(BaseFileLoader):
             tag.required = data[tag.name]['is_required']
             tag.moderator_only = data[tag.name]['is_moderator_only']
             tags_to_update.append(tag)
-        models.Tag.objects.bulk_update(tags_to_update, ['required', 'moderator_only'])
+        models.Tag.objects.bulk_update(tags_to_update, ('required', 'moderator_only'))
 
         tag_ids = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
         logger.info("Extracting post tags")
@@ -216,13 +210,7 @@ class TagLoader(BaseFileLoader):
                 for tag_name in row.get('Tags', '').split('|'):
                     if tag_name and tag_name in tag_ids:
                         post_tags_writer.writerow([row['Id'], tag_ids[tag_name]])
-
-        logger.info("Loading post tags")
-        with connection.cursor() as cursor:
-            cursor.execute('TRUNCATE TABLE post_tags CASCADE')
-            with (self.data_dir / 'post_tags.csv').open('rt') as post_tags_file:
-                cursor.copy_from(
-                    post_tags_file, table='post_tags', columns=('post_id', 'tag_id'), sep=',', null='<NULL>')
+        self.load_table_data(filename='post_tags.csv', table_name='post_tags', columns=('post_id', 'tag_id'))
 
     def load_tag_data(self):
         """Load the tag data from the stackexchange API.
@@ -232,7 +220,8 @@ class TagLoader(BaseFileLoader):
         data = []
         while True:
             response = requests.get(
-                'https://api.stackexchange.com/2.3/tags', params={'page': page, 'site': site.name}, timeout=60
+                'https://api.stackexchange.com/2.3/tags',
+                params={'page': page, 'pagesize': 100, 'site': site.name}, timeout=60
             )
             response.raise_for_status()
             response_data = response.json()
@@ -263,14 +252,11 @@ class PostVoteLoader(BaseFileLoader):
                         row['Id'], row['PostId'], row['VoteTypeId'], row['CreationDate'], row.get('UserId', '<NULL>'),
                         row.get('BountyAmount', '<NULL>')
                     ])
-
-        logger.info("Loading post votes")
-        with (self.data_dir / 'post_votes.csv').open('rt') as post_votes_file:
-            with connection.cursor() as cursor:
-                cursor.execute("TRUNCATE TABLE post_votes CASCADE")
-                cursor.copy_from(post_votes_file, table='post_votes', columns=(
-                    'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
-                ), sep=',', null='<NULL>')
+        self.load_table_data(
+            filename='post_votes.csv', table_name='post_votes', columns=(
+                'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
+            )
+        )
 
 
 class PostCommentLoader(BaseFileLoader):
@@ -288,14 +274,11 @@ class PostCommentLoader(BaseFileLoader):
                     row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value), row.get('UserId', '<NULL>'),
                     row.get('UserDisplayName', '<NULL>')
                 ])
-
-        logger.info("Loading post comments")
-        with (self.data_dir / 'post_comments.csv').open('rt') as post_comments_file:
-            with connection.cursor() as cursor:
-                cursor.execute('TRUNCATE TABLE post_comments CASCADE')
-                cursor.copy_from(post_comments_file, table='post_comments', columns=(
-                    'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
-                ), sep=',', null='<NULL>')
+        self.load_table_data(
+            filename='post_comments.csv', table_name='post_comments', columns=(
+                'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
+            )
+        )
 
 
 class PostHistoryLoader(BaseFileLoader):
@@ -315,15 +298,12 @@ class PostHistoryLoader(BaseFileLoader):
                         row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
                         row.get('Text', '<NULL>'), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
                     ])
-
-        logger.info("Loading post history")
-        with (self.data_dir / 'post_history.csv').open('rt') as post_history_file:
-            with connection.cursor() as cursor:
-                cursor.execute("TRUNCATE TABLE post_history CASCADE")
-                cursor.copy_from(post_history_file, table='post_history', columns=(
-                    'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name',
-                    'comment', 'text', 'content_license'
-                ), sep=',', null='<NULL>')
+        self.load_table_data(
+            filename='post_history.csv', table_name='post_history', columns=(
+                'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name', 'comment',
+                'text', 'content_license'
+            )
+        )
 
 
 class PostLinkLoader(BaseFileLoader):
@@ -341,15 +321,9 @@ class PostLinkLoader(BaseFileLoader):
                     post_links_writer.writerow([
                         row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
                     ])
-
-        logger.info("Loading post links")
-        with (self.data_dir / 'post_links.csv').open('rt') as post_links_file:
-            with connection.cursor() as cursor:
-                cursor.execute("TRUNCATE TABLE post_links CASCADE")
-                cursor.copy_from(
-                    post_links_file, table='post_links', columns=('id', 'post_id', 'related_post_id', 'type'), sep=',',
-                    null='<NULL>'
-                )
+        self.load_table_data(
+            filename='post_links.csv', table_name='post_links', columns=('id', 'post_id', 'related_post_id', 'type')
+        )
 
 
 class SiteDataLoader:
