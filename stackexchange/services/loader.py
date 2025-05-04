@@ -38,6 +38,20 @@ class BaseFileLoader:
         """
         raise NotImplementedError
 
+    def extract_table_data(self, input_filename: str, output_filename: str, transform_function) -> None:
+        """Extract the data from an input file.
+
+        :param input_filename: The input filename.
+        :param output_filename: The output filename.
+        :param transform_function: The transform function.
+        """
+        with (self.data_dir / output_filename).open('wt') as f:
+            writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / input_filename):
+                transformed_row = transform_function(row)
+                if transformed_row:
+                    writer.writerow(transformed_row)
+
     def load_table_data(self, filename: str, table_name: str, columns: Iterable[str], truncate: bool = True) -> None:
         """Load data for a table from a CSV file.
 
@@ -105,31 +119,36 @@ class BadgeLoader(BaseFileLoader):
     def load(self) -> None:
         """Load the badges.
         """
-        # First pass - load badges
-        logger.info("Extracting badges")
-        badge_names = set()
-        with (self.data_dir / 'badges.csv').open('wt') as badges_file:
-            badges_writer = csv.writer(badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
-                if row['Name'] not in badge_names:
-                    badges_writer.writerow([
-                        row['Id'], row['Name'], row['Class'],
-                        enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
-                    ])
-                    badge_names.add(row['Name'])
+        badges = set()
+
+        def transform_badges(row: dict) -> Iterable[str] | None:
+            if row['Name'] in badges:
+                return None
+            badges.add(row['Name'])
+
+            return (
+                row['Id'], row['Name'], row['Class'],
+                enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
+            )
+        self.extract_table_data(
+            input_filename='Badges.xml', output_filename='badges.csv', transform_function=transform_badges
+        )
         self.load_table_data(
             filename='badges.csv', table_name='badges', columns=('id', 'name', 'badge_class', 'badge_type')
         )
 
-        # Second pass - load user badges
-        logger.info("Extracting user badges")
-        badge_ids = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
-        user_ids = set(models.SiteUser.objects.values_list('pk', flat=True))
-        with (self.data_dir / 'user_badges.csv').open('wt') as user_badges_file:
-            user_badges_writer = csv.writer(user_badges_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Badges.xml'):
-                if int(row['UserId']) in user_ids:
-                    user_badges_writer.writerow([row['UserId'], badge_ids[row['Name']], row['Date']])
+        badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
+        users = set(models.SiteUser.objects.values_list('pk', flat=True))
+
+        def transform_user_badges(row: dict) -> Iterable[str] | None:
+            if int(row['UserId']) in users:
+                return row['UserId'], badges[row['Name']], row['Date']
+
+            return None
+
+        self.extract_table_data(
+            input_filename='Badges.xml', output_filename='user_badges.csv', transform_function=transform_user_badges
+        )
         self.load_table_data(
             filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
         )
