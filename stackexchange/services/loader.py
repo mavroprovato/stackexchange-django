@@ -201,7 +201,7 @@ class TagLoader(BaseFileLoader):
         tags_to_update = []
         for tag in models.Tag.objects.all():
             if tag.name not in data:
-                logger.warning(f"Tag '{tag.name}' not found in data")
+                logger.warning("Tag %s not found in data", tag.name)
                 continue
             tag.required = data[tag.name]['is_required']
             tag.moderator_only = data[tag.name]['is_moderator_only']
@@ -231,7 +231,9 @@ class TagLoader(BaseFileLoader):
         page = 1
         data = []
         while True:
-            response = requests.get("https://api.stackexchange.com/2.3/tags", params={'page': page, 'site': site.name})
+            response = requests.get(
+                'https://api.stackexchange.com/2.3/tags', params={'page': page, 'site': site.name}, timeout=60
+            )
             response.raise_for_status()
             response_data = response.json()
             data += response_data['items']
