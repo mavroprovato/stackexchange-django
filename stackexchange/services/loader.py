@@ -11,7 +11,6 @@ import tempfile
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.db import connection
-import requests
 import py7zr
 
 from stackexchange import enums, models
