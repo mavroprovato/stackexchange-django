@@ -73,20 +73,25 @@ class BaseFileLoader:
 class UserLoader(BaseFileLoader):
     """The user loader.
     """
+    def transform_users(self, row):
+        """Transform the input row so that it can be loaded to the users table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        return (
+            row['Id'], self.site_id, row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
+            row.get('AboutMe', '<NULL>'), row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'],
+            row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
+        )
+
     def load(self) -> None:
         """Load the users.
         """
         logger.info("Extracting users")
-        with (self.data_dir / 'site_users.csv').open('wt') as site_users_file:
-            site_users_writer = csv.writer(site_users_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Users.xml'):
-                site_users_writer.writerow([
-                    row['Id'], self.site_id, row['DisplayName'],
-                    row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'),
-                    row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'], row['Reputation'],
-                    row['Views'], row['UpVotes'], row['DownVotes']
-                ])
-
+        self.extract_table_data(
+            input_filename='Users.xml', output_filename='site_users.csv', transform_function=self.transform_users
+        )
         self.load_table_data(
             filename='site_users.csv', table_name='site_users', columns=(
                 'unique_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
@@ -127,9 +132,9 @@ class BadgeLoader(BaseFileLoader):
     def transform_user_badges(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the user_badges table.
 
-         :param row: The input row.
-         :return: The transformed row.
-         """
+        :param row: The input row.
+        :return: The transformed row.
+        """
         if int(row['UserId']) in self.users:
             return row['UserId'], self.badges[row['Name']], row['Date']
 
