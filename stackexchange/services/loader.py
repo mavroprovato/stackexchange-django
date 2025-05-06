@@ -118,38 +118,58 @@ class UserLoader(BaseFileLoader):
 class BadgeLoader(BaseFileLoader):
     """The badge loader.
     """
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the badge loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
+        self.processed_badges = set()
+        self.badges = []
+
+    def transform_badges(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the badges table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        if row['Name'] in self.processed_badges:
+            return None
+        self.processed_badges.add(row['Name'])
+
+        return (
+            row['Id'], row['Name'], row['Class'],
+            enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
+        )
+
+    def transform_user_badges(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the user_badges table.
+
+         :param row: The input row.
+         :return: The transformed row.
+         """
+        if int(row['UserId']) in self.users:
+            return row['UserId'], self.badges[row['Name']], row['Date']
+
+        return None
+
     def load(self) -> None:
         """Load the badges.
         """
-        badges = set()
-
-        def transform_badges(row: dict) -> Iterable[str] | None:
-            if row['Name'] in badges:
-                return None
-            badges.add(row['Name'])
-
-            return (
-                row['Id'], row['Name'], row['Class'],
-                enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
-            )
         self.extract_table_data(
-            input_filename='Badges.xml', output_filename='badges.csv', transform_function=transform_badges
+            input_filename='Badges.xml', output_filename='badges.csv', transform_function=self.transform_badges
         )
         self.load_table_data(
             filename='badges.csv', table_name='badges', columns=('id', 'name', 'badge_class', 'badge_type')
         )
 
-        badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
-        users = set(models.SiteUser.objects.values_list('pk', flat=True))
-
-        def transform_user_badges(row: dict) -> Iterable[str] | None:
-            if int(row['UserId']) in users:
-                return row['UserId'], badges[row['Name']], row['Date']
-
-            return None
+        self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
 
         self.extract_table_data(
-            input_filename='Badges.xml', output_filename='user_badges.csv', transform_function=transform_user_badges
+            input_filename='Badges.xml', output_filename='user_badges.csv',
+            transform_function=self.transform_user_badges
         )
         self.load_table_data(
             filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
