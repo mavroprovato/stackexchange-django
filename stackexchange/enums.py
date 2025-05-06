@@ -60,6 +60,24 @@ class PostType(BaseEnum):
     PRIVILEGE_WIKI = 8
 
 
+class TagFlag(enum.Enum):
+    """Enumeration for the available tag flags.
+    """
+    REQUIRED = 'required', 'required'
+    MODERATOR_ONLY = 'moderator_only', 'moderator-only'
+
+    def __init__(self, attribute_name: str, api_path: str):
+        """Initialize the tag flag enum.
+
+        :param attribute_name: The tag object attribute name.
+        :param api_path: The api path from which to get the tags that have this flag set.
+        """
+        super().__init__()
+
+        self.attribute_name = attribute_name
+        self.api_path = api_path
+
+
 class ContentLicense(enum.Enum):
     """The content license enumeration
     """

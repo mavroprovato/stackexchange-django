@@ -7,11 +7,13 @@ import datetime
 import logging
 import pathlib
 import tempfile
+import time
 
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.db import connection
 import py7zr
+import requests
 
 from stackexchange import enums, models
 from . import dowloader, siteinfo, xmlparser
@@ -172,6 +174,9 @@ class PostLoader(BaseFileLoader):
 class TagLoader(BaseFileLoader):
     """The tag loader.
     """
+    # The base URL of the official StackExchange API
+    STACKEXCHANGE_API_BASE_URL = 'https://api.stackexchange.com/2.3'
+
     def load(self) -> None:
         """Load the tags.
         """
@@ -189,6 +194,15 @@ class TagLoader(BaseFileLoader):
             )
         )
 
+        logger.info("Updating tag flags")
+        for tag_flag in enums.TagFlag:
+            tag_names = self.get_tag_names(tag_flag)
+            for tag_name in tag_names:
+                tag = models.Tag.objects.filter(name=tag_name).first()
+                if tag is not None:
+                    setattr(tag, tag_flag.attribute_name, True)
+                    tag.save()
+
         tag_ids = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
         logger.info("Extracting post tags")
         with (self.data_dir / 'post_tags.csv').open('wt') as post_tags_file:
@@ -198,6 +212,30 @@ class TagLoader(BaseFileLoader):
                     if tag_name and tag_name in tag_ids:
                         post_tags_writer.writerow([row['Id'], tag_ids[tag_name]])
         self.load_table_data(filename='post_tags.csv', table_name='post_tags', columns=('post_id', 'tag_id'))
+
+    def get_tag_names(self, tag_flag: enums.TagFlag) -> Iterable[str]:
+        """Returns the names of the tags that have the given flag.
+
+        :param tag_flag: The tag flag.
+        :return: An iterable of tag names that have the given flag set.
+        """
+        page = 1
+        tags = []
+
+        while True:
+            response = requests.get(
+                f"{self.STACKEXCHANGE_API_BASE_URL}/tags/{tag_flag.api_path}",
+                params={'page': page, 'pagesize': 100, 'site': 'meta.math'}, timeout=60
+            )
+            response.raise_for_status()
+            response_data = response.json()
+            tags += [item['name'] for item in response_data['items']]
+            if not response_data['has_more']:
+                break
+            page += 1
+            time.sleep(1)
+
+        return tags
 
 
 class PostVoteLoader(BaseFileLoader):
