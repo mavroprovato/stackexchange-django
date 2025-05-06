@@ -93,8 +93,8 @@ class Site(models.Model):
 class SiteUser(models.Model):
     """The site user model.
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, help_text="The user")
     site = models.ForeignKey(Site, on_delete=models.CASCADE, help_text="The site")
+    unique_id = models.IntegerField(help_text="The site unique user ID across all sites", unique=True)
     display_name = models.CharField(max_length=255, help_text="The site user display name")
     website_url = models.URLField(null=True, blank=True, help_text="The user web site URL")
     location = models.CharField(null=True, max_length=255, blank=True, help_text="The user location")
@@ -111,7 +111,7 @@ class SiteUser(models.Model):
 
     class Meta:
         db_table = 'site_users'
-        indexes = (models.Index(fields=('user', 'site')), )
+        indexes = models.Index(fields=('site', 'unique_id')),
 
     def __str__(self) -> str:
         """Return the string representation of the site user.

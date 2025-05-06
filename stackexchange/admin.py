@@ -63,7 +63,7 @@ class SiteUserAdmin(admin.ModelAdmin):
     list_filter = ('site', )
     search_fields = ('display_name', )
     ordering = ('site', 'display_name')
-    autocomplete_fields = ('user', 'site')
+    autocomplete_fields = 'site',
     inlines = (SiteUserBadgeInline, )
 
 

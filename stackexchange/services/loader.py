@@ -10,7 +10,6 @@ import tempfile
 import time
 
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
 from django.db import connection
 import py7zr
 import requests
@@ -77,39 +76,20 @@ class UserLoader(BaseFileLoader):
     def load(self) -> None:
         """Load the users.
         """
-        users = set(models.User.objects.values_list('pk', flat=True))
         logger.info("Extracting users")
-        with (
-            (self.data_dir / 'users.csv').open('wt') as users_file,
-            (self.data_dir / 'site_users.csv').open('wt') as site_users_file
-        ):
-            users_writer = csv.writer(users_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+        with (self.data_dir / 'site_users.csv').open('wt') as site_users_file:
             site_users_writer = csv.writer(site_users_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Users.xml'):
-                user_id = None
-                if 'AccountId' in row:
-                    user_id = int(row['AccountId'])
-                    if user_id not in users:
-                        users_writer.writerow([
-                            user_id, 'admin' if user_id == -1 else f"user{row['AccountId']}",
-                            make_password('admin') if user_id == -1 else '', '<NULL>', user_id == -1
-                        ])
-                        users.add(user_id)
-
                 site_users_writer.writerow([
-                    row['Id'], '<NULL>' if user_id is None else user_id, self.site_id, row['DisplayName'],
+                    row['Id'], self.site_id, row['DisplayName'],
                     row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'), row.get('AboutMe', '<NULL>'),
                     row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'], row['Reputation'],
                     row['Views'], row['UpVotes'], row['DownVotes']
                 ])
 
         self.load_table_data(
-            filename='users.csv', table_name='users', columns=('id', 'username', 'password', 'email', 'staff'),
-            truncate=False
-        )
-        self.load_table_data(
             filename='site_users.csv', table_name='site_users', columns=(
-                'id', 'user_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
+                'unique_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
                 'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
             )
         )
@@ -184,15 +164,15 @@ class PostLoader(BaseFileLoader):
         """
         logger.info("Extracting posts")
         post_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
-        user_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Users.xml')}
+        users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
         with (self.data_dir / 'posts.csv').open('wt') as posts_file:
             posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
                 posts_writer.writerow([
                     row['Id'], row.get('ParentId', '<NULL>'),
                     row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in post_ids else '<NULL>',
-                    row.get('OwnerUserId', '<NULL>') if row.get('OwnerUserId') in user_ids else '<NULL>',
-                    row.get('LastEditorUserId', '<NULL>') if row.get('LastEditorUserId') in user_ids else '<NULL>',
+                    users[row['OwnerUserId']] if row.get('OwnerUserId') in users else '<NULL>',
+                    users[row['LastEditorUserId']] if row.get('LastEditorUserId') in users else '<NULL>',
                     row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
                     row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
                     row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
@@ -285,12 +265,14 @@ class PostVoteLoader(BaseFileLoader):
         """
         logger.info("Extracting post votes")
         post_ids = set(models.Post.objects.values_list('pk', flat=True))
+        users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
         with (self.data_dir / 'post_votes.csv').open('wt') as post_votes_file:
             post_votes_writer = csv.writer(post_votes_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Votes.xml'):
                 if int(row['PostId']) in post_ids:
                     post_votes_writer.writerow([
-                        row['Id'], row['PostId'], row['VoteTypeId'], row['CreationDate'], row.get('UserId', '<NULL>'),
+                        row['Id'], row['PostId'], row['VoteTypeId'], row['CreationDate'],
+                        users[row['UserId']] if row.get('UserId') in users else '<NULL>',
                         row.get('BountyAmount', '<NULL>')
                     ])
         self.load_table_data(
@@ -307,12 +289,14 @@ class PostCommentLoader(BaseFileLoader):
         """Load the post comments.
         """
         logger.info("Extracting post comments")
+        users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
         with (self.data_dir / 'post_comments.csv').open('wt') as post_comments_file:
             csv_writer = csv.writer(post_comments_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'Comments.xml'):
                 csv_writer.writerow([
                     row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'],
-                    row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value), row.get('UserId', '<NULL>'),
+                    row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value),
+                    users[row['UserId']] if row.get('UserId') in users else '<NULL>',
                     row.get('UserDisplayName', '<NULL>')
                 ])
         self.load_table_data(
@@ -330,13 +314,15 @@ class PostHistoryLoader(BaseFileLoader):
         """
         logger.info("Extracting post history")
         with (self.data_dir / 'post_history.csv').open('wt') as post_history_file:
+            users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
             post_ids = set(models.Post.objects.values_list('pk', flat=True))
             post_history_writer = csv.writer(post_history_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / 'PostHistory.xml'):
                 if int(row['PostId']) in post_ids:
                     post_history_writer.writerow([
                         row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
-                        row.get('UserId', '<NULL>'), row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
+                        users[row['UserId']] if row.get('UserId') in users else '<NULL>',
+                        row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
                         row.get('Text', '<NULL>'), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
                     ])
         self.load_table_data(
