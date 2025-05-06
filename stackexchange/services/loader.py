@@ -164,27 +164,42 @@ class BadgeLoader(BaseFileLoader):
 class PostLoader(BaseFileLoader):
     """The post loader.
     """
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the post loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.users = {str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+        self.post_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
+
+    def transform_posts(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the posts table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        return (
+            row['Id'], row.get('ParentId', '<NULL>'),
+            row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in self.post_ids else '<NULL>',
+            self.users[row['OwnerUserId']] if row.get('OwnerUserId') in self.users else '<NULL>',
+            self.users[row['LastEditorUserId']] if row.get('LastEditorUserId') in self.users else '<NULL>',
+            row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
+            row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
+            row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
+            row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
+            row.get('FavoriteCount', 0), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
+        )
+
     def load(self) -> None:
         """Load the posts.
         """
         logger.info("Extracting posts")
-        post_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
-        users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
-        with (self.data_dir / 'posts.csv').open('wt') as posts_file:
-            posts_writer = csv.writer(posts_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
-                posts_writer.writerow([
-                    row['Id'], row.get('ParentId', '<NULL>'),
-                    row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in post_ids else '<NULL>',
-                    users[row['OwnerUserId']] if row.get('OwnerUserId') in users else '<NULL>',
-                    users[row['LastEditorUserId']] if row.get('LastEditorUserId') in users else '<NULL>',
-                    row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
-                    row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
-                    row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
-                    row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
-                    row.get('FavoriteCount', 0), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
-                ])
 
+        self.extract_table_data(
+            input_filename='Posts.xml', output_filename='posts.csv', transform_function=self.transform_posts
+        )
         self.load_table_data(
             filename='posts.csv', table_name='posts', columns=(
                 'id', 'question_id', 'accepted_answer_id', 'owner_id', 'last_editor_id', 'type', 'title', 'body',
