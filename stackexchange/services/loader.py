@@ -55,19 +55,16 @@ class BaseFileLoader:
                 if transformed_row:
                     writer.writerow(transformed_row)
 
-    def load_table_data(self, filename: str, table_name: str, columns: Iterable[str], truncate: bool = True) -> None:
+    def load_table_data(self, filename: str, table_name: str, columns: Iterable[str]) -> None:
         """Load data for a table from a CSV file.
 
         :param filename: The name of the CSV file.
         :param table_name: The name of the table to load.
         :param columns: The table columns.
-        :param truncate: True to truncate data before loading.
         """
         logger.info("Loading table %s", table_name)
 
         with connection.cursor() as cursor:
-            if truncate:
-                cursor.execute(f"TRUNCATE TABLE {table_name} CASCADE")
             with (self.data_dir / filename).open('rt') as f:
                 cursor.copy_from(f, table=table_name, columns=columns, sep=',', null='<NULL>')
 
