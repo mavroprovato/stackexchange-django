@@ -172,6 +172,14 @@ class UserBadgeLoader(BaseFileLoader):
 class PostLoader(BaseFileLoader):
     """The post loader.
     """
+    INPUT_FILENAME = 'Posts.xml'
+    TABLE_NAME = 'posts'
+    TABLE_COLUMNS = (
+        'id', 'question_id', 'accepted_answer_id', 'owner_id', 'last_editor_id', 'type', 'title', 'body',
+        'last_editor_display_name', 'creation_date', 'last_edit_date', 'last_activity_date', 'community_owned_date',
+        'closed_date', 'score', 'view_count', 'answer_count', 'comment_count', 'favorite_count', 'content_license'
+    )
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post loader.
 
@@ -182,7 +190,7 @@ class PostLoader(BaseFileLoader):
         self.users = {str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
         self.posts = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
 
-    def transform_posts(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the posts table.
 
         :param row: The input row.
@@ -198,21 +206,6 @@ class PostLoader(BaseFileLoader):
             row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
             row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),
             row.get('FavoriteCount', 0), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
-        )
-
-    def load(self) -> None:
-        """Load the posts.
-        """
-        self.extract_table_data(
-            input_filename='Posts.xml', output_filename='posts.csv', transform_function=self.transform_posts
-        )
-        self.load_table_data(
-            filename='posts.csv', table_name='posts', columns=(
-                'id', 'question_id', 'accepted_answer_id', 'owner_id', 'last_editor_id', 'type', 'title', 'body',
-                'last_editor_display_name', 'creation_date', 'last_edit_date', 'last_activity_date',
-                'community_owned_date', 'closed_date', 'score', 'view_count', 'answer_count', 'comment_count',
-                'favorite_count', 'content_license'
-            )
         )
 
 
@@ -468,8 +461,8 @@ class SiteDataLoader:
     """Helper class to load site data
     """
     LOADERS = (
-        SiteUserLoader, BadgeLoader, UserBadgeLoader
-        # , PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
+        SiteUserLoader, BadgeLoader, UserBadgeLoader, PostLoader
+        # , , TagLoader, PostVoteLoader, PostCommentLoader,
         # PostHistoryLoader, PostLinkLoader
     )
 
