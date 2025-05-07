@@ -143,6 +143,10 @@ class BadgeLoader(BaseFileLoader):
 class UserBadgeLoader(BaseFileLoader):
     """The user badge loader.
     """
+    INPUT_FILENAME = 'Badges.xml'
+    TABLE_NAME = 'user_badges'
+    TABLE_COLUMNS = ('user_id', 'badge_id', 'date_awarded')
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the badge loader.
 
@@ -153,18 +157,7 @@ class UserBadgeLoader(BaseFileLoader):
         self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
         self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
 
-    def load(self) -> None:
-        """Load the user badges.
-        """
-        self.extract_table_data(
-            input_filename='Badges.xml', output_filename='user_badges.csv',
-            transform_function=self.transform_user_badges
-        )
-        self.load_table_data(
-            filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
-        )
-
-    def transform_user_badges(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the user_badges table.
 
         :param row: The input row.
@@ -475,8 +468,8 @@ class SiteDataLoader:
     """Helper class to load site data
     """
     LOADERS = (
-        SiteUserLoader, BadgeLoader
-        # UserBadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
+        SiteUserLoader, BadgeLoader, UserBadgeLoader
+        # , PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
         # PostHistoryLoader, PostLinkLoader
     )
 
