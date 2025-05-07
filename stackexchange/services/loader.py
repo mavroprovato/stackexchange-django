@@ -111,9 +111,7 @@ class BadgeLoader(BaseFileLoader):
         :param data_dir: The data directory
         """
         super().__init__(site_id, data_dir)
-        self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
         self.processed_badges = set()
-        self.badges = None
 
     def load(self) -> None:
         """Load the badges.
@@ -123,15 +121,6 @@ class BadgeLoader(BaseFileLoader):
         )
         self.load_table_data(
             filename='badges.csv', table_name='badges', columns=('id', 'name', 'badge_class', 'badge_type')
-        )
-
-        self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
-        self.extract_table_data(
-            input_filename='Badges.xml', output_filename='user_badges.csv',
-            transform_function=self.transform_user_badges
-        )
-        self.load_table_data(
-            filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
         )
 
     def transform_badges(self, row: dict) -> Iterable[str] | None:
@@ -147,6 +136,31 @@ class BadgeLoader(BaseFileLoader):
         return (
             row['Id'], row['Name'], row['Class'],
             enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
+        )
+
+
+class UserBadgeLoader(BaseFileLoader):
+    """The user badge loader.
+    """
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the badge loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
+        self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
+
+    def load(self) -> None:
+        """Load the user badges.
+        """
+        self.extract_table_data(
+            input_filename='Badges.xml', output_filename='user_badges.csv',
+            transform_function=self.transform_user_badges
+        )
+        self.load_table_data(
+            filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
         )
 
     def transform_user_badges(self, row: dict) -> Iterable[str] | None:
@@ -460,8 +474,8 @@ class SiteDataLoader:
     """Helper class to load site data
     """
     LOADERS = (
-        UserLoader, BadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader, PostHistoryLoader,
-        PostLinkLoader
+        UserLoader, BadgeLoader, UserBadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
+        PostHistoryLoader, PostLinkLoader
     )
 
     def __init__(self, site: str):
