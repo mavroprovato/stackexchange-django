@@ -52,6 +52,7 @@ class BaseFileLoader(abc.ABC):
     def perform(self) -> None:
         """Load the data.
         """
+        logger.info("Performing loading for %s", type(self).__name__)
         self.extract()
         self.load()
 
@@ -306,6 +307,10 @@ class PostTagLoader(BaseFileLoader):
 class PostVoteLoader(BaseFileLoader):
     """The post vote loader.
     """
+    INPUT_FILENAME = 'Votes.xml'
+    TABLE_NAME = 'post_votes'
+    TABLE_COLUMNS = ('id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount')
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post vote loader.
 
@@ -316,19 +321,7 @@ class PostVoteLoader(BaseFileLoader):
         self.posts = set(models.Post.objects.values_list('pk', flat=True))
         self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
 
-    def load(self) -> None:
-        """Load the post votes.
-        """
-        self.extract_table_data(
-            input_filename='Votes.xml', output_filename='post_votes.csv', transform_function=self.transform_post_votes
-        )
-        self.load_table_data(
-            filename='post_votes.csv', table_name='post_votes', columns=(
-                'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
-            )
-        )
-
-    def transform_post_votes(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the post votes table.
 
         :param row: The input row.
@@ -347,6 +340,12 @@ class PostVoteLoader(BaseFileLoader):
 class PostCommentLoader(BaseFileLoader):
     """The post comment loader.
     """
+    INPUT_FILENAME = 'Comments.xml'
+    TABLE_NAME = 'post_comments'
+    TABLE_COLUMNS = (
+        'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
+    )
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post comment loader.
 
@@ -356,20 +355,7 @@ class PostCommentLoader(BaseFileLoader):
         super().__init__(site_id, data_dir)
         self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
 
-    def load(self) -> None:
-        """Load the post comments.
-        """
-        self.extract_table_data(
-            input_filename='Comments.xml', output_filename='post_comments.csv',
-            transform_function=self.transform_post_comments
-        )
-        self.load_table_data(
-            filename='post_comments.csv', table_name='post_comments', columns=(
-                'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
-            )
-        )
-
-    def transform_post_comments(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the post comments table.
 
         :param row: The input row.
@@ -386,6 +372,13 @@ class PostCommentLoader(BaseFileLoader):
 class PostHistoryLoader(BaseFileLoader):
     """The post history loader.
     """
+    INPUT_FILENAME = 'PostHistory.xml'
+    TABLE_NAME = 'post_history'
+    TABLE_COLUMNS = (
+        'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name', 'comment', 'text',
+        'content_license'
+    )
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post history loader.
 
@@ -396,21 +389,7 @@ class PostHistoryLoader(BaseFileLoader):
         self.posts = set(models.Post.objects.values_list('pk', flat=True))
         self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
 
-    def load(self) -> None:
-        """Load the post history.
-        """
-        self.extract_table_data(
-            input_filename='PostHistory.xml', output_filename='post_history.csv',
-            transform_function=self.transform_post_history
-        )
-        self.load_table_data(
-            filename='post_history.csv', table_name='post_history', columns=(
-                'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name', 'comment',
-                'text', 'content_license'
-            )
-        )
-
-    def transform_post_history(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the tags table.
 
         :param row: The input row.
@@ -430,6 +409,10 @@ class PostHistoryLoader(BaseFileLoader):
 class PostLinkLoader(BaseFileLoader):
     """The post link loader.
     """
+    INPUT_FILENAME = 'PostLinks.xml'
+    TABLE_NAME = 'post_links'
+    TABLE_COLUMNS = ('id', 'post_id', 'related_post_id', 'type')
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post link loader.
 
@@ -439,19 +422,8 @@ class PostLinkLoader(BaseFileLoader):
         super().__init__(site_id, data_dir)
         self.posts = set(models.Post.objects.values_list('pk', flat=True))
 
-    def load(self) -> None:
-        """Load the post links.
-        """
-        self.extract_table_data(
-            input_filename='PostLinks.xml', output_filename='post_links.csv',
-            transform_function=self.transform_post_history
-        )
-        self.load_table_data(
-            filename='post_links.csv', table_name='post_links', columns=('id', 'post_id', 'related_post_id', 'type')
-        )
-
-    def transform_post_history(self, row: dict) -> Iterable[str] | None:
-        """Transform the input row so that it can be loaded to the tags table.
+    def transform(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the post links table.
 
         :param row: The input row.
         :return: The transformed row.
@@ -466,9 +438,8 @@ class SiteDataLoader:
     """Helper class to load site data
     """
     LOADERS = (
-        SiteUserLoader, BadgeLoader, UserBadgeLoader, PostLoader, TagLoader, PostTagLoader
-        # , , , PostVoteLoader, PostCommentLoader,
-        # PostHistoryLoader, PostLinkLoader
+        SiteUserLoader, BadgeLoader, UserBadgeLoader, PostLoader, TagLoader, PostTagLoader, PostVoteLoader,
+        PostCommentLoader, PostHistoryLoader, PostLinkLoader
     )
 
     def __init__(self, site: str):
