@@ -118,7 +118,7 @@ class BadgeLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'Badges.xml'
     TABLE_NAME = 'badges'
-    TABLE_COLUMNS = ('id', 'name', 'badge_class', 'badge_type')
+    TABLE_COLUMNS = 'id', 'name', 'badge_class', 'badge_type'
 
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the badge loader.
@@ -150,7 +150,7 @@ class UserBadgeLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'Badges.xml'
     TABLE_NAME = 'user_badges'
-    TABLE_COLUMNS = ('user_id', 'badge_id', 'date_awarded')
+    TABLE_COLUMNS = 'user_id', 'badge_id', 'date_awarded'
 
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the badge loader.
@@ -219,7 +219,7 @@ class TagLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'Tags.xml'
     TABLE_NAME = 'tags'
-    TABLE_COLUMNS = ('id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only')
+    TABLE_COLUMNS = 'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
     # The base URL of the official StackExchange API
     STACKEXCHANGE_API_BASE_URL = 'https://api.stackexchange.com/2.3'
 
@@ -284,7 +284,7 @@ class PostTagLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'Posts.xml'
     TABLE_NAME = 'post_tags'
-    TABLE_COLUMNS = ('post_id', 'tag_id')
+    TABLE_COLUMNS = 'post_id', 'tag_id'
 
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post loader.
@@ -309,7 +309,7 @@ class PostVoteLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'Votes.xml'
     TABLE_NAME = 'post_votes'
-    TABLE_COLUMNS = ('id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount')
+    TABLE_COLUMNS = 'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
 
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post vote loader.
@@ -342,9 +342,7 @@ class PostCommentLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'Comments.xml'
     TABLE_NAME = 'post_comments'
-    TABLE_COLUMNS = (
-        'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
-    )
+    TABLE_COLUMNS = 'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
 
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post comment loader.
@@ -411,7 +409,7 @@ class PostLinkLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'PostLinks.xml'
     TABLE_NAME = 'post_links'
-    TABLE_COLUMNS = ('id', 'post_id', 'related_post_id', 'type')
+    TABLE_COLUMNS = 'id', 'post_id', 'related_post_id', 'type'
 
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the post link loader.
