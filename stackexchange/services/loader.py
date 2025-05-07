@@ -41,7 +41,7 @@ class BaseFileLoader(abc.ABC):
         self.data_dir = data_dir
 
     @abc.abstractmethod
-    def transform(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the rows from the input file to a row that can be loaded to the database table. If an input row
         cannot be loaded, this method must return None.
 
@@ -63,9 +63,13 @@ class BaseFileLoader(abc.ABC):
         with self.data_filename().open('wt') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / self.INPUT_FILENAME):
-                transformed_row = self.transform(row)
-                if transformed_row:
-                    writer.writerow(transformed_row)
+                transformed = self.transform(row)
+                if transformed:
+                    if isinstance(transformed, tuple):
+                        writer.writerow(transformed)
+                    elif isinstance(transformed, list):
+                        for transformed_row in transformed:
+                            writer.writerow(transformed_row)
 
     def load(self) -> None:
         """Load data for a table.
@@ -95,7 +99,7 @@ class SiteUserLoader(BaseFileLoader):
         'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
     )
 
-    def transform(self, row):
+    def transform(self, row) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the users table.
 
         :param row: The input row.
@@ -124,7 +128,7 @@ class BadgeLoader(BaseFileLoader):
         super().__init__(site_id, data_dir)
         self.processed_badges = set()
 
-    def transform(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the badges table.
 
         :param row: The input row.
@@ -157,7 +161,7 @@ class UserBadgeLoader(BaseFileLoader):
         self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
         self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
 
-    def transform(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the user_badges table.
 
         :param row: The input row.
@@ -190,7 +194,7 @@ class PostLoader(BaseFileLoader):
         self.users = {str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
         self.posts = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
 
-    def transform(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the posts table.
 
         :param row: The input row.
@@ -212,44 +216,20 @@ class PostLoader(BaseFileLoader):
 class TagLoader(BaseFileLoader):
     """The tag loader.
     """
+    INPUT_FILENAME = 'Tags.xml'
+    TABLE_NAME = 'tags'
+    TABLE_COLUMNS = ('id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only')
     # The base URL of the official StackExchange API
     STACKEXCHANGE_API_BASE_URL = 'https://api.stackexchange.com/2.3'
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
-        """Initialize the tag loader.
-
-        :param site_id: The site identifier.
-        :param data_dir: The data directory
-        """
-        super().__init__(site_id, data_dir)
-        self.tags = None
-
-    def load(self) -> None:
+    def perform(self) -> None:
         """Load the tags.
         """
-        self.extract_table_data(
-            input_filename='Tags.xml', output_filename='tags.csv', transform_function=self.transform_tags
-        )
-        self.load_table_data(
-            filename='tags.csv', table_name='tags', columns=(
-                'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
-            )
-        )
+        super().perform()
 
         self.update_tag_flags()
 
-        self.tags = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
-        logger.info("Extracting post tags")
-        with (self.data_dir / 'post_tags.csv').open('wt') as post_tags_file:
-            post_tags_writer = csv.writer(post_tags_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
-                for tag_name in row.get('Tags', '').split('|'):
-                    if tag_name and tag_name in self.tags:
-                        post_tags_writer.writerow([row['Id'], self.tags[tag_name]])
-        self.load_table_data(filename='post_tags.csv', table_name='post_tags', columns=('post_id', 'tag_id'))
-
-    @staticmethod
-    def transform_tags(row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the tags table.
 
         :param row: The input row.
@@ -296,6 +276,31 @@ class TagLoader(BaseFileLoader):
             time.sleep(1)
 
         return tags
+
+
+class PostTagLoader(BaseFileLoader):
+    """The post tag loader.
+    """
+    INPUT_FILENAME = 'Posts.xml'
+    TABLE_NAME = 'post_tags'
+    TABLE_COLUMNS = ('post_id', 'tag_id')
+
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the post loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.tags = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
+
+    def transform(self, row: dict) -> tuple | list[tuple] | None:
+        post_tags = []
+        for tag_name in row.get('Tags', '').split('|'):
+            if tag_name and tag_name in self.tags:
+                post_tags.append((row['Id'], self.tags[tag_name]))
+
+        return post_tags
 
 
 class PostVoteLoader(BaseFileLoader):
@@ -461,8 +466,8 @@ class SiteDataLoader:
     """Helper class to load site data
     """
     LOADERS = (
-        SiteUserLoader, BadgeLoader, UserBadgeLoader, PostLoader
-        # , , TagLoader, PostVoteLoader, PostCommentLoader,
+        SiteUserLoader, BadgeLoader, UserBadgeLoader, PostLoader, TagLoader, PostTagLoader
+        # , , , PostVoteLoader, PostCommentLoader,
         # PostHistoryLoader, PostLinkLoader
     )
 
