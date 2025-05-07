@@ -46,6 +46,8 @@ class BaseFileLoader:
         :param output_filename: The output filename.
         :param transform_function: The transform function.
         """
+        logger.info('Extracting data from %s', input_filename)
+
         with (self.data_dir / output_filename).open('wt') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
             for row in xmlparser.XmlFileIterator(self.data_dir / input_filename):
@@ -73,6 +75,19 @@ class BaseFileLoader:
 class UserLoader(BaseFileLoader):
     """The user loader.
     """
+    def load(self) -> None:
+        """Load the users.
+        """
+        self.extract_table_data(
+            input_filename='Users.xml', output_filename='site_users.csv', transform_function=self.transform_users
+        )
+        self.load_table_data(
+            filename='site_users.csv', table_name='site_users', columns=(
+                'unique_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
+                'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+            )
+        )
+
     def transform_users(self, row):
         """Transform the input row so that it can be loaded to the users table.
 
@@ -83,20 +98,6 @@ class UserLoader(BaseFileLoader):
             row['Id'], self.site_id, row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
             row.get('AboutMe', '<NULL>'), row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'],
             row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
-        )
-
-    def load(self) -> None:
-        """Load the users.
-        """
-        logger.info("Extracting users")
-        self.extract_table_data(
-            input_filename='Users.xml', output_filename='site_users.csv', transform_function=self.transform_users
-        )
-        self.load_table_data(
-            filename='site_users.csv', table_name='site_users', columns=(
-                'unique_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
-                'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
-            )
         )
 
 
@@ -112,7 +113,26 @@ class BadgeLoader(BaseFileLoader):
         super().__init__(site_id, data_dir)
         self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
         self.processed_badges = set()
-        self.badges = []
+        self.badges = None
+
+    def load(self) -> None:
+        """Load the badges.
+        """
+        self.extract_table_data(
+            input_filename='Badges.xml', output_filename='badges.csv', transform_function=self.transform_badges
+        )
+        self.load_table_data(
+            filename='badges.csv', table_name='badges', columns=('id', 'name', 'badge_class', 'badge_type')
+        )
+
+        self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
+        self.extract_table_data(
+            input_filename='Badges.xml', output_filename='user_badges.csv',
+            transform_function=self.transform_user_badges
+        )
+        self.load_table_data(
+            filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
+        )
 
     def transform_badges(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the badges table.
@@ -140,26 +160,6 @@ class BadgeLoader(BaseFileLoader):
 
         return None
 
-    def load(self) -> None:
-        """Load the badges.
-        """
-        self.extract_table_data(
-            input_filename='Badges.xml', output_filename='badges.csv', transform_function=self.transform_badges
-        )
-        self.load_table_data(
-            filename='badges.csv', table_name='badges', columns=('id', 'name', 'badge_class', 'badge_type')
-        )
-
-        self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
-
-        self.extract_table_data(
-            input_filename='Badges.xml', output_filename='user_badges.csv',
-            transform_function=self.transform_user_badges
-        )
-        self.load_table_data(
-            filename='user_badges.csv', table_name='user_badges', columns=('user_id', 'badge_id', 'date_awarded')
-        )
-
 
 class PostLoader(BaseFileLoader):
     """The post loader.
@@ -172,7 +172,7 @@ class PostLoader(BaseFileLoader):
         """
         super().__init__(site_id, data_dir)
         self.users = {str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
-        self.post_ids = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
+        self.posts = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
 
     def transform_posts(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the posts table.
@@ -182,7 +182,7 @@ class PostLoader(BaseFileLoader):
         """
         return (
             row['Id'], row.get('ParentId', '<NULL>'),
-            row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in self.post_ids else '<NULL>',
+            row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in self.posts else '<NULL>',
             self.users[row['OwnerUserId']] if row.get('OwnerUserId') in self.users else '<NULL>',
             self.users[row['LastEditorUserId']] if row.get('LastEditorUserId') in self.users else '<NULL>',
             row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
@@ -195,8 +195,6 @@ class PostLoader(BaseFileLoader):
     def load(self) -> None:
         """Load the posts.
         """
-        logger.info("Extracting posts")
-
         self.extract_table_data(
             input_filename='Posts.xml', output_filename='posts.csv', transform_function=self.transform_posts
         )
@@ -216,23 +214,54 @@ class TagLoader(BaseFileLoader):
     # The base URL of the official StackExchange API
     STACKEXCHANGE_API_BASE_URL = 'https://api.stackexchange.com/2.3'
 
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the tag loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.tags = None
+
     def load(self) -> None:
         """Load the tags.
         """
-        logger.info("Extracting tags")
-        with (self.data_dir / 'tags.csv').open('wt') as tags_file:
-            tags_writer = csv.writer(tags_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Tags.xml'):
-                tags_writer.writerow([
-                    row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId', '<NULL>'),
-                    row.get('WikiPostId', '<NULL>'), row.get('IsRequired') == 'True', row.get('ModeratorOnly') == 'True'
-                ])
+        self.extract_table_data(
+            input_filename='Tags.xml', output_filename='tags.csv', transform_function=self.transform_tags
+        )
         self.load_table_data(
             filename='tags.csv', table_name='tags', columns=(
                 'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
             )
         )
 
+        self.update_tag_flags()
+
+        self.tags = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
+        logger.info("Extracting post tags")
+        with (self.data_dir / 'post_tags.csv').open('wt') as post_tags_file:
+            post_tags_writer = csv.writer(post_tags_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
+            for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
+                for tag_name in row.get('Tags', '').split('|'):
+                    if tag_name and tag_name in self.tags:
+                        post_tags_writer.writerow([row['Id'], self.tags[tag_name]])
+        self.load_table_data(filename='post_tags.csv', table_name='post_tags', columns=('post_id', 'tag_id'))
+
+    @staticmethod
+    def transform_tags(row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the tags table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        return (
+            row['Id'], row['TagName'], row['Count'], row.get('ExcerptPostId', '<NULL>'),
+            row.get('WikiPostId', '<NULL>'), row.get('IsRequired') == 'True', row.get('ModeratorOnly') == 'True'
+        )
+
+    def update_tag_flags(self) -> None:
+        """Update the flags (required and moderator only) from the stack exchange API.
+        """
         logger.info("Updating tag flags")
         for tag_flag in enums.TagFlag:
             tag_names = self.get_tag_names(tag_flag)
@@ -241,16 +270,6 @@ class TagLoader(BaseFileLoader):
                 if tag is not None:
                     setattr(tag, tag_flag.attribute_name, True)
                     tag.save()
-
-        tag_ids = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
-        logger.info("Extracting post tags")
-        with (self.data_dir / 'post_tags.csv').open('wt') as post_tags_file:
-            post_tags_writer = csv.writer(post_tags_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml'):
-                for tag_name in row.get('Tags', '').split('|'):
-                    if tag_name and tag_name in tag_ids:
-                        post_tags_writer.writerow([row['Id'], tag_ids[tag_name]])
-        self.load_table_data(filename='post_tags.csv', table_name='post_tags', columns=('post_id', 'tag_id'))
 
     def get_tag_names(self, tag_flag: enums.TagFlag) -> Iterable[str]:
         """Returns the names of the tags that have the given flag.
@@ -261,10 +280,11 @@ class TagLoader(BaseFileLoader):
         page = 1
         tags = []
 
+        site = models.Site.objects.get(pk=self.site_id)
         while True:
             response = requests.get(
                 f"{self.STACKEXCHANGE_API_BASE_URL}/tags/{tag_flag.api_path}",
-                params={'page': page, 'pagesize': 100, 'site': 'meta.math'}, timeout=60
+                params={'page': page, 'pagesize': 100, 'site': site.name}, timeout=60
             )
             response.raise_for_status()
             response_data = response.json()
@@ -280,71 +300,103 @@ class TagLoader(BaseFileLoader):
 class PostVoteLoader(BaseFileLoader):
     """The post vote loader.
     """
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the post vote loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.posts = set(models.Post.objects.values_list('pk', flat=True))
+        self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+
     def load(self) -> None:
         """Load the post votes.
         """
-        logger.info("Extracting post votes")
-        post_ids = set(models.Post.objects.values_list('pk', flat=True))
-        users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
-        with (self.data_dir / 'post_votes.csv').open('wt') as post_votes_file:
-            post_votes_writer = csv.writer(post_votes_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Votes.xml'):
-                if int(row['PostId']) in post_ids:
-                    post_votes_writer.writerow([
-                        row['Id'], row['PostId'], row['VoteTypeId'], row['CreationDate'],
-                        users[row['UserId']] if row.get('UserId') in users else '<NULL>',
-                        row.get('BountyAmount', '<NULL>')
-                    ])
+        self.extract_table_data(
+            input_filename='Votes.xml', output_filename='post_votes.csv', transform_function=self.transform_post_votes
+        )
         self.load_table_data(
             filename='post_votes.csv', table_name='post_votes', columns=(
                 'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
             )
         )
 
+    def transform_post_votes(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the post votes table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        if int(row['PostId']) in self.posts:
+            return (
+                row['Id'], row['PostId'], row['VoteTypeId'], row['CreationDate'],
+                self.users[row['UserId']] if row.get('UserId') in self.users else '<NULL>',
+                row.get('BountyAmount', '<NULL>')
+            )
+
+        return None
+
 
 class PostCommentLoader(BaseFileLoader):
     """The post comment loader.
     """
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the post comment loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+
     def load(self) -> None:
         """Load the post comments.
         """
-        logger.info("Extracting post comments")
-        users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
-        with (self.data_dir / 'post_comments.csv').open('wt') as post_comments_file:
-            csv_writer = csv.writer(post_comments_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'Comments.xml'):
-                csv_writer.writerow([
-                    row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'],
-                    row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value),
-                    users[row['UserId']] if row.get('UserId') in users else '<NULL>',
-                    row.get('UserDisplayName', '<NULL>')
-                ])
+        self.extract_table_data(
+            input_filename='Comments.xml', output_filename='post_comments.csv',
+            transform_function=self.transform_post_comments
+        )
         self.load_table_data(
             filename='post_comments.csv', table_name='post_comments', columns=(
                 'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
             )
         )
 
+    def transform_post_comments(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the post comments table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        return (
+            row['Id'], row['PostId'], row['Score'], row['Text'], row['CreationDate'],
+            row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value),
+            self.users[row['UserId']] if row.get('UserId') in self.users else '<NULL>',
+            row.get('UserDisplayName', '<NULL>')
+        )
+
 
 class PostHistoryLoader(BaseFileLoader):
     """The post history loader.
     """
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the post history loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.posts = set(models.Post.objects.values_list('pk', flat=True))
+        self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+
     def load(self) -> None:
         """Load the post history.
         """
-        logger.info("Extracting post history")
-        with (self.data_dir / 'post_history.csv').open('wt') as post_history_file:
-            users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
-            post_ids = set(models.Post.objects.values_list('pk', flat=True))
-            post_history_writer = csv.writer(post_history_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'PostHistory.xml'):
-                if int(row['PostId']) in post_ids:
-                    post_history_writer.writerow([
-                        row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
-                        users[row['UserId']] if row.get('UserId') in users else '<NULL>',
-                        row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
-                        row.get('Text', '<NULL>'), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
-                    ])
+        self.extract_table_data(
+            input_filename='PostHistory.xml', output_filename='post_history.csv',
+            transform_function=self.transform_post_history
+        )
         self.load_table_data(
             filename='post_history.csv', table_name='post_history', columns=(
                 'id', 'type', 'post_id', 'revision_guid', 'creation_date', 'user_id', 'user_display_name', 'comment',
@@ -352,25 +404,56 @@ class PostHistoryLoader(BaseFileLoader):
             )
         )
 
+    def transform_post_history(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the tags table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        if int(row['PostId']) in self.posts:
+            return (
+                row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
+                self.users[row['UserId']] if row.get('UserId') in self.users else '<NULL>',
+                row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
+                row.get('Text', '<NULL>'), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)
+            )
+
+        return None
+
 
 class PostLinkLoader(BaseFileLoader):
     """The post link loader.
     """
+    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+        """Initialize the post link loader.
+
+        :param site_id: The site identifier.
+        :param data_dir: The data directory
+        """
+        super().__init__(site_id, data_dir)
+        self.posts = set(models.Post.objects.values_list('pk', flat=True))
+
     def load(self) -> None:
         """Load the post links.
         """
-        logger.info("Extracting post links")
-        post_ids = set(models.Post.objects.values_list('pk', flat=True))
-        with (self.data_dir / 'post_links.csv').open('wt') as post_links_file:
-            post_links_writer = csv.writer(post_links_file, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / 'PostLinks.xml'):
-                if int(row['PostId']) in post_ids and int(row['RelatedPostId']) in post_ids:
-                    post_links_writer.writerow([
-                        row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
-                    ])
+        self.extract_table_data(
+            input_filename='PostLinks.xml', output_filename='post_links.csv',
+            transform_function=self.transform_post_history
+        )
         self.load_table_data(
             filename='post_links.csv', table_name='post_links', columns=('id', 'post_id', 'related_post_id', 'type')
         )
+
+    def transform_post_history(self, row: dict) -> Iterable[str] | None:
+        """Transform the input row so that it can be loaded to the tags table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
+        if int(row['PostId']) in self.posts and int(row['RelatedPostId']) in self.posts:
+            return row['Id'], row['PostId'], row['RelatedPostId'], row['LinkTypeId']
+
+        return None
 
 
 class SiteDataLoader:
