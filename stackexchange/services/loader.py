@@ -111,6 +111,10 @@ class SiteUserLoader(BaseFileLoader):
 class BadgeLoader(BaseFileLoader):
     """The badge loader.
     """
+    INPUT_FILENAME = 'Badges.xml'
+    TABLE_NAME = 'badges'
+    TABLE_COLUMNS = ('id', 'name', 'badge_class', 'badge_type')
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Initialize the badge loader.
 
@@ -120,17 +124,7 @@ class BadgeLoader(BaseFileLoader):
         super().__init__(site_id, data_dir)
         self.processed_badges = set()
 
-    def load(self) -> None:
-        """Load the badges.
-        """
-        self.extract_table_data(
-            input_filename='Badges.xml', output_filename='badges.csv', transform_function=self.transform_badges
-        )
-        self.load_table_data(
-            filename='badges.csv', table_name='badges', columns=('id', 'name', 'badge_class', 'badge_type')
-        )
-
-    def transform_badges(self, row: dict) -> Iterable[str] | None:
+    def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the badges table.
 
         :param row: The input row.
@@ -481,8 +475,8 @@ class SiteDataLoader:
     """Helper class to load site data
     """
     LOADERS = (
-        SiteUserLoader,
-        # BadgeLoader, UserBadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
+        SiteUserLoader, BadgeLoader
+        # UserBadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
         # PostHistoryLoader, PostLinkLoader
     )
 
