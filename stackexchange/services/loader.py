@@ -21,9 +21,16 @@ from . import dowloader, siteinfo, xmlparser
 logger = logging.getLogger(__name__)
 
 
-class BaseFileLoader:
+class BaseFileLoader(abc.ABC):
     """The base class for file loading.
     """
+    # The filename from which to read the data. Subclasses must set this attribute.
+    INPUT_FILENAME = None
+    # The name of the table from which to load the data. Subclasses must set this attribute.
+    TABLE_NAME = None
+    # The table columns. Subclasses must set this attribute.
+    TABLE_COLUMNS = None
+
     def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
         """Create the file loader.
 
@@ -34,58 +41,61 @@ class BaseFileLoader:
         self.data_dir = data_dir
 
     @abc.abstractmethod
-    def load(self) -> None:
-        """Load the data.
+    def transform(self, row: dict) -> Iterable[str] | None:
+        """Transform the rows from the input file to a row that can be loaded to the database table. If an input row
+        cannot be loaded, this method must return None.
+
+        :return: The transformed row.
         """
         raise NotImplementedError
 
-    def extract_table_data(self, input_filename: str, output_filename: str, transform_function) -> None:
-        """Extract the data from an input file.
-
-        :param input_filename: The input filename.
-        :param output_filename: The output filename.
-        :param transform_function: The transform function.
+    def perform(self) -> None:
+        """Load the data.
         """
-        logger.info('Extracting data from %s', input_filename)
+        self.extract()
+        self.load()
 
-        with (self.data_dir / output_filename).open('wt') as f:
+    def extract(self) -> None:
+        """Extract the data from an input file.
+        """
+        logger.info('Extracting data from %s', self.INPUT_FILENAME)
+
+        with self.data_filename().open('wt') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / input_filename):
-                transformed_row = transform_function(row)
+            for row in xmlparser.XmlFileIterator(self.data_dir / self.INPUT_FILENAME):
+                transformed_row = self.transform(row)
                 if transformed_row:
                     writer.writerow(transformed_row)
 
-    def load_table_data(self, filename: str, table_name: str, columns: Iterable[str]) -> None:
-        """Load data for a table from a CSV file.
-
-        :param filename: The name of the CSV file.
-        :param table_name: The name of the table to load.
-        :param columns: The table columns.
+    def load(self) -> None:
+        """Load data for a table.
         """
-        logger.info("Loading table %s", table_name)
+        logger.info("Loading table %s", self.TABLE_NAME)
 
         with connection.cursor() as cursor:
-            with (self.data_dir / filename).open('rt') as f:
-                cursor.copy_from(f, table=table_name, columns=columns, sep=',', null='<NULL>')
+            cursor.execute(f"TRUNCATE TABLE {self.TABLE_NAME} CASCADE")
+            with self.data_filename().open('rt') as f:
+                cursor.copy_from(f, table=self.TABLE_NAME, columns=self.TABLE_COLUMNS, sep=',', null='<NULL>')
 
+    def data_filename(self) -> pathlib.Path:
+        """Return the file name from which to load the data.
 
-class UserLoader(BaseFileLoader):
-    """The user loader.
-    """
-    def load(self) -> None:
-        """Load the users.
+        :return: The file name from which to load the data.
         """
-        self.extract_table_data(
-            input_filename='Users.xml', output_filename='site_users.csv', transform_function=self.transform_users
-        )
-        self.load_table_data(
-            filename='site_users.csv', table_name='site_users', columns=(
-                'unique_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
-                'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
-            )
-        )
+        return self.data_dir / f"{self.TABLE_NAME}.csv"
 
-    def transform_users(self, row):
+
+class SiteUserLoader(BaseFileLoader):
+    """The site user loader.
+    """
+    INPUT_FILENAME = 'Users.xml'
+    TABLE_NAME = 'site_users'
+    TABLE_COLUMNS = (
+        'unique_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
+        'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+    )
+
+    def transform(self, row):
         """Transform the input row so that it can be loaded to the users table.
 
         :param row: The input row.
@@ -471,8 +481,9 @@ class SiteDataLoader:
     """Helper class to load site data
     """
     LOADERS = (
-        UserLoader, BadgeLoader, UserBadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
-        PostHistoryLoader, PostLinkLoader
+        SiteUserLoader,
+        # BadgeLoader, UserBadgeLoader, PostLoader, TagLoader, PostVoteLoader, PostCommentLoader,
+        # PostHistoryLoader, PostLinkLoader
     )
 
     def __init__(self, site: str):
@@ -497,7 +508,7 @@ class SiteDataLoader:
 
             for loader_class in self.LOADERS:
                 loader = loader_class(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
-                loader.load()
+                loader.perform()
 
         # Post load actions
         self.analyze()
