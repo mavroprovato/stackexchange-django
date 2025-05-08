@@ -296,6 +296,11 @@ class PostTagLoader(BaseFileLoader):
         self.tags = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
+        """Transform the input row so that it can be loaded to the post tags table.
+
+        :param row: The input row.
+        :return: The transformed row.
+        """
         post_tags = []
         for tag_name in row.get('Tags', '').split('|'):
             if tag_name and tag_name in self.tags:
