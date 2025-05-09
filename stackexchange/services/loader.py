@@ -15,7 +15,8 @@ import py7zr
 import requests
 
 from stackexchange import enums, models
-from . import dowloader, siteinfo, xmlparser
+from . import siteinfo
+from sites.services import dowloader, xmlparser
 
 # The module logger
 logger = logging.getLogger(__name__)

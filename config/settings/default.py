@@ -122,10 +122,6 @@ DATABASE_ROUTERS = (
 TENANT_MODEL = 'sites.Site'
 TENANT_DOMAIN_MODEL = 'sites.Domain'
 
-# The model to represent a user
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-user-model
-AUTH_USER_MODEL = 'sites.User'
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

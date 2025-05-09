@@ -1,17 +1,17 @@
-"""Command to load all site information
+"""Command to load all available sites
 """
 import logging
 import sys
 
 from django.core.management.base import BaseCommand
 
-from stackexchange import models, services
+from sites import models, services
 
 
 class Command(BaseCommand):
     """Command to load all site information.
     """
-    help = 'Load all site information'
+    help = 'Load all available sites'
 
     def handle(self, *args, **options):
         """Implements the logic of the command.
@@ -25,14 +25,14 @@ class Command(BaseCommand):
         sites_file = downloader.get_file()
 
         logging.info("Loading sites")
-        for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
-            models.Site.objects.update_or_create(pk=site['Id'], defaults={
-                'name': get_site_name(site['Url']), 'description': site['Name'], 'long_description': site['LongName'],
-                'tagline': site['Tagline'], 'url': site['Url'], 'icon_url': site['IconUrl'],
-                'badge_icon_url': site['BadgeIconUrl'], 'image_url': site['ImageUrl'], 'tag_css': site['TagCss'],
-                'total_questions': site['TotalQuestions'], 'total_answers': site['TotalAnswers'],
-                'total_users': site['TotalUsers'], 'total_comments': site['TotalComments'],
-                'total_tags': site['TotalTags'], 'last_post_date': site['LastPost'] + '+00:00'
+        for row in services.xmlparser.XmlFileIterator(xml_file=sites_file):
+            models.Site.objects.update_or_create(schema_name=row['TinyName'], defaults={
+                'name': get_site_name(row['Url']), 'description': row['Name'], 'long_description': row['LongName'],
+                'tagline': row['Tagline'], 'url': row['Url'], 'icon_url': row['IconUrl'],
+                'badge_icon_url': row['BadgeIconUrl'], 'image_url': row['ImageUrl'], 'tag_css': row['TagCss'],
+                'total_questions': row['TotalQuestions'], 'total_answers': row['TotalAnswers'],
+                'total_users': row['TotalUsers'], 'total_comments': row['TotalComments'],
+                'total_tags': row['TotalTags'], 'last_post_date': row['LastPost'] + '+00:00'
             })
 
         for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):

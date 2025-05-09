@@ -21,7 +21,7 @@ class XmlFileIterator:
 
         :return: Yields the data for each row.
         """
-        tree = eT.iterparse(self.xml_file, events=("start",))
+        tree = eT.iterparse(self.xml_file, events=('start', ))
         for _, elem in tree:
             if elem.tag == 'row':
                 yield dict(elem.items())
