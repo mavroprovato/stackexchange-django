@@ -26,8 +26,9 @@ class Command(BaseCommand):
 
         logging.info("Loading sites")
         for row in services.xmlparser.XmlFileIterator(xml_file=sites_file):
-            models.Site.objects.update_or_create(schema_name=row['TinyName'], defaults={
-                'name': get_site_name(row['Url']), 'description': row['Name'], 'long_description': row['LongName'],
+            site_name = get_site_name(row['Url'])
+            models.Site.objects.update_or_create(schema_name=get_schema_name(site_name), defaults={
+                'name': site_name, 'description': row['Name'], 'long_description': row['LongName'],
                 'tagline': row['Tagline'], 'url': row['Url'], 'icon_url': row['IconUrl'],
                 'badge_icon_url': row['BadgeIconUrl'], 'image_url': row['ImageUrl'], 'tag_css': row['TagCss'],
                 'total_questions': row['TotalQuestions'], 'total_answers': row['TotalAnswers'],
@@ -38,6 +39,15 @@ class Command(BaseCommand):
         for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
             if 'ParentId' in site:
                 models.Site.objects.filter(pk=site['Id']).update(parent=site['ParentId'])
+
+
+def get_schema_name(site_name: str) -> str:
+    """Get tenant the schema name from the site name.
+
+    :param site_name: The site name.
+    :return: The schema name.
+    """
+    return site_name.replace('.', '_')
 
 
 def get_site_name(site_url: str) -> str:
