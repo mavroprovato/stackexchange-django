@@ -1,4 +1,4 @@
 """Services module
 """
 from . import loader
-from . import siteinfo
+from . import site_info

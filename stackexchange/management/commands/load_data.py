@@ -5,6 +5,7 @@ import sys
 
 from django.core.management.base import BaseCommand, CommandParser
 
+from sites import models as site_models
 from stackexchange import models, services
 
 
@@ -29,7 +30,7 @@ class Command(BaseCommand):
         logging.basicConfig(
             stream=sys.stdout, level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s %(message)s')
         try:
-            loader = services.loader.SiteDataLoader(site=options['site'])
+            loader = services.loader.SiteDataLoader(site_name=options['site'])
             loader.load()
-        except models.Site.DoesNotExist:
+        except site_models.Site.DoesNotExist:
             self.stderr.write(f"Site {options['site']} does not exist.")

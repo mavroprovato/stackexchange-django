@@ -11,12 +11,13 @@ import time
 
 from django.conf import settings
 from django.db import connection
+from django_tenants.utils import schema_context
 import py7zr
 import requests
 
-from stackexchange import enums, models
-from . import siteinfo
-from sites.services import dowloader, xmlparser
+from sites import models as site_models
+from sites import services as site_services
+from stackexchange import enums, models, services
 
 # The module logger
 logger = logging.getLogger(__name__)
@@ -32,13 +33,13 @@ class BaseFileLoader(abc.ABC):
     # The table columns. Subclasses must set this attribute.
     TABLE_COLUMNS = None
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Create the file loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory.
         """
-        self.site_id = site_id
+        self.site = site
         self.data_dir = data_dir
 
     @abc.abstractmethod
@@ -64,7 +65,7 @@ class BaseFileLoader(abc.ABC):
 
         with self.data_filename().open('wt') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in xmlparser.XmlFileIterator(self.data_dir / self.INPUT_FILENAME):
+            for row in site_services.xmlparser.XmlFileIterator(self.data_dir / self.INPUT_FILENAME):
                 transformed = self.transform(row)
                 if transformed:
                     if isinstance(transformed, tuple):
@@ -79,8 +80,9 @@ class BaseFileLoader(abc.ABC):
         logger.info("Loading table %s", self.TABLE_NAME)
 
         with connection.cursor() as cursor:
-            cursor.execute(f"TRUNCATE TABLE {self.TABLE_NAME} CASCADE")
+            cursor.execute(f"TRUNCATE TABLE {self.site.schema_name}.{self.TABLE_NAME} CASCADE")
             with self.data_filename().open('rt') as f:
+                cursor.execute(f"SET search_path TO {self.site.schema_name}")
                 cursor.copy_from(f, table=self.TABLE_NAME, columns=self.TABLE_COLUMNS, sep=',', null='<NULL>')
 
     def data_filename(self) -> pathlib.Path:
@@ -108,7 +110,7 @@ class SiteUserLoader(BaseFileLoader):
         :return: The transformed row.
         """
         return (
-            row['Id'], self.site_id, row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
+            row['Id'], self.site.pk, row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
             row.get('AboutMe', '<NULL>'), row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'],
             row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
         )
@@ -121,13 +123,13 @@ class BadgeLoader(BaseFileLoader):
     TABLE_NAME = 'badges'
     TABLE_COLUMNS = 'id', 'name', 'badge_class', 'badge_type'
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the badge loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
+        super().__init__(site, data_dir)
         self.processed_badges = set()
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
@@ -153,15 +155,16 @@ class UserBadgeLoader(BaseFileLoader):
     TABLE_NAME = 'user_badges'
     TABLE_COLUMNS = 'user_id', 'badge_id', 'date_awarded'
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the badge loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
-        self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
-        self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
+        super().__init__(site, data_dir)
+        with schema_context(self.site.schema_name):
+            self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
+            self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the user_badges table.
@@ -186,15 +189,18 @@ class PostLoader(BaseFileLoader):
         'closed_date', 'score', 'view_count', 'answer_count', 'comment_count', 'favorite_count', 'content_license'
     )
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the post loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
-        self.users = {str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
-        self.posts = {row['Id'] for row in xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
+        super().__init__(site, data_dir)
+        with schema_context(self.site.schema_name):
+            self.users = {
+                str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')
+            }
+            self.posts = {row['Id'] for row in site_services.xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the posts table.
@@ -246,13 +252,14 @@ class TagLoader(BaseFileLoader):
         """Update the flags (required and moderator only) from the stack exchange API.
         """
         logger.info("Updating tag flags")
-        for tag_flag in enums.TagFlag:
-            tag_names = self.get_tag_names(tag_flag)
-            for tag_name in tag_names:
-                tag = models.Tag.objects.filter(name=tag_name).first()
-                if tag is not None:
-                    setattr(tag, tag_flag.attribute_name, True)
-                    tag.save()
+        with schema_context(self.site.schema_name):
+            for tag_flag in enums.TagFlag:
+                tag_names = self.get_tag_names(tag_flag)
+                for tag_name in tag_names:
+                    tag = models.Tag.objects.filter(name=tag_name).first()
+                    if tag is not None:
+                        setattr(tag, tag_flag.attribute_name, True)
+                        tag.save()
 
     def get_tag_names(self, tag_flag: enums.TagFlag) -> Iterable[str]:
         """Returns the names of the tags that have the given flag.
@@ -263,11 +270,10 @@ class TagLoader(BaseFileLoader):
         page = 1
         tags = []
 
-        site = models.Site.objects.get(pk=self.site_id)
         while True:
             response = requests.get(
                 f"{self.STACKEXCHANGE_API_BASE_URL}/tags/{tag_flag.api_path}",
-                params={'page': page, 'pagesize': 100, 'site': site.name}, timeout=60
+                params={'page': page, 'pagesize': 100, 'site': self.site.name}, timeout=60
             )
             response.raise_for_status()
             response_data = response.json()
@@ -287,14 +293,15 @@ class PostTagLoader(BaseFileLoader):
     TABLE_NAME = 'post_tags'
     TABLE_COLUMNS = 'post_id', 'tag_id'
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the post loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
-        self.tags = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
+        super().__init__(site, data_dir)
+        with schema_context(self.site.schema_name):
+            self.tags = {t['name']: t['pk'] for t in models.Tag.objects.values('pk', 'name')}
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the post tags table.
@@ -317,15 +324,16 @@ class PostVoteLoader(BaseFileLoader):
     TABLE_NAME = 'post_votes'
     TABLE_COLUMNS = 'id', 'post_id', 'type', 'creation_date', 'user_id', 'bounty_amount'
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the post vote loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
-        self.posts = set(models.Post.objects.values_list('pk', flat=True))
-        self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+        super().__init__(site, data_dir)
+        with schema_context(self.site.schema_name):
+            self.posts = set(models.Post.objects.values_list('pk', flat=True))
+            self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
 
     def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the post votes table.
@@ -350,14 +358,15 @@ class PostCommentLoader(BaseFileLoader):
     TABLE_NAME = 'post_comments'
     TABLE_COLUMNS = 'id', 'post_id', 'score', 'text', 'creation_date', 'content_license', 'user_id', 'user_display_name'
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the post comment loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
-        self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+        super().__init__(site, data_dir)
+        with schema_context(self.site.schema_name):
+            self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
 
     def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the post comments table.
@@ -383,15 +392,16 @@ class PostHistoryLoader(BaseFileLoader):
         'content_license'
     )
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the post history loader.
 
-        :param site_id: The site identifier.
+        :param site: The site.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
-        self.posts = set(models.Post.objects.values_list('pk', flat=True))
-        self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+        super().__init__(site, data_dir)
+        with schema_context(self.site.schema_name):
+            self.posts = set(models.Post.objects.values_list('pk', flat=True))
+            self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
 
     def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the tags table.
@@ -417,14 +427,15 @@ class PostLinkLoader(BaseFileLoader):
     TABLE_NAME = 'post_links'
     TABLE_COLUMNS = 'id', 'post_id', 'related_post_id', 'type'
 
-    def __init__(self, site_id: int, data_dir: pathlib.Path) -> None:
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the post link loader.
 
-        :param site_id: The site identifier.
+        :param site: The site identifier.
         :param data_dir: The data directory
         """
-        super().__init__(site_id, data_dir)
-        self.posts = set(models.Post.objects.values_list('pk', flat=True))
+        super().__init__(site, data_dir)
+        with schema_context(self.site.schema_name):
+            self.posts = set(models.Post.objects.values_list('pk', flat=True))
 
     def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the post links table.
@@ -446,14 +457,13 @@ class SiteDataLoader:
         PostCommentLoader, PostHistoryLoader, PostLinkLoader
     )
 
-    def __init__(self, site: str):
+    def __init__(self, site_name: str):
         """Create the importer.
 
-        :param site: The site name.
+        :param site_name: The site name.
         """
-        site = models.Site.objects.get(name=site)
-        self.site_id = site.pk
-        downloader = dowloader.Downloader(filename=f"{site.url.replace('https://', '')}.7z")
+        self.site = site_models.Site.objects.get(name=site_name)
+        downloader = site_services.dowloader.Downloader(filename=f"{self.site.url.replace('https://', '')}.7z")
         self.site_data_file = downloader.get_file()
 
     def load(self):
@@ -467,12 +477,12 @@ class SiteDataLoader:
             logger.info("Data file extracted")
 
             for loader_class in self.LOADERS:
-                loader = loader_class(site_id=self.site_id, data_dir=pathlib.Path(temp_dir))
+                loader = loader_class(site=self.site, data_dir=pathlib.Path(temp_dir))
                 loader.perform()
 
         # Post load actions
         self.analyze()
-        siteinfo.set_site_info()
+        services.site_info.SiteInfo(self.site).calculate()
 
     @staticmethod
     def analyze():
