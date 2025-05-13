@@ -19,7 +19,7 @@ class XmlFileIterator:
     def __iter__(self) -> Generator[dict]:
         """Iterate over the XML file data.
 
-        :return: Yields the data for each row.
+        :return: Yields the data for each row as a dictionary of the element names to their values.
         """
         tree = eT.iterparse(self.xml_file, events=('start', ))
         for _, elem in tree:

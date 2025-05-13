@@ -38,5 +38,3 @@ class Site(TenantMixin):
 class Domain(DomainMixin):
     """The domain model.
     """
-    pass
-
