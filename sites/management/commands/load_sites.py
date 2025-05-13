@@ -24,8 +24,9 @@ class Command(BaseCommand):
         downloader = services.dowloader.Downloader(filename='Sites.xml')
         sites_file = downloader.get_file()
 
+        # Load site data
         logging.info("Loading sites")
-        for row in services.xmlparser.XmlFileIterator(xml_file=sites_file):
+        for row in services.xml_parser.get_data(xml_file=sites_file):
             site_name = get_site_name(row['Url'])
             models.Site.objects.update_or_create(schema_name=get_schema_name(site_name), defaults={
                 'name': site_name, 'description': row['Name'], 'long_description': row['LongName'],
@@ -36,7 +37,8 @@ class Command(BaseCommand):
                 'total_tags': row['TotalTags'], 'last_post_date': row['LastPost'] + '+00:00'
             })
 
-        for site in services.xmlparser.XmlFileIterator(xml_file=sites_file):
+        # Second pass - set parent for sites
+        for site in services.xml_parser.get_data(xml_file=sites_file):
             if 'ParentId' in site:
                 models.Site.objects.filter(pk=site['Id']).update(parent=site['ParentId'])
 

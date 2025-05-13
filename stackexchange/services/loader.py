@@ -65,7 +65,7 @@ class BaseFileLoader(abc.ABC):
 
         with self.data_filename().open('wt') as f:
             writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_NONE, escapechar='\\')
-            for row in site_services.xmlparser.XmlFileIterator(self.data_dir / self.INPUT_FILENAME):
+            for row in site_services.xml_parser.get_data(self.data_dir / self.INPUT_FILENAME):
                 transformed = self.transform(row)
                 if transformed:
                     if isinstance(transformed, tuple):
@@ -200,7 +200,7 @@ class PostLoader(BaseFileLoader):
             self.users = {
                 str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')
             }
-            self.posts = {row['Id'] for row in site_services.xmlparser.XmlFileIterator(self.data_dir / 'Posts.xml')}
+            self.posts = {row['Id'] for row in site_services.xml_parser.get_data(self.data_dir / 'Posts.xml')}
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the posts table.
