@@ -23,4 +23,6 @@ class InfoViewSet(BaseViewSet):
 
         :return: The site info.
         """
-        return [self.serializer_class(services.siteinfo.get_site_info()).data]
+        site_info = services.site_info.SiteInfo(self.request.tenant)
+
+        return [self.serializer_class(site_info.get()).data]
