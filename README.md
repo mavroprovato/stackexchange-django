@@ -20,9 +20,10 @@ You will also need to create a PostgreSQL database in order to store the data, a
 database. The user needs to have the rights to create a database, in order to run the application tests. You can set up
 the database by running the following commands:
 
+```shell
+sudo -u postgres psql
 ```
-$ sudo -u postgres psql
-
+```
 postgres=# CREATE USER stackexchange WITH ENCRYPTED PASSWORD 'stackexchange' CREATEDB;
 postgres=# CREATE DATABASE stackexchange OWNER stackexchange;
 ```
@@ -32,7 +33,7 @@ configuration.
 
 Then you need to create the database schema by running:
 
-```
+```shell
 uv run manage.py migrate
 ```
 
@@ -58,22 +59,40 @@ the root directory of the application and is named `.env.example`. The environme
 
 First, you must load the available stackexchange sites by running the command:
 
-```
+```shell
 $ uv run manage.py load_sites
 ```
 
 Then you can load data for a specific site to the database by running the `loaddata` Django command. For example, in
 order to load the data for the `superuser.com` site, run the following command:
 
-```
+```shell
 $ uv run manage.py load_data superuser
 ```
 
 ## Running the application
 
+The application uses a multitenant application architecture, using the
+[django-tenants](https://django-tenants.readthedocs.io) application. This application enables Django powered websites to
+have multiple tenants via PostgreSQL schemas. So, each stackexchange application data is stored in a separate PostgreSQL
+schema. Tenants are identified via their host name (for example, tenant.domain.com). This information is stored on a
+table on the public schema. Whenever a request is made, the host name is used to match a tenant in the database.
+
+For local development, you need to map one tenant to the `127.0.0.1` domain. In order to map the `superuser` site to
+that domain, run
+
+```shell
+uv run manage.py shell
+```
+```python
+from sites.models import Site, Domain
+site = Site.objects.get(name='superuser')
+Domain.objects.create(domain='127.0.0.1', tenant=site)
+```
+
 Now everything should be ready to launch the application by running:
 
-```
+```shell
 $ uv run manage.py runserver
 ```
 
@@ -81,8 +100,12 @@ The application should now be available at http://127.0.0.1:8000. The API docume
 [Swagger](https://swagger.io/), and you can access it by opening http://127.0.0.1:8000/api/doc. It documents all the
 endpoints that you can use in order to access the data.
 
-You can also access the Django admin interface at http://127.0.0.1:8000/admin. The credentials to access the interface
-are admin/password.
+You can also access the Django admin interface at http://127.0.0.1:8000/admin. You need to create a superuser to access
+the interface. You can do this by running
+
+```shell
+uv run manage.py createsuperuser
+```
 
 ### Development
 
