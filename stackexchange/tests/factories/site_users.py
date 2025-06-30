@@ -5,7 +5,6 @@ import datetime
 import factory
 
 from stackexchange import models
-from .sites import SiteFactory
 
 
 class SiteUserFactory(factory.django.DjangoModelFactory):
@@ -13,9 +12,7 @@ class SiteUserFactory(factory.django.DjangoModelFactory):
     """
     class Meta:
         model = models.SiteUser
-        django_get_or_create = ('user', 'site')
 
-    site = factory.SubFactory(SiteFactory)
     unique_id = factory.Sequence(lambda x: x)
     display_name = factory.Faker('name')
     website_url = factory.Faker('url')
