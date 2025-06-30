@@ -2,12 +2,12 @@
 """
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
 
 from stackexchange import enums
+from stackexchange.tests.base import BaseTestCase
 
 
-class PrivilegesTests(APITestCase):
+class PrivilegesTests(BaseTestCase):
     """Privileges view set tests
     """
     def test(self):
