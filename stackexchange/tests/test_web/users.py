@@ -15,7 +15,7 @@ class UserViewTests(TestCase):
     def setUpTestData(cls):
         """Set up the test data.
         """
-        factories.UserFactory.create_batch(size=100)
+        factories.SiteUserFactory.create_batch(size=100)
 
     def test(self):
         """Test the question view

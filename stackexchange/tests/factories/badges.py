@@ -5,7 +5,7 @@ import datetime
 import factory
 
 from stackexchange import enums, models
-from .users import SiteUserFactory
+from .site_users import SiteUserFactory
 
 
 class BadgeFactory(factory.django.DjangoModelFactory):

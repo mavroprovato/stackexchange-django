@@ -4,7 +4,7 @@ import factory
 
 from stackexchange import enums, models
 from .posts import QuestionFactory
-from .users import SiteUserFactory
+from .site_users import SiteUserFactory
 
 
 class PostVoteFactory(factory.django.DjangoModelFactory):

@@ -6,7 +6,7 @@ import factory
 
 from stackexchange import enums, models
 from .tags import TagFactory
-from .users import SiteUserFactory
+from .site_users import SiteUserFactory
 
 
 class PostFactory(factory.django.DjangoModelFactory):

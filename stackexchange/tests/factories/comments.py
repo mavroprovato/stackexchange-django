@@ -4,7 +4,7 @@ import factory
 
 from stackexchange import models
 from .posts import QuestionAnswerFactory
-from .users import SiteUserFactory
+from .site_users import SiteUserFactory
 
 
 class PostCommentFactory(factory.django.DjangoModelFactory):
