@@ -2,7 +2,7 @@
 """
 import factory
 
-from stackexchange import models
+from sites import models
 
 
 class SiteFactory(factory.django.DjangoModelFactory):

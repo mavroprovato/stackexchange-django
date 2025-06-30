@@ -8,17 +8,6 @@ from stackexchange import models
 from .sites import SiteFactory
 
 
-class UserFactory(factory.django.DjangoModelFactory):
-    """The users factory
-    """
-    class Meta:
-        model = models.User
-        django_get_or_create = ('username', )
-
-    username = factory.Faker('user_name')
-    email = factory.LazyAttribute(lambda obj: f'{obj.username}@example.com')
-
-
 class SiteUserFactory(factory.django.DjangoModelFactory):
     """The site user factory
     """
@@ -27,7 +16,7 @@ class SiteUserFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ('user', 'site')
 
     site = factory.SubFactory(SiteFactory)
-    user = factory.SubFactory(UserFactory)
+    unique_id = factory.Sequence(lambda x: x)
     display_name = factory.Faker('name')
     website_url = factory.Faker('url')
     location = factory.Faker('city')
