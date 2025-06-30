@@ -6,14 +6,12 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
-from sites import models as sites_models
 from stackexchange import enums, managers
 
 
 class SiteUser(models.Model):
     """The site user model.
     """
-    site = models.ForeignKey(sites_models.Site, on_delete=models.CASCADE, help_text="The site")
     unique_id = models.IntegerField(help_text="The site unique user ID across all sites", unique=True)
     display_name = models.CharField(max_length=255, help_text="The site user display name")
     website_url = models.URLField(null=True, blank=True, help_text="The user web site URL")
@@ -31,7 +29,6 @@ class SiteUser(models.Model):
 
     class Meta:
         db_table = 'site_users'
-        indexes = models.Index(fields=('site', 'unique_id')),
 
     def __str__(self) -> str:
         """Return the string representation of the site user.

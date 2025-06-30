@@ -99,8 +99,8 @@ class SiteUserLoader(BaseFileLoader):
     INPUT_FILENAME = 'Users.xml'
     TABLE_NAME = 'site_users'
     TABLE_COLUMNS = (
-        'unique_id', 'site_id', 'display_name', 'website_url', 'location', 'about', 'creation_date',
-        'last_modified_date', 'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+        'unique_id', 'display_name', 'website_url', 'location', 'about', 'creation_date', 'last_modified_date',
+        'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
     )
 
     def transform(self, row) -> tuple | list[tuple] | None:
@@ -110,7 +110,7 @@ class SiteUserLoader(BaseFileLoader):
         :return: The transformed row.
         """
         return (
-            row['Id'], self.site.pk, row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
+            row['Id'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
             row.get('AboutMe', '<NULL>'), row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'],
             row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
         )
