@@ -1,5 +1,6 @@
 """Tests for the answers list view.
 """
+import datetime
 import random
 
 import dateutil.parser
@@ -66,6 +67,42 @@ class AnswerListTests(base.BaseTestCase):
                 self.assert_response_schema(item)
             values = [item['score'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+
+    def test_range_by_activity(self):
+        """Test the answer list endpoint range by activity date.
+        """
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('api-answer-list'), data={
+            'sort': 'activity', 'min': min_value, 'max': max_value
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assertTrue(min_value.isoformat() <= item['last_activity_date'] <= max_value.isoformat())
+
+    def test_range_by_creation_date(self):
+        """Test the answer list endpoint range by creation date.
+        """
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('api-answer-list'), data={
+            'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assertTrue(min_value.isoformat() <= item['creation_date'] <= max_value.isoformat())
+
+    def test_range_by_votes(self):
+        """Test the answer list endpoint range by votes.
+        """
+        min_value = 3000
+        max_value = 6000
+        response = self.client.get(reverse('api-answer-list'), data={
+            'sort': 'votes', 'min': min_value, 'max': max_value
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assertTrue(min_value <= item['score'] <= max_value)
 
     def assert_response_schema(self, item: dict):
         """Assert that the response schema is correct.
