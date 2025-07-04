@@ -6,19 +6,18 @@ import dateutil.parser
 from django.urls import reverse
 from rest_framework import status
 
-from stackexchange.tests import factories
-from stackexchange.tests.base import BaseTestCase
-from stackexchange import models
+from stackexchange.tests import base, factories
+from stackexchange import enums, models
 
 
-class AnswerListTests(BaseTestCase):
+class AnswerListTests(base.BaseTestCase):
     """Answer view set list tests
     """
     @classmethod
     def setUpClass(cls):
         """Set up the test data.
         """
-        BaseTestCase.setUpClass()
+        base.BaseTestCase.setUpClass()
         site_users = factories.SiteUserFactory.create_batch(size=100)
         questions = []
         for site_user in site_users:
@@ -33,13 +32,31 @@ class AnswerListTests(BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         for item in response.json()['items']:
-            answer = models.Post.objects.get(id=item['answer_id'])
-            self.assertEqual(item['owner']['reputation'], answer.owner.reputation)
-            self.assertEqual(item['owner']['user_id'], answer.owner.id)
-            self.assertEqual(item['owner']['display_name'], answer.owner.display_name)
-            self.assertEqual(item['owner']['user_type'], answer.owner.user_type())
-            self.assertEqual(item['score'], answer.score)
-            self.assertEqual(dateutil.parser.parse(item['last_activity_date']), answer.last_activity_date)
-            self.assertEqual(dateutil.parser.parse(item['creation_date']), answer.creation_date)
-            self.assertEqual(item['question_id'], answer.question_id)
-            self.assertEqual(item['content_license'], answer.content_license)
+            self.assert_response_schema(item)
+
+    def test_sort_by_activity(self):
+        """Test the answer list endpoint sorted by activity date.
+        """
+        for order in enums.OrderingDirection:
+            response = self.client.get(reverse('api-answer-list'), data={'sort': 'activity', 'order': order.value})
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            for item in response.json()['items']:
+                self.assert_response_schema(item)
+            values = [item['last_activity_date'] for item in response.json()['items']]
+            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+
+    def assert_response_schema(self, item: dict):
+        """Assert that the response schema is correct.
+
+        :param item: The response item.
+        """
+        answer = models.Post.objects.get(id=item['answer_id'])
+        self.assertEqual(item['owner']['reputation'], answer.owner.reputation)
+        self.assertEqual(item['owner']['user_id'], answer.owner.id)
+        self.assertEqual(item['owner']['display_name'], answer.owner.display_name)
+        self.assertEqual(item['owner']['user_type'], answer.owner.user_type())
+        self.assertEqual(item['score'], answer.score)
+        self.assertEqual(dateutil.parser.parse(item['last_activity_date']), answer.last_activity_date)
+        self.assertEqual(dateutil.parser.parse(item['creation_date']), answer.creation_date)
+        self.assertEqual(item['question_id'], answer.question_id)
+        self.assertEqual(item['content_license'], answer.content_license)
