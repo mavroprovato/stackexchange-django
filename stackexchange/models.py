@@ -146,6 +146,13 @@ class Post(models.Model):
 
         return None
 
+    def is_accepted(self) -> bool:
+        """Return true if the post is an answer and it is accepted.
+
+        :return: true if the post is an answer and it is accepted.
+        """
+        return self.type == enums.PostType.ANSWER.value and self.accepted_answer_id is not None
+
 
 class Tag(models.Model):
     """The tag model
