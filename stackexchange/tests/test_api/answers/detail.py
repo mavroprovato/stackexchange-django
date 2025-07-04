@@ -7,16 +7,17 @@ from rest_framework import status
 
 from stackexchange import enums, models
 from stackexchange.tests import base, factories
+from .base import BaseAnswerTests
 
 
-class AnswerDetailTests(base.BaseTestCase):
+class AnswerDetailTests(BaseAnswerTests):
     """Answer view set detail tests
     """
     @classmethod
     def setUpClass(cls):
         """Set up the test data.
         """
-        base.BaseTestCase.setUpClass()
+        BaseAnswerTests.setUpClass()
         site_users = factories.SiteUserFactory.create_batch(size=10)
         questions = []
         for site_user in site_users:
@@ -31,6 +32,9 @@ class AnswerDetailTests(base.BaseTestCase):
         response = self.client.get(reverse('api-answer-detail', kwargs={'pk': answer.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+        for item in response.json()['items']:
+            self.assert_response_schema(item)
+
     def test_multiple(self):
         """Test the question detail endpoint for multiple ids.
         """
@@ -38,3 +42,6 @@ class AnswerDetailTests(base.BaseTestCase):
         response = self.client.get(
             reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        for item in response.json()['items']:
+            self.assert_response_schema(item)

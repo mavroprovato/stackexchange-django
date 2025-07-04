@@ -31,7 +31,6 @@ class AnswerListTests(BaseAnswerTests):
         """
         response = self.client.get(reverse('api-answer-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         for item in response.json()['items']:
             self.assert_response_schema(item)
 
