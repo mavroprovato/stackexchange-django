@@ -3,22 +3,22 @@
 import datetime
 import random
 
-import dateutil.parser
 from django.urls import reverse
 from rest_framework import status
 
-from stackexchange.tests import base, factories
-from stackexchange import enums, models
+from stackexchange import enums
+from stackexchange.tests import factories
+from .base import BaseAnswerTests
 
 
-class AnswerListTests(base.BaseTestCase):
+class AnswerListTests(BaseAnswerTests):
     """Answer view set list tests
     """
     @classmethod
     def setUpClass(cls):
         """Set up the test data.
         """
-        base.BaseTestCase.setUpClass()
+        BaseAnswerTests.setUpClass()
         site_users = factories.SiteUserFactory.create_batch(size=100)
         questions = []
         for site_user in site_users:
@@ -103,19 +103,3 @@ class AnswerListTests(base.BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.json()['items']:
             self.assertTrue(min_value <= item['score'] <= max_value)
-
-    def assert_response_schema(self, item: dict):
-        """Assert that the response schema is correct.
-
-        :param item: The response item.
-        """
-        answer = models.Post.objects.get(id=item['answer_id'])
-        self.assertEqual(item['owner']['reputation'], answer.owner.reputation)
-        self.assertEqual(item['owner']['user_id'], answer.owner.id)
-        self.assertEqual(item['owner']['display_name'], answer.owner.display_name)
-        self.assertEqual(item['owner']['user_type'], answer.owner.user_type())
-        self.assertEqual(item['score'], answer.score)
-        self.assertEqual(dateutil.parser.parse(item['last_activity_date']), answer.last_activity_date)
-        self.assertEqual(dateutil.parser.parse(item['creation_date']), answer.creation_date)
-        self.assertEqual(item['question_id'], answer.question_id)
-        self.assertEqual(item['content_license'], answer.content_license)
