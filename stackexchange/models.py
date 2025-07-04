@@ -37,6 +37,13 @@ class SiteUser(models.Model):
         """
         return str(self.display_name)
 
+    def user_type(self) -> str:
+        """Return the site user type.
+
+        :return: 'moderator' if the user has enough reputation to be a moderator, or 'registered'
+        """
+        return 'moderator' if self.reputation >= enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation else 'registered'
+
 
 class Badge(models.Model):
     """The badge model.

@@ -37,7 +37,7 @@ class AnswerListTests(BaseTestCase):
             self.assertEqual(item['owner']['reputation'], answer.owner.reputation)
             self.assertEqual(item['owner']['user_id'], answer.owner.id)
             self.assertEqual(item['owner']['display_name'], answer.owner.display_name)
-            # TODO: check user type
+            self.assertEqual(item['owner']['user_type'], answer.owner.user_type())
             self.assertEqual(item['score'], answer.score)
             self.assertEqual(dateutil.parser.parse(item['last_activity_date']), answer.last_activity_date)
             self.assertEqual(dateutil.parser.parse(item['creation_date']), answer.creation_date)

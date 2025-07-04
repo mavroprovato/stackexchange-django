@@ -12,24 +12,10 @@ class BaseSiteUserSerializer(serializers.ModelSerializer):
     """The base site user serializer.
     """
     user_id = fields.IntegerField(source="pk", help_text="The user identifier")
-    user_type = fields.SerializerMethodField(help_text="The user type")
 
     class Meta:
         model = models.SiteUser
         fields = ('reputation', 'user_id', 'display_name', 'user_type')
-
-    @staticmethod
-    def get_user_type(site_user: models.SiteUser) -> str:
-        """Return the site user type.
-
-        :param site_user: The user.
-        :return: The user type.
-        """
-        if not site_user.pk:
-            return 'does_not_exist'
-
-        return 'moderator' if site_user.reputation >= enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation \
-            else 'registered'
 
 
 class UserBadgeCountSerializer(BaseSerializer):
