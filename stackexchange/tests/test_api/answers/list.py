@@ -45,6 +45,28 @@ class AnswerListTests(base.BaseTestCase):
             values = [item['last_activity_date'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
+    def test_sort_by_creation_date(self):
+        """Test the answer list endpoint sorted by creation date.
+        """
+        for order in enums.OrderingDirection:
+            response = self.client.get(reverse('api-answer-list'), data={'sort': 'creation', 'order': order.value})
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            for item in response.json()['items']:
+                self.assert_response_schema(item)
+            values = [item['creation_date'] for item in response.json()['items']]
+            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+
+    def test_sort_by_votes(self):
+        """Test the answer list endpoint sorted by votes.
+        """
+        for order in enums.OrderingDirection:
+            response = self.client.get(reverse('api-answer-list'), data={'sort': 'votes', 'order': order.value})
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            for item in response.json()['items']:
+                self.assert_response_schema(item)
+            values = [item['score'] for item in response.json()['items']]
+            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+
     def assert_response_schema(self, item: dict):
         """Assert that the response schema is correct.
 
