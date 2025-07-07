@@ -25,6 +25,17 @@ class BaseTestCase(TenantTestCase):
         values = [item[attribute] for item in response.json()['items']]
         self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
+    def assert_items_in_range(self, response, attribute: str, min_value, max_value):
+        """Assert that the response items fall in the provided range.
+
+        :param response: The response.
+        :param attribute: The range attribute.
+        :param min_value: The minimum value.
+        :param max_value: The minimum value.
+        """
+        for item in response.json()['items']:
+            self.assertTrue(min_value <= item[attribute] <= max_value)
+
     def assert_answer_response(self, response):
         """Assert that the answer response schema is correct.
 

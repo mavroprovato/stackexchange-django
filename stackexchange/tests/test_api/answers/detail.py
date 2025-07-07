@@ -93,8 +93,7 @@ class AnswerDetailTests(base.BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_answer_response(response)
-        for item in response.json()['items']:
-            self.assertTrue(min_value.isoformat() <= item['last_activity_date'] <= max_value.isoformat())
+        self.assert_items_in_range(response, 'last_activity_date', min_value.isoformat(), max_value.isoformat())
 
     def test_range_by_creation_date(self):
         """Test the question detail endpoint range by user creation date.
@@ -108,8 +107,7 @@ class AnswerDetailTests(base.BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_answer_response(response)
-        for item in response.json()['items']:
-            self.assertTrue(min_value.isoformat() <= item['creation_date'] <= max_value.isoformat())
+        self.assert_items_in_range(response, 'creation_date', min_value.isoformat(), max_value.isoformat())
 
     def test_range_by_votes(self):
         """Test the question detail endpoint range by votes.
@@ -123,8 +121,7 @@ class AnswerDetailTests(base.BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_answer_response(response)
-        for item in response.json()['items']:
-            self.assertTrue(min_value <= item['score'] <= max_value)
+        self.assert_items_in_range(response, 'score', min_value, max_value)
 
     def test_date_range(self):
         """Test the question detail list endpoint date range.
@@ -139,5 +136,4 @@ class AnswerDetailTests(base.BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_answer_response(response)
-        for item in response.json()['items']:
-            self.assertTrue(from_value.isoformat() <= item['creation_date'] <= to_value.isoformat())
+        self.assert_items_in_range(response, 'creation_date', from_value.isoformat(), to_value.isoformat())
