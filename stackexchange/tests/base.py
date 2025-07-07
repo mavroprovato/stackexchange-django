@@ -52,3 +52,15 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(dateutil.parser.parse(item['creation_date']), answer.creation_date)
             self.assertEqual(item['question_id'], answer.question_id)
             self.assertEqual(item['content_license'], answer.content_license)
+
+    def assert_badge_with_award_count_response(self, response):
+        """Assert that the badge with award count response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            badge = models.Badge.objects.get(id=item['badge_id'])
+            self.assertEqual(item['badge_type'], enums.BadgeType(badge.badge_type).name.lower())
+            self.assertEqual(item['rank'], enums.BadgeClass(badge.badge_class).name.lower())
+            self.assertEqual(item['award_count'],  models.UserBadge.objects.filter(badge=badge).count())
+            self.assertEqual(item['name'], badge.name)
