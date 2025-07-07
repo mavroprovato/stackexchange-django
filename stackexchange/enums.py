@@ -1,19 +1,32 @@
 """Enumerations for the application
 """
 import enum
+from unittest import case
 
 
-class OrderingFieldType(enum.Enum):
+class BaseStringEnum(enum.Enum):
+    """The base enumeration class.
+    """
+    @property
+    def description(self) -> str:
+        """Return the description for the enum value.
+
+        :return: the description for the enum value.
+        """
+        return ' '.join(word.lower() for word in self.name.split('_')).capitalize()
+
+
+class OrderingFieldType(BaseStringEnum):
     """The ordering field type enumeration.
     """
     STRING = 'string'
     INTEGER = 'integer'
     DATE = 'date'
-    BADGE_CLASS = 'badge_class'
+    RANK = 'rank'
     BADGE_TYPE = 'badge_type'
 
 
-class OrderingDirection(enum.Enum):
+class OrderingDirection(BaseStringEnum):
     """The ordering direction enumeration.
     """
     DESC = 'desc'
@@ -32,19 +45,35 @@ class BaseEnum(enum.IntEnum):
         return ' '.join(word.lower() for word in self.name.split('_')).capitalize()
 
 
-class BadgeClass(BaseEnum):
-    """Enumeration for badge classes.
+class BadgeRank(BaseStringEnum):
+    """Enumeration for badge ranks.
     """
-    GOLD = 1
-    SILVER = 2
-    BRONZE = 3
+    GOLD = 'gold'
+    SILVER = 'silver'
+    BRONZE = 'bronze'
+
+    @staticmethod
+    def from_int(int_value: int) -> 'BadgeRank':
+        """Return the badge class for the integer value.
+
+        :param int_value: The integer value of the badge class.
+        """
+        match int_value:
+            case 1:
+                return BadgeRank.GOLD
+            case 2:
+                return BadgeRank.SILVER
+            case 3:
+                return BadgeRank.BRONZE
+            case _:
+                raise ValueError(f"Invalid badge class {int_value}")
 
 
-class BadgeType(BaseEnum):
+class BadgeType(BaseStringEnum):
     """Enumeration for badge types.
     """
-    NAMED = 1
-    TAG_BASED = 2
+    NAMED = 'named'
+    TAG_BASED = 'tag_based'
 
 
 class PostType(BaseEnum):

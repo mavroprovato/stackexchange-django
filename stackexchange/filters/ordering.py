@@ -198,9 +198,9 @@ class OrderingFilter(BaseFilterBackend):
                     return timezone.make_aware(datetime.datetime.strptime(value_str, '%Y-%m-%d'))
                 except ValueError as exception:
                     raise ValidationError(param_name) from exception
-            case enums.OrderingFieldType.BADGE_CLASS:
+            case enums.OrderingFieldType.RANK:
                 try:
-                    return enums.BadgeClass[value_str.upper()].value
+                    return enums.BadgeRank[value_str.upper()].value
                 except KeyError as exception:
                     raise ValidationError(param_name) from exception
             case enums.OrderingFieldType.BADGE_TYPE:

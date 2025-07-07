@@ -121,7 +121,7 @@ class BadgeLoader(BaseFileLoader):
     """
     INPUT_FILENAME = 'Badges.xml'
     TABLE_NAME = 'badges'
-    TABLE_COLUMNS = 'id', 'name', 'badge_class', 'badge_type'
+    TABLE_COLUMNS = 'id', 'name', 'rank', 'badge_type'
 
     def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
         """Initialize the badge loader.
@@ -143,7 +143,7 @@ class BadgeLoader(BaseFileLoader):
         self.processed_badges.add(row['Name'])
 
         return (
-            row['Id'], row['Name'], row['Class'],
+            row['Id'], row['Name'], enums.BadgeRank.from_int(int(row['Class'])).value,
             enums.BadgeType.TAG_BASED.value if row['TagBased'] == 'True' else enums.BadgeType.NAMED.value
         )
 

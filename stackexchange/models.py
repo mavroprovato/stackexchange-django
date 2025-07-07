@@ -49,10 +49,14 @@ class Badge(models.Model):
     """The badge model.
     """
     name = models.CharField(max_length=255, unique=True, help_text="The badge name")
-    badge_class = models.PositiveSmallIntegerField(
-        choices=((bc.value, bc.description) for bc in enums.BadgeClass), help_text="The badge class")
-    badge_type = models.PositiveSmallIntegerField(
-        choices=((bt.value, bt.description) for bt in enums.BadgeType), help_text="The badge type")
+    rank = models.CharField(
+        choices=((bc.value, bc.description) for bc in enums.BadgeRank),
+        max_length=max(len(bc.description) for bc in enums.BadgeRank),
+        help_text="The badge class")
+    badge_type = models.CharField(
+        choices=((bt.value, bt.description) for bt in enums.BadgeType),
+        max_length=max(len(bc.description) for bc in enums.BadgeType),
+        help_text="The badge type")
 
     objects = managers.BadgeQuerySet.as_manager()
 

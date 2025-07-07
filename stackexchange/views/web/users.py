@@ -58,13 +58,13 @@ class UserDetailView(BaseDetailView):
                 owner=OuterRef('pk'), type=enums.PostType.QUESTION
             ).values('owner').annotate(count=Count('pk')).values('count'), 0),
             gold_badge_count=Coalesce(models.UserBadge.objects.filter(
-                user=OuterRef('pk'), badge__badge_class=enums.BadgeClass.GOLD.value
+                user=OuterRef('pk'), badge__badge_class=enums.BadgeRank.GOLD.value
             ).values('user').annotate(count=Count('pk')).values('count'), 0),
             silver_badge_count=Coalesce(models.UserBadge.objects.filter(
-                user=OuterRef('pk'), badge__badge_class=enums.BadgeClass.SILVER.value
+                user=OuterRef('pk'), badge__badge_class=enums.BadgeRank.SILVER.value
             ).values('user').annotate(count=Count('pk')).values('count'), 0),
             bronze_badge_count=Coalesce(models.UserBadge.objects.filter(
-                user=OuterRef('pk'), badge__badge_class=enums.BadgeClass.BRONZE.value
+                user=OuterRef('pk'), badge__badge_class=enums.BadgeRank.BRONZE.value
             ).values('user').annotate(count=Count('pk')).values('count'), 0)
         )
 

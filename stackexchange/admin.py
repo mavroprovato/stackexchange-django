@@ -9,8 +9,8 @@ from stackexchange import models
 class BadgeAdmin(admin.ModelAdmin):
     """Admin for badges.
     """
-    list_display = ('name', 'badge_class', 'badge_type')
-    list_filter = ('badge_class', 'badge_type')
+    list_display = ('name', 'rank', 'badge_type')
+    list_filter = ('rank', 'badge_type')
     search_fields = ('name', )
     ordering = ('name', )
 

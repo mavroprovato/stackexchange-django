@@ -16,7 +16,7 @@ class BadgeFactory(factory.django.DjangoModelFactory):
         django_get_or_create = ('name', )
 
     name = factory.Faker('word')
-    badge_class = factory.Faker('random_element', elements=[bc.value for bc in enums.BadgeClass])
+    rank = factory.Faker('random_element', elements=[bc.value for bc in enums.BadgeRank])
     badge_type = factory.Faker('random_element', elements=[bt.value for bt in enums.BadgeType])
 
 

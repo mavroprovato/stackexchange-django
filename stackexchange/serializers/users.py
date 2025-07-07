@@ -27,7 +27,7 @@ class UserBadgeCountSerializer(BaseSerializer):
         :return: The fields for the serializer.
         """
         serializer_fields = super().get_fields()
-        for badge_class in enums.BadgeClass:
+        for badge_class in enums.BadgeRank:
             serializer_fields[badge_class.name.lower()] = fields.IntegerField(
                 source=f"{badge_class.name.lower()}_count", help_text=f"The {badge_class.name.lower()} badge count")
 
@@ -92,7 +92,7 @@ class UserBadgeDetailSerializer(BaseSerializer):
         :param user_badge: The user badge info.
         :return: The badge type.
         """
-        return str(enums.BadgeClass(user_badge['badge__badge_class']).name).lower()
+        return str(enums.BadgeRank(user_badge['badge__badge_class']).name).lower()
 
 
 class UserPrivilegeSerializer(BaseSerializer):

@@ -27,7 +27,7 @@ class SiteUserQuerySet(QuerySet):
                     count=Count('pk')
                 ).values('count')
             ), 0)
-            for badge_class in enums.BadgeClass
+            for badge_class in enums.BadgeRank
         })
 
 

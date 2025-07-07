@@ -60,7 +60,7 @@ class BaseTestCase(TenantTestCase):
         """
         for item in response.json()['items']:
             badge = models.Badge.objects.get(id=item['badge_id'])
-            self.assertEqual(item['badge_type'], enums.BadgeType(badge.badge_type).name.lower())
-            self.assertEqual(item['rank'], enums.BadgeClass(badge.badge_class).name.lower())
+            self.assertEqual(item['badge_type'], enums.BadgeType(badge.badge_type).value)
+            self.assertEqual(item['rank'], enums.BadgeRank(badge.rank).value)
             self.assertEqual(item['award_count'],  models.UserBadge.objects.filter(badge=badge).count())
             self.assertEqual(item['name'], badge.name)
