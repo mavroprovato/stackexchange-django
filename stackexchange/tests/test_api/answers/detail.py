@@ -1,5 +1,6 @@
 """Tests for the answers detail view.
 """
+import datetime
 import random
 
 from django.urls import reverse
@@ -42,6 +43,111 @@ class AnswerDetailTests(BaseAnswerTests):
         response = self.client.get(
             reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         for item in response.json()['items']:
             self.assert_response_schema(item)
+
+    def test_sort_by_activity(self):
+        """Test the question detail endpoint sorted by activity date.
+        """
+        for order in enums.OrderingDirection:
+            answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+            response = self.client.get(
+                reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+                data={'sort': 'activity', 'order': order.value}
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            for item in response.json()['items']:
+                self.assert_response_schema(item)
+            values = [item['last_activity_date'] for item in response.json()['items']]
+            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+
+    def test_sort_by_creation_date(self):
+        """Test the question detail endpoint sorted by creation date.
+        """
+        for order in enums.OrderingDirection:
+            answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+            response = self.client.get(
+                reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+                data={'sort': 'creation', 'order': order.value}
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            for item in response.json()['items']:
+                self.assert_response_schema(item)
+            values = [item['creation_date'] for item in response.json()['items']]
+            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+
+    def test_sort_by_votes(self):
+        """Test the question detail endpoint sorted by votes.
+        """
+        for order in enums.OrderingDirection:
+            answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+            response = self.client.get(
+                reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+                data={'sort': 'votes', 'order': order.value}
+            )
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            for item in response.json()['items']:
+                self.assert_response_schema(item)
+            values = [item['score'] for item in response.json()['items']]
+            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+
+    def test_range_by_activity(self):
+        """Test the question detail endpoint range by activity.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'activity', 'min': min_value, 'max': max_value}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assert_response_schema(item)
+            self.assertTrue(min_value.isoformat() <= item['last_activity_date'] <= max_value.isoformat())
+
+    def test_range_by_creation_date(self):
+        """Test the question detail endpoint range by user creation date.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assert_response_schema(item)
+            self.assertTrue(min_value.isoformat() <= item['creation_date'] <= max_value.isoformat())
+
+    def test_range_by_votes(self):
+        """Test the question detail endpoint range by votes.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        min_value = 3000
+        max_value = 6000
+        response = self.client.get(
+            reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
+            data={'sort': 'votes', 'min': min_value, 'max': max_value}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assert_response_schema(item)
+            self.assertTrue(min_value <= item['score'] <= max_value)
+
+    def test_date_range(self):
+        """Test the question detail list endpoint date range.
+        """
+        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        response = self.client.get(
+            reverse('api-answer-detail', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}), data={
+                'fromdate': from_value.isoformat(), 'todate': to_value.isoformat()
+            }
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assert_response_schema(item)
+            self.assertTrue(from_value.isoformat() <= item['creation_date'] <= to_value.isoformat())
