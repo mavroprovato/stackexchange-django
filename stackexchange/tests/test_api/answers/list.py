@@ -30,8 +30,7 @@ class AnswerListTests(base.BaseTestCase):
         """
         response = self.client.get(reverse('api-answer-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        for item in response.json()['items']:
-            self.assert_answer_response(item)
+        self.assert_answer_response(response)
 
     def test_sort_by_activity(self):
         """Test the answer list endpoint sorted by activity date.
@@ -39,8 +38,7 @@ class AnswerListTests(base.BaseTestCase):
         for order in enums.OrderingDirection:
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'activity', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            for item in response.json()['items']:
-                self.assert_answer_response(item)
+            self.assert_answer_response(response)
             values = [item['last_activity_date'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
@@ -50,8 +48,7 @@ class AnswerListTests(base.BaseTestCase):
         for order in enums.OrderingDirection:
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'creation', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            for item in response.json()['items']:
-                self.assert_answer_response(item)
+            self.assert_answer_response(response)
             values = [item['creation_date'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
@@ -61,8 +58,7 @@ class AnswerListTests(base.BaseTestCase):
         for order in enums.OrderingDirection:
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'votes', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            for item in response.json()['items']:
-                self.assert_answer_response(item)
+            self.assert_answer_response(response)
             values = [item['score'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
@@ -75,8 +71,8 @@ class AnswerListTests(base.BaseTestCase):
             'sort': 'activity', 'min': min_value, 'max': max_value
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_answer_response(response)
         for item in response.json()['items']:
-            self.assert_answer_response(item)
             self.assertTrue(min_value.isoformat() <= item['last_activity_date'] <= max_value.isoformat())
 
     def test_range_by_creation_date(self):
@@ -88,8 +84,8 @@ class AnswerListTests(base.BaseTestCase):
             'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_answer_response(response)
         for item in response.json()['items']:
-            self.assert_answer_response(item)
             self.assertTrue(min_value.isoformat() <= item['creation_date'] <= max_value.isoformat())
 
     def test_range_by_votes(self):
@@ -101,8 +97,8 @@ class AnswerListTests(base.BaseTestCase):
             'sort': 'votes', 'min': min_value, 'max': max_value
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_answer_response(response)
         for item in response.json()['items']:
-            self.assert_answer_response(item)
             self.assertTrue(min_value <= item['score'] <= max_value)
 
     def test_date_range(self):
@@ -114,6 +110,6 @@ class AnswerListTests(base.BaseTestCase):
             'fromdate': from_value.isoformat(), 'todate': from_value.isoformat()
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_answer_response(response)
         for item in response.json()['items']:
-            self.assert_answer_response(item)
             self.assertTrue(from_value.isoformat() <= item['creation_date'] <= to_value.isoformat())
