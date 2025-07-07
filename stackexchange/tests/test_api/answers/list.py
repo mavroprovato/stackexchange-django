@@ -7,18 +7,17 @@ from django.urls import reverse
 from rest_framework import status
 
 from stackexchange import enums
-from stackexchange.tests import factories
-from .base import BaseAnswerTests
+from stackexchange.tests import base, factories
 
 
-class AnswerListTests(BaseAnswerTests):
+class AnswerListTests(base.BaseTestCase):
     """Answer view set list tests
     """
     @classmethod
     def setUpClass(cls):
         """Set up the test data.
         """
-        BaseAnswerTests.setUpClass()
+        base.BaseTestCase.setUpClass()
         site_users = factories.SiteUserFactory.create_batch(size=100)
         questions = []
         for site_user in site_users:
@@ -32,7 +31,7 @@ class AnswerListTests(BaseAnswerTests):
         response = self.client.get(reverse('api-answer-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.json()['items']:
-            self.assert_response_schema(item)
+            self.assert_answer_response(item)
 
     def test_sort_by_activity(self):
         """Test the answer list endpoint sorted by activity date.
@@ -41,7 +40,7 @@ class AnswerListTests(BaseAnswerTests):
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'activity', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             for item in response.json()['items']:
-                self.assert_response_schema(item)
+                self.assert_answer_response(item)
             values = [item['last_activity_date'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
@@ -52,7 +51,7 @@ class AnswerListTests(BaseAnswerTests):
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'creation', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             for item in response.json()['items']:
-                self.assert_response_schema(item)
+                self.assert_answer_response(item)
             values = [item['creation_date'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
@@ -63,7 +62,7 @@ class AnswerListTests(BaseAnswerTests):
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'votes', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             for item in response.json()['items']:
-                self.assert_response_schema(item)
+                self.assert_answer_response(item)
             values = [item['score'] for item in response.json()['items']]
             self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
@@ -77,7 +76,7 @@ class AnswerListTests(BaseAnswerTests):
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.json()['items']:
-            self.assert_response_schema(item)
+            self.assert_answer_response(item)
             self.assertTrue(min_value.isoformat() <= item['last_activity_date'] <= max_value.isoformat())
 
     def test_range_by_creation_date(self):
@@ -90,7 +89,7 @@ class AnswerListTests(BaseAnswerTests):
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.json()['items']:
-            self.assert_response_schema(item)
+            self.assert_answer_response(item)
             self.assertTrue(min_value.isoformat() <= item['creation_date'] <= max_value.isoformat())
 
     def test_range_by_votes(self):
@@ -103,7 +102,7 @@ class AnswerListTests(BaseAnswerTests):
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.json()['items']:
-            self.assert_response_schema(item)
+            self.assert_answer_response(item)
             self.assertTrue(min_value <= item['score'] <= max_value)
 
     def test_date_range(self):
@@ -116,5 +115,5 @@ class AnswerListTests(BaseAnswerTests):
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.json()['items']:
-            self.assert_response_schema(item)
+            self.assert_answer_response(item)
             self.assertTrue(from_value.isoformat() <= item['creation_date'] <= to_value.isoformat())
