@@ -102,3 +102,15 @@ class AnswerListTests(BaseAnswerTests):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         for item in response.json()['items']:
             self.assertTrue(min_value <= item['score'] <= max_value)
+
+    def test_date_range(self):
+        """Test the answer list endpoint date range.
+        """
+        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
+        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        response = self.client.get(reverse('api-answer-list'), data={
+            'fromdate': from_value.isoformat(), 'todate': from_value.isoformat()
+        })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for item in response.json()['items']:
+            self.assertTrue(from_value.isoformat() <= item['creation_date'] <= to_value.isoformat())
