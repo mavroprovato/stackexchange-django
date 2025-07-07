@@ -3,9 +3,8 @@
 import dateutil.parser
 from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
-from rest_framework.response import Response
 
-from stackexchange import models
+from stackexchange import enums, models
 
 
 class BaseTestCase(TenantTestCase):
@@ -15,6 +14,16 @@ class BaseTestCase(TenantTestCase):
         """Set up the multitenant test client.
         """
         self.client = TenantClient(self.tenant)
+
+    def assert_items_sorted(self, response, attribute: str, order: enums.OrderingDirection):
+        """Assert that the response items are sorted by attribute.
+
+        :param response: The response.
+        :param attribute: The sorting attribute.
+        :param order: The sorting order.
+        """
+        values = [item[attribute] for item in response.json()['items']]
+        self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
     def assert_answer_response(self, response):
         """Assert that the answer response schema is correct.

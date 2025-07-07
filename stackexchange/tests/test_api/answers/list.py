@@ -39,8 +39,7 @@ class AnswerListTests(base.BaseTestCase):
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'activity', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assert_answer_response(response)
-            values = [item['last_activity_date'] for item in response.json()['items']]
-            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+            self.assert_items_sorted(response, 'last_activity_date', order)
 
     def test_sort_by_creation_date(self):
         """Test the answer list endpoint sorted by creation date.
@@ -49,8 +48,7 @@ class AnswerListTests(base.BaseTestCase):
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'creation', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assert_answer_response(response)
-            values = [item['creation_date'] for item in response.json()['items']]
-            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+            self.assert_items_sorted(response, 'creation_date', order)
 
     def test_sort_by_votes(self):
         """Test the answer list endpoint sorted by votes.
@@ -59,8 +57,7 @@ class AnswerListTests(base.BaseTestCase):
             response = self.client.get(reverse('api-answer-list'), data={'sort': 'votes', 'order': order.value})
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assert_answer_response(response)
-            values = [item['score'] for item in response.json()['items']]
-            self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
+            self.assert_items_sorted(response, 'score', order)
 
     def test_range_by_activity(self):
         """Test the answer list endpoint range by activity date.
