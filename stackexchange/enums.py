@@ -1,6 +1,9 @@
 """Enumerations for the application
 """
+import datetime
 import enum
+
+from django.utils import timezone
 
 
 class DescriptionMixin:
@@ -76,6 +79,26 @@ class OrderingFieldType(DescriptionMixin, enum.Enum):
     DATE = 'date'
     RANK = 'rank'
     BADGE_TYPE = 'badge_type'
+
+    def transform(self, value: str):
+        """Transform a string value to the proper type, based on the filed type.
+
+        :param value: The string value.
+        :return: The value.
+        """
+        match self:
+            case OrderingFieldType.STRING:
+                return value
+            case OrderingFieldType.INTEGER:
+                return int(value)
+            case OrderingFieldType.DATE:
+                return timezone.make_aware(datetime.datetime.strptime(value, '%Y-%m-%d'))
+            case OrderingFieldType.RANK:
+                return BadgeRank(value)
+            case OrderingFieldType.BADGE_TYPE:
+                return BadgeType(value)
+            case _:
+                return NotImplemented
 
 
 class OrderingDirection(DescriptionMixin, enum.Enum):
