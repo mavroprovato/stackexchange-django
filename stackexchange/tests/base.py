@@ -18,32 +18,32 @@ class BaseTestCase(TenantTestCase):
         """
         self.client = TenantClient(self.tenant)
 
-    def assert_items_sorted(self, response, attribute: str, order: enums.OrderingDirection):
-        """Assert that the response items are sorted by attribute.
+    def assert_items_sorted(
+        self, response, attribute: str, order: enums.OrderingDirection, field_type: enums.OrderingFieldType
+    ):
+        """Assert that the response items are sorted by a field.
 
         :param response: The response.
         :param attribute: The sorting attribute.
         :param order: The sorting order.
+        :param field_type: The field type.
         """
-        values = [item[attribute] for item in response.json()['items']]
+        values = [field_type.transform(item[attribute]) for item in response.json()['items']]
         self.assertListEqual(values, sorted(values, reverse=order == enums.OrderingDirection.DESC))
 
-    def assert_items_in_range(self, response, attribute: str, min_value=None, max_value=None, attribute_type=None):
+    def assert_items_in_range(
+        self, response, attribute: str, field_type: enums.OrderingFieldType, min_value=None, max_value=None
+    ):
         """Assert that the response items fall in the provided range.
 
         :param response: The response.
         :param attribute: The range attribute.
         :param min_value: The minimum value.
         :param max_value: The minimum value.
-        :param attribute_type: The attribute type.
+        :param field_type: The field type.
         """
         for item in response.json()['items']:
-            if attribute_type == datetime.date:
-                value = dateutil.parser.parse(item[attribute])
-            elif attribute_type is not None and issubclass(attribute_type, enum.Enum):
-                value = attribute_type(item[attribute])
-            else:
-                value = item[attribute]
+            value = field_type.transform(item[attribute])
 
             if min_value is not None and max_value is not None:
                 self.assertTrue(min_value < value < max_value)

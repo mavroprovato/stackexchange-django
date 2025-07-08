@@ -1,9 +1,8 @@
 """Enumerations for the application
 """
-import datetime
 import enum
 
-from django.utils import timezone
+import dateutil.parser
 
 
 class DescriptionMixin:
@@ -92,7 +91,7 @@ class OrderingFieldType(DescriptionMixin, enum.Enum):
             case OrderingFieldType.INTEGER:
                 return int(value)
             case OrderingFieldType.DATE:
-                return timezone.make_aware(datetime.datetime.strptime(value, '%Y-%m-%d'))
+                return dateutil.parser.parse(value).date()
             case OrderingFieldType.RANK:
                 return BadgeRank(value)
             case OrderingFieldType.BADGE_TYPE:
