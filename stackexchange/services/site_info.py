@@ -17,6 +17,10 @@ class SiteInfo:
     """Class managing the site information
     """
     def __init__(self, site: site_models.Site):
+        """Create a SiteInfo instance.
+
+        :param site: The site.
+        """
         self.site = site
 
     def get(self) -> dict:

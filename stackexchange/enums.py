@@ -1,22 +1,74 @@
 """Enumerations for the application
 """
 import enum
-from unittest import case
 
 
-class BaseStringEnum(enum.Enum):
-    """The base enumeration class.
+class DescriptionMixin:
+    """A mixin to add a description field to an enum instance.
     """
     @property
     def description(self) -> str:
-        """Return the description for the enum value.
+        return ' '.join(word.lower() for word in getattr(self, 'name').split('_')).capitalize()
 
-        :return: the description for the enum value.
+
+class OrderingMixin:
+    """A mixin to enable ordering of enum instances. Enums that use this mixin should implement an order property and
+    provide an integer to use for sorting.
+    """
+    @property
+    def order(self) -> int:
+        """Return an integer value used to order the instances of this enum.
+
+        :return: An integer value used to order the instances of this enum.
         """
-        return ' '.join(word.lower() for word in self.name.split('_')).capitalize()
+        raise NotImplementedError("Ordering not implemented")
+
+    def __ge__(self, other) -> bool:
+        """Returns true if this enum instance is greater than or equal to another enum instance of the same class.
+
+        :param other: The enum instance to compare.
+        :return: True if this enum instance is greater than or equal to another enum instance of the same class.
+        """
+        if self.__class__ is other.__class__:
+            return self.order >= other.order
+
+        return NotImplemented
+
+    def __gt__(self, other) -> bool:
+        """Returns true if this enum instance is greater than to another enum instance of the same class.
+
+        :param other: The enum instance to compare.
+        :return: True if this enum instance is greater than to another enum instance of the same class.
+        """
+        if self.__class__ is other.__class__:
+            return self.order > other.order
+
+        return NotImplemented
+
+    def __le__(self, other) -> bool:
+        """Returns true if this enum instance is less than or equal to another enum instance of the same class.
+
+        :param other: The enum instance to compare.
+        :return: True if this enum instance is less than or equal to another enum instance of the same class.
+        """
+        if self.__class__ is other.__class__:
+            return self.order <= other.order
+
+        return NotImplemented
+
+    def __lt__(self, other):
+        """Returns true if this enum instance is less than to another enum instance of the same class.
+
+        :param other: The enum instance to compare.
+        :return: True if this enum instance is less than to another enum instance of the same class.
+        """
+        if self.__class__ is other.__class__:
+            return self.order < other.order
+
+        return NotImplemented
 
 
-class OrderingFieldType(BaseStringEnum):
+class OrderingFieldType(DescriptionMixin, enum.Enum):
     """The ordering field type enumeration.
     """
     STRING = 'string'
@@ -26,26 +78,14 @@ class OrderingFieldType(BaseStringEnum):
     BADGE_TYPE = 'badge_type'
 
 
-class OrderingDirection(BaseStringEnum):
+class OrderingDirection(DescriptionMixin, enum.Enum):
     """The ordering direction enumeration.
     """
     DESC = 'desc'
     ASC = 'asc'
 
 
-class BaseEnum(enum.IntEnum):
-    """The base enumeration. Enumerations have and int value and
-    """
-    @property
-    def description(self) -> str:
-        """Return the description for the enum value.
-
-        :return: the description for the enum value.
-        """
-        return ' '.join(word.lower() for word in self.name.split('_')).capitalize()
-
-
-class BadgeRank(BaseStringEnum):
+class BadgeRank(DescriptionMixin, OrderingMixin, enum.StrEnum):
     """Enumeration for badge ranks.
     """
     GOLD = 'gold'
@@ -53,30 +93,76 @@ class BadgeRank(BaseStringEnum):
     BRONZE = 'bronze'
 
     @staticmethod
-    def from_int(int_value: int) -> 'BadgeRank':
-        """Return the badge class for the integer value.
+    def from_export_value(export_value) -> 'BadgeRank':
+        """Return the badge rank for the export value.
 
-        :param int_value: The integer value of the badge class.
+        :param export_value: The export value of the badge rank.
+        :return: The badge rank.
         """
-        match int_value:
-            case 1:
+        match export_value:
+            case '1':
                 return BadgeRank.GOLD
-            case 2:
+            case '2':
                 return BadgeRank.SILVER
-            case 3:
+            case '3':
                 return BadgeRank.BRONZE
             case _:
-                raise ValueError(f"Invalid badge class {int_value}")
+                raise ValueError(f"Invalid export value {export_value}")
+
+    @property
+    def order(self) -> int:
+        """Return an integer value used to order the badge rank.
+
+        :return: An integer value used to order the badge rank.
+        """
+        match self:
+            case BadgeRank.BRONZE:
+                return 3
+            case BadgeRank.SILVER:
+                return 2
+            case BadgeRank.GOLD:
+                return 1
+            case _:
+                return NotImplemented
 
 
-class BadgeType(BaseStringEnum):
+class BadgeType(DescriptionMixin, OrderingMixin, enum.StrEnum):
     """Enumeration for badge types.
     """
     NAMED = 'named'
     TAG_BASED = 'tag_based'
 
+    @staticmethod
+    def from_export_value(export_value) -> 'BadgeType':
+        """Return the badge rank for the export value.
 
-class PostType(BaseEnum):
+        :param export_value: The export value of the badge rank.
+        :return: The badge rank.
+        """
+        match export_value:
+            case 'True':
+                return BadgeType.TAG_BASED
+            case 'False':
+                return BadgeType.NAMED
+            case _:
+                raise ValueError(f"Invalid export value {export_value}")
+
+    @property
+    def order(self) -> int:
+        """Return an integer value used to order the badge type.
+
+        :return: An integer value used to order the badge type.
+        """
+        match self:
+            case BadgeType.TAG_BASED:
+                return 2
+            case BadgeType.NAMED:
+                return 1
+            case _:
+                return NotImplemented
+
+
+class PostType(DescriptionMixin, enum.IntEnum):
     """Enumeration for the post type.
     """
     QUESTION = 1
@@ -115,7 +201,7 @@ class ContentLicense(enum.Enum):
     CC_BY_SA_4_0 = 'Attribution-ShareAlike 4.0 International'
 
 
-class PostVoteType(BaseEnum):
+class PostVoteType(DescriptionMixin, enum.IntEnum):
     """Enumeration for the post vote type.
     """
     ACCEPTED_BY_ORIGINATOR = 1
@@ -133,14 +219,14 @@ class PostVoteType(BaseEnum):
     INFORM_MODERATOR = 13
 
 
-class PostLinkType(BaseEnum):
+class PostLinkType(DescriptionMixin, enum.IntEnum):
     """Enumeration for the post link type.
     """
     LINKED = 1
     DUPLICATE = 3
 
 
-class PostHistoryType(BaseEnum):
+class PostHistoryType(DescriptionMixin, enum.IntEnum):
     """Enumeration for the post history type.
     """
     INITIAL_TITLE = 1
