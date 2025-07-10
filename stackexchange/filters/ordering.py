@@ -94,7 +94,7 @@ class OrderingRangeFilter(BaseFilterBackend):
         stable_ordering_fields = getattr(view, 'stable_ordering', None)
 
         if stable_ordering_fields is None:
-            return tuple('pk',)
+            return ('pk', )
 
         return stable_ordering_fields
 
