@@ -4,7 +4,7 @@ from collections.abc import Sequence
 import dataclasses
 import functools
 
-from django.db.models import QuerySet
+from django.db.models import F, QuerySet, When, Case, Expression
 from django.views import View
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
@@ -27,6 +27,18 @@ class OrderingField:
         """
         if self.field is None:
             self.field = self.name
+
+    def get_expression(self) -> F | Expression:
+        """Return the expression used in order to sort and filter the query.
+
+        :return: The expression used in order to sort and filter the query.
+        """
+        if self.type == enums.OrderingFieldType.RANK:
+            return Case(*[When(rank=rank, then=rank.order) for rank in enums.BadgeRank])
+        elif self.type == enums.OrderingFieldType.BADGE_TYPE:
+            return Case(*[When(badge_type=badge_type, then=badge_type.order) for badge_type in enums.BadgeType])
+        else:
+            return F(self.field)
 
 
 class OrderingRangeFilter(BaseFilterBackend):
@@ -145,10 +157,14 @@ class OrderingRangeFilter(BaseFilterBackend):
         :param view: The view.
         :return: The ordered queryset.
         """
-        order_by = list(self.get_stable_ordering(view))
+        order_by = [F(field) for field in self.get_stable_ordering(view)]
         ordering = self.get_ordering_from_request(request, view)
         if ordering:
-            order_by.insert(0, f"{'-' if ordering[1] == enums.OrderingDirection.DESC else ''}{ordering[0].field}")
+            ordering_field, ordering_direction = ordering
+            order_by_field = ordering_field.get_expression()
+            if ordering_direction == enums.OrderingDirection.DESC:
+                order_by_field = order_by_field.desc()
+            order_by.insert(0, order_by_field)
 
         return queryset.order_by(*order_by)
 
