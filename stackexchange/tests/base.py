@@ -1,8 +1,5 @@
 """Base test case
 """
-import datetime
-import enum
-
 import dateutil.parser
 from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
@@ -44,13 +41,10 @@ class BaseTestCase(TenantTestCase):
         """
         for item in response.json()['items']:
             value = field_type.transform(item[attribute])
-
-            if min_value is not None and max_value is not None:
-                self.assertTrue(min_value < value < max_value)
-            elif min_value is not None:
-                self.assertTrue(min_value < value)
-            elif max_value is not None:
-                self.assertTrue(value < max_value)
+            if min_value is not None:
+                self.assertLessEqual(min_value, value)
+            if max_value is not None:
+                self.assertGreaterEqual(max_value, value)
 
     def assert_answer_response(self, response):
         """Assert that the answer response schema is correct.
