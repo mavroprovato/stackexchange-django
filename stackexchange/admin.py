@@ -28,8 +28,8 @@ class SiteUserAdmin(admin.ModelAdmin):
     """Admin for site users.
     """
     list_display = 'display_name', 'creation_date', 'reputation', 'views', 'up_votes', 'down_votes'
-    search_fields = 'display_name',
-    ordering = 'display_name',
+    search_fields = ('display_name', )
+    ordering = ('display_name', )
     inlines = (SiteUserBadgeInline, )
 
 
