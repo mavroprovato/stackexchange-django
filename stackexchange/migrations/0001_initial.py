@@ -20,8 +20,20 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(help_text='The badge name', max_length=255, unique=True)),
-                ('rank', models.CharField(choices=[('gold', 'Gold'), ('silver', 'Silver'), ('bronze', 'Bronze')], help_text='The badge class', max_length=6)),
-                ('badge_type', models.CharField(choices=[('named', 'Named'), ('tag_based', 'Tag based')], help_text='The badge type', max_length=9)),
+                (
+                    'rank',
+                    models.CharField(
+                        choices=[('gold', 'Gold'), ('silver', 'Silver'), ('bronze', 'Bronze')],
+                        help_text='The badge rank', max_length=6
+                    )
+                ),
+                (
+                    'badge_type',
+                    models.CharField(
+                        choices=[('named', 'Named'), ('tag_based', 'Tag based')], help_text='The badge type',
+                        max_length=9
+                    )
+                ),
             ],
             options={
                 'db_table': 'badges',

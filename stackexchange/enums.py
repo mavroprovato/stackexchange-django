@@ -10,6 +10,10 @@ class DescriptionMixin:
     """
     @property
     def description(self) -> str:
+        """Return a description for the enum value.
+
+        :return: A description for the enum value.
+        """
         return ' '.join(word.lower() for word in getattr(self, 'name').split('_')).capitalize()
 
 

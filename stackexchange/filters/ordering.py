@@ -36,10 +36,10 @@ class OrderingField:
         """
         if self.type == enums.OrderingFieldType.RANK:
             return Case(*[When(rank=rank, then=rank.order) for rank in enums.BadgeRank])
-        elif self.type == enums.OrderingFieldType.BADGE_TYPE:
+        if self.type == enums.OrderingFieldType.BADGE_TYPE:
             return Case(*[When(badge_type=badge_type, then=badge_type.order) for badge_type in enums.BadgeType])
-        else:
-            return F(self.field)
+
+        return F(self.field)
 
 
 class OrderingRangeFilter(BaseFilterBackend):
@@ -94,7 +94,7 @@ class OrderingRangeFilter(BaseFilterBackend):
         stable_ordering_fields = getattr(view, 'stable_ordering', None)
 
         if stable_ordering_fields is None:
-            return 'pk',
+            return tuple('pk',)
 
         return stable_ordering_fields
 

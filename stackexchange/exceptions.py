@@ -38,4 +38,6 @@ class ValidationError(DRFValidationError):
 
         :param detail: The error detail.
         """
+        super().__init__(detail)
+
         self.detail = detail

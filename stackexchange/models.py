@@ -52,7 +52,7 @@ class Badge(models.Model):
     rank = models.CharField(
         choices=((bc.value, bc.description) for bc in enums.BadgeRank),
         max_length=max(len(bc.description) for bc in enums.BadgeRank),
-        help_text="The badge class")
+        help_text="The badge rank")
     badge_type = models.CharField(
         choices=((bt.value, bt.description) for bt in enums.BadgeType),
         max_length=max(len(bc.description) for bc in enums.BadgeType),
