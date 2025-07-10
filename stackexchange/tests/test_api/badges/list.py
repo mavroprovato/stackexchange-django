@@ -89,6 +89,7 @@ class BadgeListTests(base.BaseTestCase):
         response = self.client.get(reverse('api-badge-list'), data={
             'sort': 'type', 'min': min_value.name.lower()
         })
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_items_in_range(
             response, 'badge_type', min_value=min_value, field_type=enums.OrderingFieldType.BADGE_TYPE
         )
