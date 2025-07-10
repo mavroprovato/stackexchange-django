@@ -5,6 +5,7 @@ import dataclasses
 import functools
 
 from django.db.models import F, QuerySet, When, Case, Expression
+from django.db.models.lookups import GreaterThanOrEqual, LessThanOrEqual
 from django.views import View
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
@@ -178,12 +179,13 @@ class OrderingRangeFilter(BaseFilterBackend):
         """
         ordering = self.get_ordering_from_request(request, view)
         if ordering:
-            min_value = self.get_range_value(request, self.min_param, ordering[0])
+            ordering_field, _ = ordering
+            min_value = self.get_range_value(request, self.min_param, ordering_field)
             if min_value:
-                queryset = queryset.filter(**{f'{ordering[0].field}__gte': min_value})
-            max_value = self.get_range_value(request, self.max_param, ordering[0])
+                queryset = queryset.filter(GreaterThanOrEqual(ordering_field.get_expression(), min_value))
+            max_value = self.get_range_value(request, self.max_param, ordering_field)
             if max_value:
-                queryset = queryset.filter(**{f'{ordering[0].field}__lte': max_value})
+                queryset = queryset.filter(LessThanOrEqual(ordering_field.get_expression(), min_value))
 
         return queryset
 
@@ -199,7 +201,10 @@ class OrderingRangeFilter(BaseFilterBackend):
         value = request.query_params.get(param_name, '').strip()
         if value:
             try:
-                return ordering_field.type.transform(value)
+                transformed_value = ordering_field.type.transform(value)
+                if ordering_field.type in (enums.OrderingFieldType.RANK, enums.OrderingFieldType.BADGE_TYPE):
+                    transformed_value = transformed_value.order
+                return transformed_value
             except (ValueError, KeyError) as exception:
                 raise ValidationError(param_name) from exception
 
