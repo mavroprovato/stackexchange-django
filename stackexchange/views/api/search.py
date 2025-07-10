@@ -23,7 +23,7 @@ class SearchViewSet(BaseViewSet):
     """The search view set
     """
     filter_backends = (
-        filters.OrderingFilter, filters.DateRangeFilter, filters.TaggedFilter, filters.NotTaggedFilter,
+        filters.OrderingRangeFilter, filters.DateRangeFilter, filters.TaggedFilter, filters.NotTaggedFilter,
         filters.InTitleFilter
     )
 

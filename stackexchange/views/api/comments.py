@@ -23,7 +23,7 @@ class CommentViewSet(BaseViewSet):
     """
     queryset = models.PostComment.objects.select_related('post', 'user')
     serializer_class = serializers.PostCommentSerializer
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
+    filter_backends = (filters.OrderingRangeFilter, filters.DateRangeFilter)
     ordering_fields = (
         filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
         filters.OrderingField('votes', 'score', type=enums.OrderingFieldType.INTEGER)

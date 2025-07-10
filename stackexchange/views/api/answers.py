@@ -54,7 +54,7 @@ from .base import BaseViewSet
 class AnswerViewSet(BaseViewSet):
     """The answers view set
     """
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
+    filter_backends = (filters.OrderingRangeFilter, filters.DateRangeFilter)
 
     def get_queryset(self) -> QuerySet | None:
         """Return the queryset for the action.

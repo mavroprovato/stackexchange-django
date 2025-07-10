@@ -151,7 +151,7 @@ from .base import BaseViewSet
 class UserViewSet(BaseViewSet):
     """The user view set
     """
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter, filters.InNameFilter)
+    filter_backends = (filters.OrderingRangeFilter, filters.DateRangeFilter, filters.InNameFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.

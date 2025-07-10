@@ -51,7 +51,7 @@ from .base import BaseViewSet
 class TagViewSet(BaseViewSet):
     """The tag view set
     """
-    filter_backends = (filters.OrderingFilter, filters.InNameFilter)
+    filter_backends = (filters.OrderingRangeFilter, filters.InNameFilter)
     detail_field = 'name'
     detail_field_integer = False
 

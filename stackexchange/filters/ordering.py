@@ -2,11 +2,9 @@
 """
 from collections.abc import Sequence
 import dataclasses
-import datetime
 import functools
 
 from django.db.models import QuerySet
-from django.utils import timezone
 from django.views import View
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.request import Request
@@ -31,8 +29,8 @@ class OrderingField:
             self.field = self.name
 
 
-class OrderingFilter(BaseFilterBackend):
-    """The ordering filter.
+class OrderingRangeFilter(BaseFilterBackend):
+    """The ordering and range filter.
     """
     ordering_name_param = 'sort'
     ordering_sort_param = 'order'
@@ -63,7 +61,7 @@ class OrderingFilter(BaseFilterBackend):
         ordering_fields = getattr(view, 'ordering_fields', [])
 
         if ordering_fields is None:
-            return []
+            return tuple()
 
         for ordering_field in ordering_fields:
             if not isinstance(ordering_field, OrderingField):
@@ -74,17 +72,18 @@ class OrderingFilter(BaseFilterBackend):
     @staticmethod
     @functools.lru_cache(maxsize=None)
     def get_stable_ordering(view: View) -> Sequence[str]:
-        """Get the ordering fields from the view.
+        """Get the stable ordering fields from the view. Those fields should be unique, so that sorting by them always
+        return the same result.
 
         :param view: The view.
-        :return: The sequence of ordering fields.
+        :return: The sequence of stable ordering fields.
         """
         stable_ordering_fields = getattr(view, 'stable_ordering', None)
 
         if stable_ordering_fields is None:
-            return ['pk']
+            return 'pk',
 
-        return list(stable_ordering_fields)
+        return stable_ordering_fields
 
     def get_ordering_from_request(
             self, request: Request, view: View) -> tuple[OrderingField, enums.OrderingDirection] | None:

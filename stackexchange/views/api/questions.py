@@ -142,9 +142,9 @@ class QuestionViewSet(BaseViewSet):
         :return: The filter backends for the action.
         """
         if self.action in ('list', 'no_answers'):
-            return filters.OrderingFilter, filters.DateRangeFilter, filters.TaggedFilter
+            return filters.OrderingRangeFilter, filters.DateRangeFilter, filters.TaggedFilter
 
-        return filters.OrderingFilter, filters.DateRangeFilter
+        return filters.OrderingRangeFilter, filters.DateRangeFilter
 
     @action(detail=True, url_path='answers')
     def answers(self, request: Request, *args, **kwargs) -> Response:

@@ -55,7 +55,7 @@ from .base import BaseViewSet
 class PostViewSet(BaseViewSet):
     """The post view set
     """
-    filter_backends = (filters.OrderingFilter, filters.DateRangeFilter)
+    filter_backends = (filters.OrderingRangeFilter, filters.DateRangeFilter)
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
