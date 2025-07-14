@@ -50,13 +50,11 @@ class Badge(models.Model):
     """
     name = models.CharField(max_length=255, unique=True, help_text="The badge name")
     rank = models.CharField(
-        choices=((bc.value, bc.description) for bc in enums.BadgeRank),
-        max_length=max(len(bc.description) for bc in enums.BadgeRank),
-        help_text="The badge rank")
+        max_length=max(len(bc) for bc in enums.BadgeRank),
+        choices=((bc.value, bc.description) for bc in enums.BadgeRank), help_text="The badge rank")
     badge_type = models.CharField(
-        choices=((bt.value, bt.description) for bt in enums.BadgeType),
-        max_length=max(len(bc.description) for bc in enums.BadgeType),
-        help_text="The badge type")
+        max_length=max(len(bc) for bc in enums.BadgeType),
+        choices=((bt.value, bt.description) for bt in enums.BadgeType), help_text="The badge type")
 
     objects = managers.BadgeQuerySet.as_manager()
 
@@ -117,9 +115,8 @@ class Post(models.Model):
     comment_count = models.PositiveIntegerField(default=0, help_text="The post comment count")
     favorite_count = models.PositiveIntegerField(default=0, help_text="The post favorite count")
     content_license = models.CharField(
-        max_length=max(len(cl.value) for cl in enums.ContentLicense),
-        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name,
-        help_text="The content license")
+        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0,
+        max_length=max(len(cl) for cl in enums.ContentLicense), help_text="The content license")
     tags = models.ManyToManyField('Tag', related_name='posts', through='PostTag', help_text="The post tags")
     title_search = search.SearchVectorField(null=True, help_text="The title search vector")
 
@@ -229,8 +226,8 @@ class PostComment(models.Model):
     text = models.TextField(help_text="The comment text")
     creation_date = models.DateTimeField(default=timezone.now, help_text="The date that the comment was created")
     content_license = models.CharField(
-        help_text="The content license", max_length=max(len(cl.value) for cl in enums.ContentLicense),
-        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name)
+        help_text="The content license", max_length=max(len(cl) for cl in enums.ContentLicense),
+        choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0)
     user_display_name = models.CharField(max_length=255, null=True, blank=True, help_text="The user display name")
 
     class Meta:
@@ -262,8 +259,8 @@ class PostHistory(models.Model):
     comment = models.TextField(null=True, blank=True, help_text="The comment of the user that has edited this post")
     text = models.TextField(null=True, blank=True, help_text="A raw version of the new value for a given revision")
     content_license = models.CharField(
-       max_length=max(len(cl.value) for cl in enums.ContentLicense),
-       choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0.name,
+       max_length=max(len(cl) for cl in enums.ContentLicense),
+       choices=((cl.name, cl.value) for cl in enums.ContentLicense), default=enums.ContentLicense.CC_BY_SA_4_0,
        help_text="The content license")
 
     objects = managers.PostHistoryQuerySet.as_manager()

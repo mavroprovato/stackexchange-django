@@ -219,12 +219,24 @@ class TagFlag(enum.Enum):
         self.api_path = api_path
 
 
-class ContentLicense(enum.Enum):
+class ContentLicense(enum.StrEnum):
     """The content license enumeration
     """
-    CC_BY_SA_2_5 = 'Attribution-ShareAlike 2.5 Generic'
-    CC_BY_SA_3_0 = 'Attribution-ShareAlike 3.0 Unported'
-    CC_BY_SA_4_0 = 'Attribution-ShareAlike 4.0 International'
+    CC_BY_SA_2_5 = 'CC_BY_SA_2_5'
+    CC_BY_SA_3_0 = 'CC_BY_SA_3_0'
+    CC_BY_SA_4_0 = 'CC_BY_SA_4_0'
+
+    @property
+    def description(self) -> str:
+        match self:
+            case self.CC_BY_SA_2_5:
+                return 'Attribution-ShareAlike 2.5 Generic'
+            case self.CC_BY_SA_3_0:
+                return 'Attribution-ShareAlike 3.0 Unported'
+            case self.CC_BY_SA_4_0:
+                return 'Attribution-ShareAlike 4.0 International'
+            case _:
+                raise ValueError(f"Invalid content licence value {self}")
 
 
 class PostVoteType(DescriptionMixin, enum.IntEnum):
