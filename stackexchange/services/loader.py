@@ -366,7 +366,9 @@ class PostCommentLoader(BaseFileLoader):
         """
         super().__init__(site, data_dir)
         with schema_context(self.site.schema_name):
-            self.users = {user['unique_id']: user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')}
+            self.users = {
+                str(user['unique_id']): user['pk'] for user in models.SiteUser.objects.values('pk', 'unique_id')
+            }
 
     def transform(self, row: dict) -> Iterable[str] | None:
         """Transform the input row so that it can be loaded to the post comments table.
