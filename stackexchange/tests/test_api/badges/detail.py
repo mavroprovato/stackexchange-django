@@ -109,7 +109,7 @@ class BadgeRetrieveTests(base.BaseTestCase):
             data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assert_items_in_range(response, 'rank', max_value=max_value, field_type=enums.OrderingFieldType.BADGE_TYPE)
+        self.assert_items_in_range(response, 'name', enums.OrderingFieldType.STRING, min_value, max_value)
 
     def test_range_by_type(self):
         """Test the badges retrieve endpoint range by badge type.
