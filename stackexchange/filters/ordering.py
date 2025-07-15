@@ -185,7 +185,7 @@ class OrderingRangeFilter(BaseFilterBackend):
                 queryset = queryset.filter(GreaterThanOrEqual(ordering_field.get_expression(), min_value))
             max_value = self.get_range_value(request, self.max_param, ordering_field)
             if max_value:
-                queryset = queryset.filter(LessThanOrEqual(ordering_field.get_expression(), min_value))
+                queryset = queryset.filter(LessThanOrEqual(ordering_field.get_expression(), max_value))
 
         return queryset
 
