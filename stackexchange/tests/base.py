@@ -74,3 +74,20 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['rank'], enums.BadgeRank(badge.rank).value)
             self.assertEqual(item['award_count'],  models.UserBadge.objects.filter(badge=badge).count())
             self.assertEqual(item['name'], badge.name)
+
+    def assert_comment_response(self, response):
+        """Assert that the comment response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            comment = models.PostComment.objects.get(id=item['comment_id'])
+            self.assertEqual(item['score'], comment.score)
+            self.assertEqual(dateutil.parser.parse(item['creation_date']), comment.creation_date)
+            self.assertEqual(item['post_id'], comment.post_id)
+            self.assertEqual(item['content_license'], enums.ContentLicense(comment.content_license).value)
+            if item['owner'] is not None:
+                self.assertEqual(item['owner']['reputation'], comment.user.reputation)
+                self.assertEqual(item['owner']['user_id'], comment.user_id)
+                self.assertEqual(item['owner']['display_name'], comment.user.display_name)
+                self.assertEqual(item['owner']['user_type'], comment.user.user_type())
