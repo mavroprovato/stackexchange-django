@@ -10,7 +10,7 @@ from stackexchange import enums, models
 from stackexchange.tests import base, factories
 
 
-class AnswerDetailTests(base.BaseTestCase):
+class AnswerRetrieveTests(base.BaseTestCase):
     """Answer view set detail tests
     """
     @classmethod
@@ -26,7 +26,7 @@ class AnswerDetailTests(base.BaseTestCase):
             factories.AnswerFactory.create_batch(size=2, question=question, owner=random.choice(site_users))
 
     def test(self):
-        """Test the question detail endpoint
+        """Test the answer detail endpoint
         """
         answer = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 1)[0]
         response = self.client.get(reverse('api-answer-detail', kwargs={'pk': answer.pk}))
@@ -34,7 +34,7 @@ class AnswerDetailTests(base.BaseTestCase):
         self.assert_answer_response(response)
 
     def test_multiple(self):
-        """Test the question detail endpoint for multiple ids.
+        """Test the answer detail endpoint for multiple ids.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         response = self.client.get(
@@ -43,7 +43,7 @@ class AnswerDetailTests(base.BaseTestCase):
         self.assert_answer_response(response)
 
     def test_sort_by_activity(self):
-        """Test the question detail endpoint sorted by activity date.
+        """Test the answer detail endpoint sorted by activity date.
         """
         for order in enums.OrderingDirection:
             answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
@@ -56,7 +56,7 @@ class AnswerDetailTests(base.BaseTestCase):
             self.assert_items_sorted(response, 'last_activity_date', order, enums.OrderingFieldType.DATE)
 
     def test_sort_by_creation_date(self):
-        """Test the question detail endpoint sorted by creation date.
+        """Test the answer detail endpoint sorted by creation date.
         """
         for order in enums.OrderingDirection:
             answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
@@ -69,7 +69,7 @@ class AnswerDetailTests(base.BaseTestCase):
             self.assert_items_sorted(response, 'creation_date', order, enums.OrderingFieldType.DATE)
 
     def test_sort_by_votes(self):
-        """Test the question detail endpoint sorted by votes.
+        """Test the answer detail endpoint sorted by votes.
         """
         for order in enums.OrderingDirection:
             answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
@@ -82,7 +82,7 @@ class AnswerDetailTests(base.BaseTestCase):
             self.assert_items_sorted(response, 'score', order, enums.OrderingFieldType.INTEGER)
 
     def test_range_by_activity(self):
-        """Test the question detail endpoint range by activity.
+        """Test the answer detail endpoint range by activity.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
@@ -96,7 +96,7 @@ class AnswerDetailTests(base.BaseTestCase):
         self.assert_items_in_range(response, 'last_activity_date', enums.OrderingFieldType.DATE, min_value, max_value)
 
     def test_range_by_creation_date(self):
-        """Test the question detail endpoint range by user creation date.
+        """Test the answer detail endpoint range by user creation date.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
@@ -110,7 +110,7 @@ class AnswerDetailTests(base.BaseTestCase):
         self.assert_items_in_range(response, 'creation_date', enums.OrderingFieldType.DATE, min_value, max_value)
 
     def test_range_by_votes(self):
-        """Test the question detail endpoint range by votes.
+        """Test the answer detail endpoint range by votes.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         min_value = 3000
@@ -124,7 +124,7 @@ class AnswerDetailTests(base.BaseTestCase):
         self.assert_items_in_range(response, 'score', enums.OrderingFieldType.INTEGER, min_value, max_value)
 
     def test_date_range(self):
-        """Test the question detail list endpoint date range.
+        """Test the answer detail list endpoint date range.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
         from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
