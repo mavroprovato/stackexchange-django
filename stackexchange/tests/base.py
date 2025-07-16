@@ -75,6 +75,22 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['award_count'],  models.UserBadge.objects.filter(badge=badge).count())
             self.assertEqual(item['name'], badge.name)
 
+    def assert_badge_with_recipient_response(self, response):
+        """Assert that the badge with recipient response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            badge = models.Badge.objects.get(id=item['badge_id'])
+            self.assertEqual(item['badge_type'], enums.BadgeType(badge.badge_type).value)
+            self.assertEqual(item['rank'], enums.BadgeRank(badge.rank).value)
+            self.assertEqual(item['name'], badge.name)
+            site_user = models.SiteUser.objects.get(id=item['user']['user_id'])
+            self.assertEqual(item['user']['reputation'], site_user.reputation)
+            self.assertEqual(item['user']['display_name'], site_user.display_name)
+            self.assertEqual(item['user']['user_type'], site_user.user_type())
+            self.assertTrue(models.UserBadge.objects.filter(badge=badge, user=site_user).exists())
+
     def assert_comment_response(self, response):
         """Assert that the comment response schema is correct.
 
