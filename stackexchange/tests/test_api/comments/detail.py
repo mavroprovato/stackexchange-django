@@ -71,7 +71,7 @@ class CommentRetrieveTests(base.BaseTestCase):
             self.assert_items_sorted(response, 'score', order, enums.OrderingFieldType.INTEGER)
 
     def test_range_by_creation_date(self):
-        """Test the comment detail endpoint range by user creation date.
+        """Test the comment detail endpoint range by creation date.
         """
         comments = random.sample(list(models.PostComment.objects.all()), 3)
         min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
