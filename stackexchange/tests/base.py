@@ -53,15 +53,12 @@ class BaseTestCase(TenantTestCase):
         """
         for item in response.json()['items']:
             answer = models.Post.objects.get(id=item['answer_id'])
-            self.assertEqual(item['owner']['reputation'], answer.owner.reputation)
-            self.assertEqual(item['owner']['user_id'], answer.owner.id)
-            self.assertEqual(item['owner']['display_name'], answer.owner.display_name)
-            self.assertEqual(item['owner']['user_type'], answer.owner.user_type())
             self.assertEqual(item['score'], answer.score)
             self.assertEqual(dateutil.parser.parse(item['last_activity_date']), answer.last_activity_date)
             self.assertEqual(dateutil.parser.parse(item['creation_date']), answer.creation_date)
             self.assertEqual(item['question_id'], answer.question_id)
             self.assertEqual(item['content_license'], answer.content_license)
+            self.assert_user(item, 'owner', answer.owner)
 
     def assert_badge_with_award_count_response(self, response):
         """Assert that the badge with award count response schema is correct.
@@ -86,10 +83,7 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['rank'], enums.BadgeRank(badge.rank).value)
             self.assertEqual(item['name'], badge.name)
             site_user = models.SiteUser.objects.get(id=item['user']['user_id'])
-            self.assertEqual(item['user']['reputation'], site_user.reputation)
-            self.assertEqual(item['user']['display_name'], site_user.display_name)
-            self.assertEqual(item['user']['user_type'], site_user.user_type())
-            self.assertTrue(models.UserBadge.objects.filter(badge=badge, user=site_user).exists())
+            self.assert_user(item, 'user', site_user)
 
     def assert_comment_response(self, response):
         """Assert that the comment response schema is correct.
@@ -102,11 +96,7 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(dateutil.parser.parse(item['creation_date']), comment.creation_date)
             self.assertEqual(item['post_id'], comment.post_id)
             self.assertEqual(item['content_license'], enums.ContentLicense(comment.content_license).value)
-            if item['owner'] is not None:
-                self.assertEqual(item['owner']['reputation'], comment.user.reputation)
-                self.assertEqual(item['owner']['user_id'], comment.user_id)
-                self.assertEqual(item['owner']['display_name'], comment.user.display_name)
-                self.assertEqual(item['owner']['user_type'], comment.user.user_type())
+            self.assert_user(item, 'owner', comment.user)
 
     def assert_question_response(self, response):
         """Assert that the comment response schema is correct.
@@ -125,8 +115,17 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(dateutil.parser.parse(item['last_edit_date']), question.last_edit_date)
             self.assertEqual(item['content_license'], question.content_license)
             self.assertEqual(item['title'], question.title)
-            if item['owner'] is not None:
-                self.assertEqual(item['owner']['reputation'], question.owner.reputation)
-                self.assertEqual(item['owner']['user_id'], question.owner_id)
-                self.assertEqual(item['owner']['display_name'], question.owner.display_name)
-                self.assertEqual(item['owner']['user_type'], question.owner.user_type())
+            self.assert_user(item, 'owner', question.owner)
+
+    def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
+        """Assert that the user response schema is correct.
+
+        :param item: The response item.
+        :param user_attr: The user attribute name.
+        :param user: The user.
+        """
+        if item[user_attr] is not None:
+            self.assertEqual(item[user_attr]['reputation'], user.reputation)
+            self.assertEqual(item[user_attr]['user_id'], user.id)
+            self.assertEqual(item[user_attr]['display_name'], user.display_name)
+            self.assertEqual(item[user_attr]['user_type'], user.user_type())
