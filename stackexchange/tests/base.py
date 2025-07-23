@@ -107,3 +107,26 @@ class BaseTestCase(TenantTestCase):
                 self.assertEqual(item['owner']['user_id'], comment.user_id)
                 self.assertEqual(item['owner']['display_name'], comment.user.display_name)
                 self.assertEqual(item['owner']['user_type'], comment.user.user_type())
+
+    def assert_question_response(self, response):
+        """Assert that the comment response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            question = models.Post.objects.get(id=item['question_id'])
+            self.assertEqual(item['is_answered'], question.is_answered())
+            self.assertEqual(item['view_count'], question.view_count)
+            self.assertEqual(item['accepted_answer_id'], question.accepted_answer_id)
+            self.assertEqual(item['answer_count'], question.answer_count)
+            self.assertEqual(item['score'], question.score)
+            self.assertEqual(dateutil.parser.parse(item['last_activity_date']), question.last_activity_date)
+            self.assertEqual(dateutil.parser.parse(item['creation_date']), question.creation_date)
+            self.assertEqual(dateutil.parser.parse(item['last_edit_date']), question.last_edit_date)
+            self.assertEqual(item['content_license'], question.content_license)
+            self.assertEqual(item['title'], question.title)
+            if item['owner'] is not None:
+                self.assertEqual(item['owner']['reputation'], question.owner.reputation)
+                self.assertEqual(item['owner']['user_id'], question.owner_id)
+                self.assertEqual(item['owner']['display_name'], question.owner.display_name)
+                self.assertEqual(item['owner']['user_type'], question.owner.user_type())

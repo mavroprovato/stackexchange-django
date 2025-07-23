@@ -161,6 +161,13 @@ class Post(models.Model):
         """
         return self.type == enums.PostType.ANSWER.value and self.accepted_answer_id is not None
 
+    def is_answered(self) -> bool:
+        """Return true if the post is a question and it is answered.
+
+        :return: true if the post is a question and it is answered.
+        """
+        return self.type == enums.PostType.QUESTION.value and self.answer_count > 0
+
 
 class Tag(models.Model):
     """The tag model
