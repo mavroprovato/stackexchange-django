@@ -188,18 +188,44 @@ class BadgeType(DescriptionMixin, OrderingMixin, enum.StrEnum):
                 return NotImplemented
 
 
-class PostType(DescriptionMixin, enum.IntEnum):
+class PostType(DescriptionMixin, enum.StrEnum):
     """Enumeration for the post type.
     """
-    QUESTION = 1
-    ANSWER = 2
-    WIKI = 3
-    TAG_WIKI_EXPERT = 4
-    TAG_WIKI = 5
-    MODERATOR_NOMINATION = 6
-    WIKI_PLACEHOLDER = 7
-    PRIVILEGE_WIKI = 8
+    QUESTION = 'question'
+    ANSWER = 'answer'
+    WIKI = 'wiki'
+    TAG_WIKI_EXPERT = 'tag_wiki_expert'
+    TAG_WIKI = 'tag_wiki'
+    MODERATOR_NOMINATION = 'moderator_nomination'
+    WIKI_PLACEHOLDER = 'wiki_placeholder'
+    PRIVILEGE_WIKI = 'privilege_wiki'
 
+    @staticmethod
+    def from_export_value(export_value) -> 'PostType':
+        """Return the badge rank for the export value.
+
+        :param export_value: The export value of the badge rank.
+        :return: The badge rank.
+        """
+        match export_value:
+            case '1':
+                return PostType.QUESTION
+            case '2':
+                return PostType.ANSWER
+            case '3':
+                return PostType.WIKI
+            case '4':
+                return PostType.TAG_WIKI_EXPERT
+            case '5':
+                return PostType.TAG_WIKI
+            case '6':
+                return PostType.MODERATOR_NOMINATION
+            case '7':
+                return PostType.WIKI_PLACEHOLDER
+            case '8':
+                return PostType.PRIVILEGE_WIKI
+            case _:
+                raise ValueError(f"Invalid export value {export_value}")
 
 class TagFlag(enum.Enum):
     """Enumeration for the available tag flags.

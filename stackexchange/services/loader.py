@@ -213,7 +213,7 @@ class PostLoader(BaseFileLoader):
             row['AcceptedAnswerId'] if row.get('AcceptedAnswerId') in self.posts else '<NULL>',
             self.users[row['OwnerUserId']] if row.get('OwnerUserId') in self.users else '<NULL>',
             self.users[row['LastEditorUserId']] if row.get('LastEditorUserId') in self.users else '<NULL>',
-            row['PostTypeId'], row.get('Title', '<NULL>'), row['Body'],
+            enums.PostType.from_export_value(row['PostTypeId']), row.get('Title', '<NULL>'), row['Body'],
             row.get('LastEditorDisplayName', '<NULL>'), row['CreationDate'], row.get('LastEditDate', '<NULL>'),
             row['LastActivityDate'], row.get('CommunityOwnedDate', '<NULL>'), row.get('ClosedDate', '<NULL>'),
             row['Score'], row.get('ViewCount', 0), row.get('AnswerCount', 0), row.get('CommentCount', 0),

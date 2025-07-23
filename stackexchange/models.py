@@ -98,7 +98,7 @@ class Post(models.Model):
     last_editor = models.ForeignKey(
         SiteUser, on_delete=models.CASCADE, related_name='last_edited_posts', null=True, blank=True,
         help_text="The last editor of the post")
-    type = models.PositiveSmallIntegerField(
+    type = models.CharField(
         choices=((pt.value, pt.description) for pt in enums.PostType), help_text="The post type")
     title = models.CharField(max_length=1000, null=True, blank=True, help_text="The post title")
     body = models.TextField(help_text="The post body")
