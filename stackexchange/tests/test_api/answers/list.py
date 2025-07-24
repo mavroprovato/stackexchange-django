@@ -1,6 +1,5 @@
 """Tests for the answers list view.
 """
-import datetime
 import random
 
 from django.urls import reverse
@@ -62,8 +61,7 @@ class AnswerListTests(base.BaseTestCase):
     def test_range_by_activity(self):
         """Test the answer list endpoint range by activity date.
         """
-        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        min_value, max_value = self.generate_random_date_range()
         response = self.client.get(reverse('api-answer-list'), data={
             'sort': 'activity', 'min': min_value, 'max': max_value
         })
@@ -74,8 +72,7 @@ class AnswerListTests(base.BaseTestCase):
     def test_range_by_creation_date(self):
         """Test the answer list endpoint range by creation date.
         """
-        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        min_value, max_value = self.generate_random_date_range()
         response = self.client.get(reverse('api-answer-list'), data={
             'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })
@@ -98,11 +95,10 @@ class AnswerListTests(base.BaseTestCase):
     def test_date_range(self):
         """Test the answer list endpoint date range.
         """
-        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
-        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        from_date, to_date = self.generate_random_date_range()
         response = self.client.get(reverse('api-answer-list'), data={
-            'fromdate': from_value.isoformat(), 'todate': from_value.isoformat()
+            'fromdate': from_date.isoformat(), 'todate': to_date.isoformat()
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_answer_response(response)
-        self.assert_items_in_range(response, 'creation_date', enums.OrderingFieldType.DATE, from_value, to_value)
+        self.assert_items_in_range(response, 'creation_date', enums.OrderingFieldType.DATE, from_date, to_date)

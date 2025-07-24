@@ -1,5 +1,8 @@
 """Base test case
 """
+import datetime
+import random
+
 import dateutil.parser
 from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
@@ -129,3 +132,16 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item[user_attr]['user_id'], user.id)
             self.assertEqual(item[user_attr]['display_name'], user.display_name)
             self.assertEqual(item[user_attr]['user_type'], user.user_type())
+
+    @staticmethod
+    def generate_random_date_range() -> tuple[datetime.date, datetime.date]:
+        """Generate a random date range for the last year.
+
+        :return: A tuple of the start and end dates.
+        """
+        start_days, end_days = sorted(random.sample(range(365), 2), reverse=True)
+
+        return (
+            datetime.date.today() - datetime.timedelta(days=start_days),
+            datetime.date.today() - datetime.timedelta(days=end_days)
+        )

@@ -1,6 +1,5 @@
 """Tests for the comments detail view.
 """
-import datetime
 import random
 
 from django.urls import reverse
@@ -74,8 +73,7 @@ class CommentRetrieveTests(base.BaseTestCase):
         """Test the comment detail endpoint range by creation date.
         """
         comments = random.sample(list(models.PostComment.objects.all()), 3)
-        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        min_value, max_value = self.generate_random_date_range()
         response = self.client.get(
             reverse('api-comment-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}),
             data={'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()}
@@ -102,13 +100,12 @@ class CommentRetrieveTests(base.BaseTestCase):
         """Test the comment detail list endpoint date range.
         """
         comments = random.sample(list(models.PostComment.objects.all()), 3)
-        from_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
-        to_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        from_date, to_date = self.generate_random_date_range()
         response = self.client.get(
             reverse('api-comment-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}), data={
-                'fromdate': from_value.isoformat(), 'todate': to_value.isoformat()
+                'fromdate': from_date.isoformat(), 'todate': to_date.isoformat()
             }
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_comment_response(response)
-        self.assert_items_in_range(response, 'creation_date', enums.OrderingFieldType.DATE, from_value, to_value)
+        self.assert_items_in_range(response, 'creation_date', enums.OrderingFieldType.DATE, from_date, to_date)

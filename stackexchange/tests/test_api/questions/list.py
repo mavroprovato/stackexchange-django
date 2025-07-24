@@ -1,6 +1,5 @@
 """Questions view set list testing
 """
-import datetime
 import random
 
 from django.urls import reverse
@@ -64,8 +63,7 @@ class QuestionListTests(base.BaseTestCase):
     def test_range_by_activity(self):
         """Test the question list endpoint range by activity date.
         """
-        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        min_value, max_value = self.generate_random_date_range()
         response = self.client.get(reverse('api-question-list'), data={
             'sort': 'activity', 'min': min_value, 'max': max_value
         })
@@ -76,8 +74,7 @@ class QuestionListTests(base.BaseTestCase):
     def test_range_by_creation_date(self):
         """Test the question list endpoint range by creation date.
         """
-        min_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=300)).date()
-        max_value = (datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=30)).date()
+        min_value, max_value = self.generate_random_date_range()
         response = self.client.get(reverse('api-question-list'), data={
             'sort': 'creation', 'min': min_value.isoformat(), 'max': max_value.isoformat()
         })
