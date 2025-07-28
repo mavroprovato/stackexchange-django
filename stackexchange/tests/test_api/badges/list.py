@@ -64,6 +64,7 @@ class BadgeListTests(base.BaseTestCase):
             'sort': 'rank', 'min': min_value.value
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'rank', min_value=min_value, field_type=enums.OrderingFieldType.RANK)
 
         max_value = enums.BadgeRank.SILVER
@@ -71,6 +72,7 @@ class BadgeListTests(base.BaseTestCase):
             'sort': 'rank', 'max': max_value.value
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'rank', max_value=max_value, field_type=enums.OrderingFieldType.RANK)
 
     def test_range_by_name(self):
@@ -80,6 +82,7 @@ class BadgeListTests(base.BaseTestCase):
         max_value = 't'
         response = self.client.get(reverse('api-badge-list'), data={'sort': 'name', 'min': min_value, 'max': max_value})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'name', enums.OrderingFieldType.STRING, min_value, max_value)
 
     def test_range_by_type(self):
@@ -90,6 +93,7 @@ class BadgeListTests(base.BaseTestCase):
             'sort': 'type', 'min': min_value.name.lower()
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(
             response, 'badge_type', min_value=min_value, field_type=enums.OrderingFieldType.BADGE_TYPE
         )
@@ -98,6 +102,7 @@ class BadgeListTests(base.BaseTestCase):
             'sort': 'type', 'max': max_value.name.lower()
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(
             response, 'badge_type', max_value=max_value, field_type=enums.OrderingFieldType.BADGE_TYPE
         )

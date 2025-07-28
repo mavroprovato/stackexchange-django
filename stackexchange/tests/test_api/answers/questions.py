@@ -1,6 +1,5 @@
 """Answer questions view set testing
 """
-import datetime
 import random
 
 from django.urls import reverse
@@ -10,7 +9,7 @@ from stackexchange import enums, models
 from stackexchange.tests import base, factories
 
 
-class AnswerQuestionListTests(base.BaseTestCase):
+class AnswerQuestionTests(base.BaseTestCase):
     """Answer questions view set list tests
     """
     @classmethod

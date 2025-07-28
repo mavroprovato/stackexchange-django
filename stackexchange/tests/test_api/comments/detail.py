@@ -86,8 +86,7 @@ class CommentRetrieveTests(base.BaseTestCase):
         """Test the comment detail endpoint range by votes.
         """
         comments = random.sample(list(models.PostComment.objects.all()), 3)
-        min_value = 3000
-        max_value = 6000
+        min_value, max_value = self.generate_random_integers()
         response = self.client.get(
             reverse('api-comment-detail', kwargs={'pk': ';'.join(str(comment.pk) for comment in comments)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}

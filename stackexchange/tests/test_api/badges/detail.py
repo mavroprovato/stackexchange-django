@@ -88,6 +88,7 @@ class BadgeRetrieveTests(base.BaseTestCase):
             data={'sort': 'rank', 'min': min_value.value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'rank', min_value=min_value, field_type=enums.OrderingFieldType.RANK)
 
         max_value = enums.BadgeRank.SILVER
@@ -96,6 +97,7 @@ class BadgeRetrieveTests(base.BaseTestCase):
             data={'sort': 'rank', 'max': max_value.value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'rank', max_value=max_value, field_type=enums.OrderingFieldType.RANK)
 
     def test_range_by_name(self):
@@ -109,6 +111,7 @@ class BadgeRetrieveTests(base.BaseTestCase):
             data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'name', enums.OrderingFieldType.STRING, min_value, max_value)
 
     def test_range_by_type(self):
@@ -121,6 +124,7 @@ class BadgeRetrieveTests(base.BaseTestCase):
             data={'sort': 'type', 'min': min_value.value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(
             response, 'badge_type', min_value=min_value, field_type=enums.OrderingFieldType.BADGE_TYPE
         )
@@ -131,6 +135,7 @@ class BadgeRetrieveTests(base.BaseTestCase):
             data={'sort': 'type', 'max': max_value.value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(
             response, 'badge_type', max_value=max_value, field_type=enums.OrderingFieldType.BADGE_TYPE
         )

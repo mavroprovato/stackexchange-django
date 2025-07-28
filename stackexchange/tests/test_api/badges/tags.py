@@ -55,6 +55,7 @@ class BadgeTagsTests(base.BaseTestCase):
             'sort': 'rank', 'min': min_value.value
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'rank', min_value=min_value, field_type=enums.OrderingFieldType.RANK)
 
         max_value = enums.BadgeRank.SILVER
@@ -62,6 +63,7 @@ class BadgeTagsTests(base.BaseTestCase):
             'sort': 'rank', 'max': max_value.value
         })
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'rank', max_value=max_value, field_type=enums.OrderingFieldType.RANK)
 
     def test_range_by_name(self):
@@ -73,4 +75,5 @@ class BadgeTagsTests(base.BaseTestCase):
             reverse('api-badge-tags'), data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_badge_with_award_count_response(response)
         self.assert_items_in_range(response, 'name', enums.OrderingFieldType.STRING, min_value, max_value)
