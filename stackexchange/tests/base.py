@@ -4,7 +4,7 @@ import datetime
 import random
 
 import dateutil.parser
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Exists, OuterRef
 from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
 
@@ -103,9 +103,11 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['content_license'], enums.ContentLicense(comment.content_license).value)
             self.assert_user(item, 'owner', comment.user)
 
-    def assert_question_response(self, response):
+    def assert_question_response(self, response, no_answers=False, unanswered=False):
         """Assert that the comment response schema is correct.
 
+        :param no_answers: True if that there are no answers for this question should be tested.
+        :param unanswered: True if that question is unanswered should be tested.
         :param response: The response.
         """
         for item in response.json()['items']:
@@ -123,6 +125,12 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['title'], question.title)
             self.assert_user(item, 'owner', question.owner)
             self.assert_tags(item, question.tags)
+            if no_answers:
+                self.assertTrue(question.answer_count == 0)
+            if unanswered:
+                self.assertTrue(models.Post.objects.filter(~Exists(
+                    models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)
+                )))
 
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
