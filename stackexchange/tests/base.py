@@ -109,6 +109,7 @@ class BaseTestCase(TenantTestCase):
         """
         for item in response.json()['items']:
             question = models.Post.objects.get(id=item['question_id'])
+            self.assertEqual(question.type, enums.PostType.QUESTION)
             self.assertEqual(item['is_answered'], question.is_answered())
             self.assertEqual(item['view_count'], question.view_count)
             self.assertEqual(item['accepted_answer_id'], question.accepted_answer_id)
