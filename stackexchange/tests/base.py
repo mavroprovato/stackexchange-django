@@ -4,6 +4,7 @@ import datetime
 import random
 
 import dateutil.parser
+from django.db.models import QuerySet
 from django_tenants.test.cases import TenantTestCase
 from django_tenants.test.client import TenantClient
 
@@ -121,6 +122,7 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['content_license'], question.content_license)
             self.assertEqual(item['title'], question.title)
             self.assert_user(item, 'owner', question.owner)
+            self.assert_tags(item, question.tags)
 
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
@@ -134,6 +136,14 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item[user_attr]['user_id'], user.id)
             self.assertEqual(item[user_attr]['display_name'], user.display_name)
             self.assertEqual(item[user_attr]['user_type'], user.user_type())
+
+    def assert_tags(self, item: dict, tags: QuerySet):
+        """Assert that the tags are correct.
+
+        :param item: The response item.
+        :param tags: The tags.
+        """
+        self.assertCountEqual(item['tags'], (tag.name for tag in tags.all()))
 
     @staticmethod
     def generate_random_integers(min_value: int = 0, max_value: int = 3_000) -> tuple[int, int]:
