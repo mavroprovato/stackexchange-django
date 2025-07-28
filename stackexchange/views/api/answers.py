@@ -64,11 +64,9 @@ class AnswerViewSet(BaseViewSet):
         if self.action == 'comments':
             return models.PostComment.objects.select_related('user', 'post')
         if self.action == 'questions':
-            return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
-                'tags')
+            return models.Post.objects.questions().select_related('owner').prefetch_related('tags')
 
-        return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related(
-            'owner', 'question').prefetch_related('tags')
+        return models.Post.objects.answers().select_related('owner', 'question').prefetch_related('tags')
 
     def get_serializer_class(self) -> type[Serializer]:
         """Get the serializer class for the action.

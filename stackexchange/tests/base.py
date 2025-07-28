@@ -56,6 +56,7 @@ class BaseTestCase(TenantTestCase):
         """
         for item in response.json()['items']:
             answer = models.Post.objects.get(id=item['answer_id'])
+            self.assertEqual(answer.type, enums.PostType.ANSWER)
             self.assertEqual(item['score'], answer.score)
             self.assertEqual(dateutil.parser.parse(item['last_activity_date']), answer.last_activity_date)
             self.assertEqual(dateutil.parser.parse(item['creation_date']), answer.creation_date)

@@ -68,19 +68,18 @@ class QuestionViewSet(BaseViewSet):
         :return: The queryset for the action.
         """
         if self.action == 'answers':
-            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner')
+            return models.Post.objects.answers().select_related('owner')
         if self.action == 'comments':
             return models.PostComment.objects.select_related('user')
         if self.action == 'no_answers':
-            return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
-                'owner').prefetch_related('tags')
+            return models.Post.objects.questions().filter(answer_count=0).select_related('owner').prefetch_related(
+                'tags')
         if self.action == 'unanswered':
-            return models.Post.objects.filter(type=enums.PostType.QUESTION).filter(~Exists(
+            return models.Post.objects.questions().filter(~Exists(
                 models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)
             )).select_related('owner').prefetch_related('tags')
 
-        return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
-            'tags')
+        return models.Post.objects.question().select_related('owner').prefetch_related('tags')
 
     def get_serializer_class(self) -> type[Serializer]:
         """Get the serializer class for the action.

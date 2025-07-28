@@ -120,6 +120,8 @@ class Post(models.Model):
     tags = models.ManyToManyField('Tag', related_name='posts', through='PostTag', help_text="The post tags")
     title_search = search.SearchVectorField(null=True, help_text="The title search vector")
 
+    objects = managers.PostQuerySet.as_manager()
+
     class Meta:
         db_table = 'posts'
         indexes = (

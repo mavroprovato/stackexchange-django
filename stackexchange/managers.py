@@ -48,6 +48,24 @@ class BadgeQuerySet(QuerySet):
         )
 
 
+class PostQuerySet(QuerySet):
+    """The post queryset
+    """
+    def questions(self):
+        """Return questions.
+
+        :return: The questions.
+        """
+        return self.filter(type=enums.PostType.QUESTION)
+
+    def answers(self):
+        """Return answers.
+
+        :return: The answers.
+        """
+        return self.filter(type=enums.PostType.ANSWER)
+
+
 class UserBadgeQuerySet(QuerySet):
     """The user badge queryset
     """
