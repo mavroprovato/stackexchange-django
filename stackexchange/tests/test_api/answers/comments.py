@@ -87,8 +87,7 @@ class AnswerCommentsTests(base.BaseTestCase):
         """Test the answer comments endpoint range by votes.
         """
         answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
-        min_value = 3000
-        max_value = 6000
+        min_value, max_value = self.generate_random_integers()
         response = self.client.get(
             reverse('api-answer-comments', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}

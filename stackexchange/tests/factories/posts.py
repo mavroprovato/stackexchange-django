@@ -20,11 +20,11 @@ class PostFactory(factory.django.DjangoModelFactory):
     type = factory.Faker('random_element', elements=[pt.value for pt in enums.PostType])
     creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
     last_activity_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
-    score = factory.Faker('pyint')
-    view_count = factory.Faker('pyint')
-    answer_count = factory.Faker('pyint')
-    comment_count = factory.Faker('pyint')
-    favorite_count = factory.Faker('pyint')
+    score = 0
+    view_count = 0
+    answer_count = 0
+    comment_count = 0
+    favorite_count = 0
     owner = factory.SubFactory(SiteUserFactory)
 
 
@@ -38,12 +38,18 @@ class QuestionFactory(PostFactory):
     """The question factory
     """
     type = enums.PostType.QUESTION.value
+    score = factory.Faker('pyint', min_value=0, max_value=3_000)
+    comment_count = factory.Faker('pyint', min_value=0, max_value=50)
+    favorite_count = factory.Faker('pyint', min_value=0, max_value=100)
 
 
 class AnswerFactory(PostFactory):
     """The answer factory
     """
     type = enums.PostType.ANSWER.value
+    score = factory.Faker('pyint', min_value=0, max_value=3_000)
+    answer_count = factory.Faker('pyint', min_value=0, max_value=40)
+    comment_count = factory.Faker('pyint', min_value=0, max_value=50)
     question = factory.SubFactory(QuestionFactory)
 
 

@@ -134,6 +134,19 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item[user_attr]['user_type'], user.user_type())
 
     @staticmethod
+    def generate_random_integers(min_value: int = 0, max_value: int = 3_000) -> tuple[int, int]:
+        """Generate a random integer range between two values.
+
+        :param min_value: The minimum value.
+        :param max_value: The maximum value.
+        :return: A tuple of the start and end dates.
+        """
+        val1 = random.randrange(min_value, max_value)
+        val2 = random.randrange(min_value, max_value)
+
+        return (val1, val2) if val1 < val2 else (val2, val1)
+
+    @staticmethod
     def generate_random_date_range() -> tuple[datetime.date, datetime.date]:
         """Generate a random date range for the last year.
 

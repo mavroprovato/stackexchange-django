@@ -65,8 +65,7 @@ class CommentListTests(base.BaseTestCase):
     def test_range_by_votes(self):
         """Test the comment list endpoint range by votes.
         """
-        min_value = 3000
-        max_value = 6000
+        min_value, max_value = self.generate_random_integers()
         response = self.client.get(reverse('api-comment-list'), data={
             'sort': 'votes', 'min': min_value, 'max': max_value
         })
