@@ -79,7 +79,7 @@ class QuestionViewSet(BaseViewSet):
                 models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)
             )).select_related('owner').prefetch_related('tags')
 
-        return models.Post.objects.question().select_related('owner').prefetch_related('tags')
+        return models.Post.objects.questions().select_related('owner').prefetch_related('tags')
 
     def get_serializer_class(self) -> type[Serializer]:
         """Get the serializer class for the action.
