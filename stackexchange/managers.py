@@ -34,6 +34,21 @@ class SiteUserQuerySet(QuerySet):
 class BadgeQuerySet(QuerySet):
     """The badge queryset
     """
+
+    def named(self):
+        """Return named badges.
+
+        :return: The named badges.
+        """
+        return self.filter(badge_type=enums.BadgeType.NAMED)
+
+    def tag_based(self):
+        """Return tag based badges.
+
+        :return: The tag based badges.
+        """
+        return self.filter(badge_type=enums.BadgeType.TAG_BASED)
+
     def with_award_count(self) -> QuerySet:
         """Annotate the queryset with the badge award count. A field named `award_count` is added to the queryset.
 
