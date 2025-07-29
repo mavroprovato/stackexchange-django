@@ -104,7 +104,7 @@ class BaseTestCase(TenantTestCase):
             self.assert_user(item, 'owner', comment.user)
 
     def assert_question_response(self, response, no_answers=False, unanswered=False):
-        """Assert that the comment response schema is correct.
+        """Assert that the question response schema is correct.
 
         :param no_answers: True if that there are no answers for this question should be tested.
         :param unanswered: True if that question is unanswered should be tested.
@@ -131,6 +131,21 @@ class BaseTestCase(TenantTestCase):
                 self.assertTrue(models.Post.objects.filter(~Exists(
                     models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)
                 )))
+
+    def assert_post_response(self, response):
+        """Assert that the post response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            post = models.Post.objects.get(id=item['post_id'])
+            self.assertEqual(item['score'], post.score)
+            self.assertEqual(dateutil.parser.parse(item['last_activity_date']), post.last_activity_date)
+            self.assertEqual(dateutil.parser.parse(item['creation_date']), post.creation_date)
+            self.assertEqual(item['post_type'], post.type)
+            self.assertEqual(item['post_id'], post.id)
+            self.assertEqual(item['content_license'], post.content_license)
+            self.assert_user(item, 'owner', post.owner)
 
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
