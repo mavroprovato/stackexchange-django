@@ -1,7 +1,5 @@
 """Posts view set list testing
 """
-import datetime
-
 from django.urls import reverse
 from rest_framework import status
 
