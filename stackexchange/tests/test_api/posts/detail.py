@@ -1,6 +1,5 @@
 """Posts view set retrieve testing
 """
-import datetime
 import random
 
 from django.urls import reverse
