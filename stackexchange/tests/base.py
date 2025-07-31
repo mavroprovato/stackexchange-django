@@ -2,6 +2,7 @@
 """
 import datetime
 import random
+import uuid
 
 import dateutil.parser
 from django.db.models import QuerySet, Exists, OuterRef
@@ -146,6 +147,28 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['post_id'], post.id)
             self.assertEqual(item['content_license'], post.content_license)
             self.assert_user(item, 'owner', post.owner)
+
+    def assert_post_revision_response(self, response):
+        """Assert that the post revision response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            # This is not 100% correct, as many post history objects can exist with the same post id and revision
+            post_history = models.PostHistory.objects.get(
+                post_id=item['post_id'], revision_guid=item['revision_guid']
+            )
+            self.assertEqual(item['set_community_wiki'], post_history.type == enums.PostHistoryType.COMMUNITY_OWNED)
+            self.assertEqual(item['is_rollback'], enums.PostHistoryType(post_history.type).rollback())
+            self.assertEqual(dateutil.parser.parse(item['creation_date']), post_history.creation_date)
+            self.assertEqual(item['post_id'], post_history.post.id)
+            self.assertEqual(item['post_type'], post_history.post.type)
+            # Need to check for revision number here
+            self.assertEqual(item['revision_type'],
+                             'vote_based' if enums.PostHistoryType(post_history.type).vote_based() else 'single_user')
+            self.assertEqual(item['comment'], post_history.comment)
+            self.assertEqual(uuid.UUID(item['revision_guid']), post_history.revision_guid)
+            self.assert_user(item, 'owner', post_history.user)
 
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
