@@ -201,7 +201,7 @@ class PostType(DescriptionMixin, enum.StrEnum):
     PRIVILEGE_WIKI = 'privilege_wiki'
 
     @staticmethod
-    def from_export_value(export_value) -> 'PostType':
+    def from_export_value(export_value: str) -> 'PostType':
         """Return the badge rank for the export value.
 
         :param export_value: The export value of the badge rank.
@@ -226,6 +226,7 @@ class PostType(DescriptionMixin, enum.StrEnum):
                 return PostType.PRIVILEGE_WIKI
             case _:
                 raise ValueError(f"Invalid export value {export_value}")
+
 
 class TagFlag(enum.Enum):
     """Enumeration for the available tag flags.
@@ -290,42 +291,122 @@ class PostLinkType(DescriptionMixin, enum.IntEnum):
     DUPLICATE = 3
 
 
-class PostHistoryType(DescriptionMixin, enum.IntEnum):
+class PostHistoryType(DescriptionMixin, enum.StrEnum):
     """Enumeration for the post history type.
     """
-    INITIAL_TITLE = 1
-    INITIAL_BODY = 2
-    INITIAL_TAGS = 3
-    EDIT_TITLE = 4
-    EDIT_BODY = 5
-    EDIT_TAGS = 6
-    ROLLBACK_TITLE = 7
-    ROLLBACK_BODY = 8
-    ROLLBACK_TAGS = 9
-    POST_CLOSED = 10
-    POST_REOPENED = 11
-    POST_DELETED = 12
-    POST_UNDELETED = 13
-    POST_LOCKED = 14
-    POST_UNLOCKED = 15
-    COMMUNITY_OWNED = 16
-    POST_MIGRATED = 17
-    QUESTION_MERGED = 18
-    QUESTION_PROTECTED = 19
-    QUESTION_UNPROTECTED = 20
-    QUESTION_UNMERGED = 22
-    SUGGESTED_EDIT_APPLIED = 24
-    POST_TWEETED = 25
-    DISCUSSION_MOVED_TO_CHAT = 31
-    POST_NOTICE_ADDED = 33
-    POST_NOTICE_REMOVED = 34
-    POST_MIGRATED_AWAY = 35
-    POST_MIGRATED_HERE = 36
-    POST_MERGE_SOURCE = 37
-    POST_MERGE_DESTINATION = 38
-    COMMUNITY_BUMP = 50
-    SELECTED_HOT_QUESTION = 52
-    REMOVED_HOT_QUESTION = 53
+    INITIAL_TITLE = 'initial_title'
+    INITIAL_BODY = 'initial_body'
+    INITIAL_TAGS = 'initial_tags'
+    EDIT_TITLE = 'edit_title'
+    EDIT_BODY = 'edit_body'
+    EDIT_TAGS = 'edit_tags'
+    ROLLBACK_TITLE = 'rollback_title'
+    ROLLBACK_BODY = 'rollback_body'
+    ROLLBACK_TAGS = 'rollback_tags'
+    POST_CLOSED = 'post_closed'
+    POST_REOPENED = 'post_reopened'
+    POST_DELETED = 'post_deleted'
+    POST_UNDELETED = 'post_undeleted'
+    POST_LOCKED = 'post_locked'
+    POST_UNLOCKED = 'post_unlocked'
+    COMMUNITY_OWNED = 'community_owned'
+    POST_MIGRATED = 'post_migrated'
+    QUESTION_MERGED = 'question_merged'
+    QUESTION_PROTECTED = 'question_protected'
+    QUESTION_UNPROTECTED = 'question_unprotected'
+    QUESTION_UNMERGED = 'question_unmerged'
+    SUGGESTED_EDIT_APPLIED = 'suggested_edit_applied'
+    POST_TWEETED = 'post_tweeted'
+    DISCUSSION_MOVED_TO_CHAT = 'discussion_moved_to_chat'
+    POST_NOTICE_ADDED = 'post_notice_added'
+    POST_NOTICE_REMOVED = 'post_notice_removed'
+    POST_MIGRATED_AWAY = 'post_migrated_away'
+    POST_MIGRATED_HERE = 'post_migrated_here'
+    POST_MERGE_SOURCE = 'post_merge_source'
+    POST_MERGE_DESTINATION = 'post_merge_destination'
+    COMMUNITY_BUMP = 'community_bump'
+    SELECTED_HOT_QUESTION = 'selected_hot_question'
+    REMOVED_HOT_QUESTION = 'removed_hot_question'
+    CREATED_FROM_ASK_WIZARD = 'created_from_ask_wizard'
+
+    @staticmethod
+    def from_export_value(export_value: str) -> 'PostHistoryType':
+        """Return the badge rank for the export value.
+
+        :param export_value: The export value of the badge rank.
+        :return: The badge rank.
+        """
+        match export_value:
+            case '1':
+                return PostHistoryType.INITIAL_TITLE
+            case '2':
+                return PostHistoryType.INITIAL_BODY
+            case '3':
+                return PostHistoryType.INITIAL_TAGS
+            case '4':
+                return PostHistoryType.EDIT_TITLE
+            case '5':
+                return PostHistoryType.EDIT_BODY
+            case '6':
+                return PostHistoryType.EDIT_TAGS
+            case '7':
+                return PostHistoryType.ROLLBACK_TITLE
+            case '8':
+                return PostHistoryType.ROLLBACK_BODY
+            case '9':
+                return PostHistoryType.ROLLBACK_TAGS
+            case '10':
+                return PostHistoryType.POST_CLOSED
+            case '11':
+                return PostHistoryType.POST_REOPENED
+            case '12':
+                return PostHistoryType.POST_DELETED
+            case '13':
+                return PostHistoryType.POST_UNDELETED
+            case '14':
+                return PostHistoryType.POST_LOCKED
+            case '15':
+                return PostHistoryType.POST_UNLOCKED
+            case '16':
+                return PostHistoryType.COMMUNITY_OWNED
+            case '17':
+                return PostHistoryType.POST_MIGRATED
+            case '18':
+                return PostHistoryType.QUESTION_MERGED
+            case '19':
+                return PostHistoryType.QUESTION_PROTECTED
+            case '20':
+                return PostHistoryType.QUESTION_UNPROTECTED
+            case '22':
+                return PostHistoryType.QUESTION_UNMERGED
+            case '24':
+                return PostHistoryType.SUGGESTED_EDIT_APPLIED
+            case '25':
+                return PostHistoryType.POST_TWEETED
+            case '31':
+                return PostHistoryType.DISCUSSION_MOVED_TO_CHAT
+            case '33':
+                return PostHistoryType.POST_NOTICE_ADDED
+            case '34':
+                return PostHistoryType.POST_NOTICE_REMOVED
+            case '35':
+                return PostHistoryType.POST_MIGRATED_AWAY
+            case '36':
+                return PostHistoryType.POST_MIGRATED_HERE
+            case '37':
+                return PostHistoryType.POST_MERGE_SOURCE
+            case '38':
+                return PostHistoryType.POST_MERGE_DESTINATION
+            case '50':
+                return PostHistoryType.COMMUNITY_BUMP
+            case '52':
+                return PostHistoryType.SELECTED_HOT_QUESTION
+            case '53':
+                return PostHistoryType.REMOVED_HOT_QUESTION
+            case '66':
+                return PostHistoryType.CREATED_FROM_ASK_WIZARD
+            case _:
+                raise ValueError(f"Invalid export value {export_value}")
 
     def vote_based(self) -> bool:
         """Return true if the post history type is vote based.

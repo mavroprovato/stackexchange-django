@@ -413,7 +413,8 @@ class PostHistoryLoader(BaseFileLoader):
         """
         if int(row['PostId']) in self.posts:
             return (
-                row['Id'], row['PostHistoryTypeId'], row['PostId'], row['RevisionGUID'], row['CreationDate'],
+                row['Id'], enums.PostHistoryType.from_export_value(row['PostHistoryTypeId']), row['PostId'],
+                row['RevisionGUID'], row['CreationDate'],
                 self.users[row['UserId']] if row.get('UserId') in self.users else '<NULL>',
                 row.get('UserDisplayName', '<NULL>'), row.get('Comment', '<NULL>'),
                 row.get('Text', '<NULL>'), row.get('ContentLicense', enums.ContentLicense.CC_BY_SA_4_0.value)

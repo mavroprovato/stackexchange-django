@@ -42,7 +42,9 @@ class SiteUser(models.Model):
 
         :return: 'moderator' if the user has enough reputation to be a moderator, or 'registered'
         """
-        return 'moderator' if self.reputation >= enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation else 'registered'
+        return 'moderator' if (
+            self.reputation is not None and self.reputation >= enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation
+        ) else 'registered'
 
 
 class Badge(models.Model):
@@ -99,6 +101,7 @@ class Post(models.Model):
         SiteUser, on_delete=models.CASCADE, related_name='last_edited_posts', null=True, blank=True,
         help_text="The last editor of the post")
     type = models.CharField(
+        max_length=max(len(pt) for pt in enums.PostType),
         choices=((pt.value, pt.description) for pt in enums.PostType), help_text="The post type")
     title = models.CharField(max_length=1000, null=True, blank=True, help_text="The post title")
     body = models.TextField(help_text="The post body")
@@ -258,7 +261,8 @@ class PostHistory(models.Model):
     user = models.ForeignKey(
         SiteUser, on_delete=models.CASCADE, null=True, blank=True, related_name='post_history',
         help_text="The user that created this history record")
-    type = models.PositiveSmallIntegerField(
+    type = models.CharField(
+        max_length=max(len(pht) for pht in enums.PostHistoryType),
         choices=((pht.value, pht.description) for pht in enums.PostHistoryType), help_text="The post history type")
     revision_guid = models.UUIDField(help_text="The GUID of the action that created this history record", db_index=True)
     creation_date = models.DateTimeField(
