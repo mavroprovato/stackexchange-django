@@ -9,11 +9,12 @@ class TagSerializer(serializers.ModelSerializer):
     """The tag serializer
     """
     is_required = fields.BooleanField(source='required')
+    is_moderator_only = fields.BooleanField(source='moderator_only')
     count = fields.IntegerField(source='award_count', help_text="The tag award count")
 
     class Meta:
         model = models.Tag
-        fields = ('is_required', 'count', 'name')
+        fields = ('is_required', 'is_moderator_only', 'count', 'name')
 
 
 class TagWikiSerializer(serializers.ModelSerializer):

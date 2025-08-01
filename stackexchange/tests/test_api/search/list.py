@@ -32,6 +32,7 @@ class SearchTests(base.BaseTestCase):
         """
         tag = random.choice(self.tags)
         response = self.client.get(reverse('api-search-list'), data={'tagged': tag.name})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_question_response(response)
 
     def test_sort_by_activity(self):

@@ -170,6 +170,18 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(uuid.UUID(item['revision_guid']), post_history.revision_guid)
             self.assert_user(item, 'owner', post_history.user)
 
+    def assert_tag_response(self, response):
+        """Assert that the tag response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            tag = models.Tag.objects.get(name=item['name'])
+            self.assertEqual(item['is_required'], tag.required)
+            self.assertEqual(item['is_moderator_only'], tag.moderator_only)
+            self.assertEqual(item['count'], tag.award_count)
+            self.assertEqual(item['name'], tag.name)
+
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
 
