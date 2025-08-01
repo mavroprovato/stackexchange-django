@@ -72,7 +72,7 @@ class TagInfoTests(base.BaseTestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_tag_response(response)
-        self.assert_items_in_range(response, 'award_count', enums.OrderingFieldType.INTEGER, min_value, max_value)
+        self.assert_items_in_range(response, 'count', enums.OrderingFieldType.INTEGER, min_value, max_value)
 
     def test_range_by_name(self):
         """Test the tag list endpoint range by badge type.

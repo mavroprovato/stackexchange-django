@@ -182,6 +182,18 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['count'], tag.award_count)
             self.assertEqual(item['name'], tag.name)
 
+    def assert_tag_wiki_response(self, response):
+        """Assert that the tag wiki response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            tag = models.Tag.objects.get(name=item['tag_name'])
+            self.assertEqual(dateutil.parser.parse(item['excerpt_last_edit_date']), tag.excerpt.last_edit_date)
+            self.assertEqual(dateutil.parser.parse(item['body_last_edit_date']), tag.wiki.last_edit_date)
+            self.assertEqual(item['excerpt'], tag.excerpt.body)
+            self.assertEqual(item['tag_name'], tag.name)
+
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
 
