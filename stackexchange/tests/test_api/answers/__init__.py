@@ -1,4 +1,4 @@
-"""Test API info
+"""Test API answers
 """
 from .comments import *
 from .detail import *

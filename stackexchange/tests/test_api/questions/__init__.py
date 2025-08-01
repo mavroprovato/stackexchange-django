@@ -1,4 +1,4 @@
-"""Test API badges
+"""Test API questions
 """
 from .answers import *
 from .comments import *
