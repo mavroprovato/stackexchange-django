@@ -207,12 +207,13 @@ class TagSynonym(models.Model):
         Tag, help_text="The to synonym tag", on_delete=models.CASCADE, related_name='to_synonym',
         null=True, blank=True
     )
-    name = models.CharField(max_length=255, help_text="The to tag synonym name")
+    to_tag_name = models.CharField(max_length=255, help_text="The to tag synonym name")
     creation_date = models.DateTimeField(default=timezone.now, help_text="The tag synonym creation date")
+    last_applied_date = models.DateTimeField(null=True, blank=True, help_text="The tag synonym last applied date")
     applied_count = models.IntegerField(help_text="The tag synonym applied count")
 
     class Meta:
-        db_table = 'tag_synonym'
+        db_table = 'tag_synonyms'
 
 
 class PostTag(models.Model):

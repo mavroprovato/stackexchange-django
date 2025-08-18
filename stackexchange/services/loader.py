@@ -254,14 +254,14 @@ class TagLoader(BaseFileLoader):
         logger.info("Updating tag flags")
         with schema_context(self.site.schema_name):
             for tag_flag in enums.TagFlag:
-                tag_names = self.get_tag_names(tag_flag)
+                tag_names = self.get_tag_names_with_flag(tag_flag)
                 for tag_name in tag_names:
                     tag = models.Tag.objects.filter(name=tag_name).first()
                     if tag is not None:
                         setattr(tag, tag_flag.attribute_name, True)
                         tag.save()
 
-    def get_tag_names(self, tag_flag: enums.TagFlag) -> Iterable[str]:
+    def get_tag_names_with_flag(self, tag_flag: enums.TagFlag) -> Iterable[str]:
         """Returns the names of the tags that have the given flag.
 
         :param tag_flag: The tag flag.
