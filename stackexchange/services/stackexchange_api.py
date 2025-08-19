@@ -1,9 +1,12 @@
 """Class used to call the StackExchange API.
 """
 from collections.abc import Iterable
+import json
 import logging
+import pathlib
 import time
 
+from django.conf import settings
 import requests
 
 from sites import models as site_models
@@ -27,6 +30,8 @@ class StackExchangeAPI:
         :param site: The site.
         """
         self.site = site
+        self._cache_dir = pathlib.Path(settings.BASE_DIR) / "var" / "cache" / self.site.name
+        self._cache_dir.mkdir(parents=True, exist_ok=True)
 
     def get_tags(self, tag_flag: enums.TagFlag) -> Iterable[dict]:
         """Get the tags that have the specified tag flag.
@@ -34,14 +39,41 @@ class StackExchangeAPI:
         :param tag_flag: The tag flag.
         :return: The tag data.
         """
-        return self._fetch_data(f"{self.STACKEXCHANGE_API_BASE_URL}/tags/{tag_flag.api_path}")
+        path = f"tags/{tag_flag.api_path}"
+        data = []
+        if self._should_fetch(path):
+            data = self._fetch_data(path)
+            with open(self._cache_file(path), 'wt') as file:
+                json.dump(data, file)
+        else:
+            with open(self._cache_file(path), 'rt') as file:
+                data = json.load(file)
 
-    def _fetch_data(self, url: str) -> Iterable[dict]:
+        return data
+
+    def _should_fetch(self, path: str) -> bool:
+        """Check if a call should be performed.
+        """
+        if not self._cache_file(path).exists():
+            return True
+
+        return False
+
+    def _cache_file(self, path: str) -> pathlib.Path:
+        """Get the cache file.
+
+        :param path: The API path.
+        :return: The cache file.
+        """
+        return self._cache_dir / pathlib.Path(path.replace('/', '_') + '.json')
+
+    def _fetch_data(self, path: str) -> Iterable[dict]:
         """Returns the data from the StackExchange API.
 
-        :param url: The endpoint URL.
+        :param path: The API path.
         :return: An iterable of the data returned by the StackExchange API.
         """
+        url = f"{self.STACKEXCHANGE_API_BASE_URL}/{path}"
         logger.info('Fetching data from StackExchange API url: %s', url)
         page = 1
         data = []
