@@ -7,13 +7,11 @@ import datetime
 import logging
 import pathlib
 import tempfile
-import time
 
 from django.conf import settings
 from django.db import connection
 from django_tenants.utils import schema_context
 import py7zr
-import requests
 
 from sites import models as site_models
 from sites import services as site_services
@@ -227,8 +225,16 @@ class TagLoader(BaseFileLoader):
     INPUT_FILENAME = 'Tags.xml'
     TABLE_NAME = 'tags'
     TABLE_COLUMNS = 'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
-    # The base URL of the official StackExchange API
-    STACKEXCHANGE_API_BASE_URL = 'https://api.stackexchange.com/2.3'
+
+    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
+        """Initialize the tag loader.
+
+        :param site: The site.
+        :param data_dir: The data directory
+        """
+        super().__init__(site, data_dir)
+
+        self.api = services.stackexchange_api.StackExchangeAPI(site=site)
 
     def perform(self) -> None:
         """Load the tags.
@@ -254,36 +260,12 @@ class TagLoader(BaseFileLoader):
         logger.info("Updating tag flags")
         with schema_context(self.site.schema_name):
             for tag_flag in enums.TagFlag:
-                tag_names = self.get_tag_names_with_flag(tag_flag)
-                for tag_name in tag_names:
-                    tag = models.Tag.objects.filter(name=tag_name).first()
+                tags = self.api.get_tags(tag_flag=tag_flag)
+                for tag_info in tags:
+                    tag = models.Tag.objects.filter(name=tag_info['name']).first()
                     if tag is not None:
                         setattr(tag, tag_flag.attribute_name, True)
                         tag.save()
-
-    def get_tag_names_with_flag(self, tag_flag: enums.TagFlag) -> Iterable[str]:
-        """Returns the names of the tags that have the given flag.
-
-        :param tag_flag: The tag flag.
-        :return: An iterable of tag names that have the given flag set.
-        """
-        page = 1
-        tags = []
-
-        while True:
-            response = requests.get(
-                f"{self.STACKEXCHANGE_API_BASE_URL}/tags/{tag_flag.api_path}",
-                params={'page': page, 'pagesize': 100, 'site': self.site.name}, timeout=60
-            )
-            response.raise_for_status()
-            response_data = response.json()
-            tags += [item['name'] for item in response_data['items']]
-            if not response_data['has_more']:
-                break
-            page += 1
-            time.sleep(1)
-
-        return tags
 
 
 class PostTagLoader(BaseFileLoader):
