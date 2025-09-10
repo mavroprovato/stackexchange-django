@@ -42,10 +42,12 @@ class StackExchangeAPI:
         path = f"tags/{tag_flag.api_path}"
         data = []
         if self._should_fetch(path):
+            logger.info("Fetching tag flag %s from API", tag_flag.attribute_name)
             data = self._fetch_data(path)
             with open(self._cache_file(path), 'wt') as file:
                 json.dump(data, file)
         else:
+            logger.info("Fetching tag flag %s from cache", tag_flag.attribute_name)
             with open(self._cache_file(path), 'rt') as file:
                 data = json.load(file)
 
