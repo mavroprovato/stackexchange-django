@@ -70,3 +70,12 @@ class TagAdmin(admin.ModelAdmin):
     search_fields = ('name', )
     ordering = ('name', )
     autocomplete_fields = ('excerpt', 'wiki')
+
+
+@admin.register(models.TagSynonym)
+class TagSynonymAdmin(admin.ModelAdmin):
+    """Admin for tags.
+    """
+    list_display = ('from_tag', 'to_tag', 'creation_date', 'last_applied_date')
+    search_fields = ('from_tag', 'to_tag')
+    ordering = ('from_tag', )
