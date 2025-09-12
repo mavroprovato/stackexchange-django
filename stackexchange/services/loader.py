@@ -282,10 +282,13 @@ class TagLoader(BaseFileLoader):
                         tag_synonym_info['last_applied_date'], datetime.UTC
                     )
 
-                TagSynonym.objects.create(
+                TagSynonym.objects.update_or_create(
                     from_tag=tag_synonym_info['from_tag'], to_tag=tag_synonym_info['to_tag'],
-                    creation_date=datetime.datetime.fromtimestamp(tag_synonym_info['creation_date'], datetime.UTC),
-                    last_applied_date=last_applied_date, applied_count=tag_synonym_info['applied_count']
+                    defaults={
+                        'creation_date': datetime.datetime.fromtimestamp(
+                            tag_synonym_info['creation_date'], datetime.UTC
+                        ), 'last_applied_date': last_applied_date, 'applied_count': tag_synonym_info['applied_count']
+                    }
                 )
 
 
