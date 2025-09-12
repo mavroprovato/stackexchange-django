@@ -182,6 +182,19 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['count'], tag.award_count)
             self.assertEqual(item['name'], tag.name)
 
+    def assert_tag_synonym_response(self, response):
+        """Assert that the tag synonym response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            tag_synonym = models.TagSynonym.objects.get(from_tag=item['from_tag'], to_tag=item['to_tag'])
+            self.assertEqual(item['from_tag'], tag_synonym.from_tag)
+            self.assertEqual(item['to_tag'], tag_synonym.to_tag)
+            self.assertEqual(dateutil.parser.parse(item['creation_date']), tag_synonym.creation_date)
+            self.assertEqual(dateutil.parser.parse(item['last_applied_date']), tag_synonym.last_applied_date)
+            self.assertEqual(item['applied_count'], tag_synonym.applied_count)
+
     def assert_tag_wiki_response(self, response):
         """Assert that the tag wiki response schema is correct.
 
