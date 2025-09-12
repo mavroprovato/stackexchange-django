@@ -16,6 +16,7 @@ import py7zr
 from sites import models as site_models
 from sites import services as site_services
 from stackexchange import enums, models, services
+from stackexchange.models import TagSynonym
 
 # The module logger
 logger = logging.getLogger(__name__)
@@ -242,6 +243,7 @@ class TagLoader(BaseFileLoader):
         super().perform()
 
         self.update_tag_flags()
+        self.update_tag_synonyms()
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the tags table.
@@ -255,7 +257,7 @@ class TagLoader(BaseFileLoader):
         )
 
     def update_tag_flags(self) -> None:
-        """Update the flags (required and moderator only) from the stack exchange API.
+        """Update the tag flags (required and moderator only) from the Stack Exchange API.
         """
         logger.info("Updating tag flags")
         with schema_context(self.site.schema_name):
@@ -266,6 +268,25 @@ class TagLoader(BaseFileLoader):
                     if tag is not None:
                         setattr(tag, tag_flag.attribute_name, True)
                         tag.save()
+
+    def update_tag_synonyms(self) -> None:
+        """Update the tag synonyms from the Stack Exchange API.
+        """
+        logger.info("Updating tag synonyms")
+        with schema_context(self.site.schema_name):
+            tag_synonyms = self.api.get_tag_synonyms()
+            for tag_synonym_info in tag_synonyms:
+                last_applied_date = None
+                if 'last_applied_date' in tag_synonym_info:
+                    last_applied_date = datetime.datetime.fromtimestamp(
+                        tag_synonym_info['last_applied_date'], datetime.UTC
+                    )
+
+                TagSynonym.objects.create(
+                    from_tag=tag_synonym_info['from_tag'], to_tag=tag_synonym_info['to_tag'],
+                    creation_date=datetime.datetime.fromtimestamp(tag_synonym_info['creation_date'], datetime.UTC),
+                    last_applied_date=last_applied_date, applied_count=tag_synonym_info['applied_count']
+                )
 
 
 class PostTagLoader(BaseFileLoader):

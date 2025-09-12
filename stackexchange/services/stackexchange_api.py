@@ -53,6 +53,25 @@ class StackExchangeAPI:
 
         return data
 
+    def get_tag_synonyms(self) -> Iterable[dict]:
+        """Get the tag synonyms.
+
+        :return: The tag synonyms.
+        """
+        path = "tags/synonyms"
+        data = []
+        if self._should_fetch(path):
+            logger.info("Fetching tag synonyms from API")
+            data = self._fetch_data(path)
+            with open(self._cache_file(path), 'wt') as file:
+                json.dump(data, file)
+        else:
+            logger.info("Fetching tag synonyms from cache")
+            with open(self._cache_file(path), 'rt') as file:
+                data = json.load(file)
+
+        return data
+
     def _should_fetch(self, path: str) -> bool:
         """Check if a call should be performed.
         """

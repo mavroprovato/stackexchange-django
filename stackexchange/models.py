@@ -200,20 +200,15 @@ class Tag(models.Model):
 class TagSynonym(models.Model):
     """The tag synonym model
     """
-    from_tag = models.ForeignKey(
-        Tag, help_text="The from synonym tag", on_delete=models.CASCADE, related_name='from_synonym'
-    )
-    to_tag = models.ForeignKey(
-        Tag, help_text="The to synonym tag", on_delete=models.CASCADE, related_name='to_synonym',
-        null=True, blank=True
-    )
-    to_tag_name = models.CharField(max_length=255, help_text="The to tag synonym name")
+    from_tag = models.CharField(null=True, blank=True, max_length=255, help_text="The from tag synonym name")
+    to_tag = models.CharField(null=True, blank=True, max_length=255, help_text="The to tag synonym name")
     creation_date = models.DateTimeField(default=timezone.now, help_text="The tag synonym creation date")
     last_applied_date = models.DateTimeField(null=True, blank=True, help_text="The tag synonym last applied date")
     applied_count = models.IntegerField(help_text="The tag synonym applied count")
 
     class Meta:
         db_table = 'tag_synonyms'
+        unique_together = ('from_tag', 'to_tag')
 
 
 class PostTag(models.Model):
