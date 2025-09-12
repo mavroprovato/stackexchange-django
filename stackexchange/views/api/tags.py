@@ -37,6 +37,10 @@ from .base import BaseViewSet
         summary='Get the tags on the site that fulfill required tag constraints',
         description=render_to_string('doc/tags/required.md'),
     ),
+    synonyms=extend_schema(
+        summary='Get all the tag synonyms on the site',
+        description=render_to_string('doc/tags/synonyms.md'),
+    ),
     wikis=extend_schema(
         summary='Get the wiki entries for a set of tags',
         description=render_to_string('doc/tags/wikis.md'),
@@ -64,6 +68,8 @@ class TagViewSet(BaseViewSet):
             return models.Tag.objects.filter(moderator_only=True)
         if self.action == 'required':
             return models.Tag.objects.filter(required=True)
+        if self.action == 'synonyms':
+            return models.TagSynonym.objects
         if self.action == 'wikis':
             return models.Tag.objects.all().select_related('excerpt', 'wiki').order_by('name')
 
@@ -74,6 +80,8 @@ class TagViewSet(BaseViewSet):
 
         :return: The serializer class for the action.
         """
+        if self.action == 'synonyms':
+            return serializers.TagSynonymSerializer
         if self.action == 'wikis':
             return serializers.TagWikiSerializer
 
@@ -89,6 +97,12 @@ class TagViewSet(BaseViewSet):
             return (
                 filters.OrderingField('popular', 'award_count', type=enums.OrderingFieldType.INTEGER),
                 filters.OrderingField('name', direction=enums.OrderingDirection.ASC)
+            )
+        if self.action == 'synonyms':
+            return (
+                filters.OrderingField('creation', 'creation_date', type=enums.OrderingFieldType.DATE),
+                filters.OrderingField('applied', 'applied_count', type=enums.OrderingFieldType.INTEGER),
+                filters.OrderingField('activity', 'last_applied_date', type=enums.OrderingFieldType.INTEGER)
             )
 
         return None
@@ -125,6 +139,15 @@ class TagViewSet(BaseViewSet):
     @action(detail=False, url_path='required')
     def required(self, request: Request, *args, **kwargs) -> Response:
         """Get the tags on the site that fulfill required tag constraints.
+
+        :param request: The request.
+        :return: The response.
+        """
+        return super().list(request, *args, **kwargs)
+
+    @action(detail=False, url_path='synonyms')
+    def synonyms(self, request: Request, *args, **kwargs) -> Response:
+        """Get the tag synonyms.
 
         :param request: The request.
         :return: The response.

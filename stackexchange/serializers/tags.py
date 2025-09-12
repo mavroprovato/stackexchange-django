@@ -17,6 +17,13 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('is_required', 'is_moderator_only', 'count', 'name')
 
 
+class TagSynonymSerializer(serializers.ModelSerializer):
+    """The tag synonym serializer
+    """
+    class Meta:
+        model = models.TagSynonym
+        fields = ('from_tag', 'to_tag', 'creation_date', 'last_applied_date', 'applied_count')
+
 class TagWikiSerializer(serializers.ModelSerializer):
     """The tag wiki serializer
     """
