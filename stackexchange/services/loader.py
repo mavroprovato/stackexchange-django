@@ -162,7 +162,7 @@ class UserBadgeLoader(BaseFileLoader):
         """
         super().__init__(site, data_dir)
         with schema_context(self.site.schema_name):
-            self.users = set(models.SiteUser.objects.values_list('pk', flat=True))
+            self.users = {u['unique_id']: u['pk'] for u in models.SiteUser.objects.values('pk', 'unique_id')}
             self.badges = {b['name']: b['pk'] for b in models.Badge.objects.values('pk', 'name')}
 
     def transform(self, row: dict) -> tuple | list[tuple] | None:
@@ -172,7 +172,7 @@ class UserBadgeLoader(BaseFileLoader):
         :return: The transformed row.
         """
         if int(row['UserId']) in self.users:
-            return row['UserId'], self.badges[row['Name']], row['Date']
+            return self.users[int(row['UserId'])], self.badges[row['Name']], row['Date']
 
         return None
 
