@@ -26,7 +26,7 @@ class UserListTests(base.BaseTestCase):
         """Test the user detail endpoint.
         """
         user = random.sample(list(models.SiteUser.objects.all()), 1)[0]
-        response = self.client.get(reverse('api-user-detail', kwargs={'pk': user.pk}))
+        response = self.client.get(reverse('api-user-detail', kwargs={'pk': user.unique_id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_user_response(response)
 
@@ -34,7 +34,9 @@ class UserListTests(base.BaseTestCase):
         """Test the user detail endpoint for multiple ids.
         """
         users = random.sample(list(models.SiteUser.objects.all()), 3)
-        response = self.client.get(reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}))
+        response = self.client.get(
+            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)})
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_user_response(response)
 
@@ -44,7 +46,7 @@ class UserListTests(base.BaseTestCase):
         for order in enums.OrderingDirection:
             users = random.sample(list(models.SiteUser.objects.all()), 3)
             response = self.client.get(
-                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
                 data={'sort': 'reputation', 'order': order.value}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -57,7 +59,7 @@ class UserListTests(base.BaseTestCase):
         for order in enums.OrderingDirection:
             users = random.sample(list(models.SiteUser.objects.all()), 3)
             response = self.client.get(
-                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
                 data={'sort': 'creation', 'order': order.value}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -70,7 +72,7 @@ class UserListTests(base.BaseTestCase):
         for order in enums.OrderingDirection:
             users = random.sample(list(models.SiteUser.objects.all()), 3)
             response = self.client.get(
-                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
                 data={'sort': 'name', 'order': order.value}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -83,7 +85,7 @@ class UserListTests(base.BaseTestCase):
         for order in enums.OrderingDirection:
             users = random.sample(list(models.SiteUser.objects.all()), 3)
             response = self.client.get(
-                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+                reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
                 data={'sort': 'modified', 'order': order.value}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -96,12 +98,12 @@ class UserListTests(base.BaseTestCase):
         min_value, max_value = self.generate_random_integers(max_value=500_000)
         users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
-            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
             data={'sort': 'reputation', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_user_response(response)
-        self.assert_items_in_range(response, 'reputation', enums.OrderingFieldType.DATE, min_value, max_value)
+        self.assert_items_in_range(response, 'reputation', enums.OrderingFieldType.INTEGER, min_value, max_value)
 
     def test_range_by_creation(self):
         """Test the user list endpoint range by user creation date.
@@ -109,7 +111,7 @@ class UserListTests(base.BaseTestCase):
         min_value, max_value = self.generate_random_date_range()
         users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
-            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
             data={'sort': 'creation', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -123,7 +125,7 @@ class UserListTests(base.BaseTestCase):
         max_value = 't'
         users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
-            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
             data={'sort': 'name', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -136,7 +138,7 @@ class UserListTests(base.BaseTestCase):
         min_value, max_value = self.generate_random_date_range()
         users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
-            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
             data={'sort': 'modified', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -149,7 +151,7 @@ class UserListTests(base.BaseTestCase):
         from_date, to_date = self.generate_random_date_range()
         users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
-            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-detail', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
             data={'fromdate': from_date.isoformat(), 'todate': to_date.isoformat()}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)

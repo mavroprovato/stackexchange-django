@@ -88,7 +88,7 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['badge_type'], enums.BadgeType(badge.badge_type).value)
             self.assertEqual(item['rank'], enums.BadgeRank(badge.rank).value)
             self.assertEqual(item['name'], badge.name)
-            site_user = models.SiteUser.objects.get(id=item['user']['user_id'])
+            site_user = models.SiteUser.objects.get(unique_id=item['user']['user_id'])
             self.assert_user(item, 'user', site_user)
 
     def assert_comment_response(self, response):
@@ -213,7 +213,7 @@ class BaseTestCase(TenantTestCase):
         :param response: The response.
         """
         for item in response.json()['items']:
-            user = models.SiteUser.objects.get(id=item['user_id'])
+            user = models.SiteUser.objects.get(unique_id=item['user_id'])
             self.assertEqual(item['badge_counts']['bronze'], models.UserBadge.objects.filter(
                 user=user, badge__rank=enums.BadgeRank.BRONZE.value
             ).count())
@@ -239,7 +239,7 @@ class BaseTestCase(TenantTestCase):
         """
         if item[user_attr] is not None:
             self.assertEqual(item[user_attr]['reputation'], user.reputation)
-            self.assertEqual(item[user_attr]['user_id'], user.id)
+            self.assertEqual(item[user_attr]['user_id'], user.unique_id)
             self.assertEqual(item[user_attr]['display_name'], user.display_name)
             self.assertEqual(item[user_attr]['user_type'], user.user_type())
 

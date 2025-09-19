@@ -152,6 +152,7 @@ class UserViewSet(BaseViewSet):
     """The user view set
     """
     filter_backends = (filters.OrderingRangeFilter, filters.DateRangeFilter, filters.InNameFilter)
+    pk_field = 'unique_id'
 
     def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.

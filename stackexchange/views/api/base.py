@@ -17,6 +17,8 @@ class BaseListViewSet(GenericViewSet):
     """
     # The maximum number of object to retrieve for detail actions
     MAX_RETRIEVE_OBJECTS = 100
+    # The field used to uniquely identify the object for detail actions
+    pk_field = 'pk'
 
     def list(self, request: Request, *args, **kwargs) -> Response:
         """Override the retrieve method in order to accept a list of semicolon separated list of object ids.
@@ -55,7 +57,7 @@ class BaseListViewSet(GenericViewSet):
         :return: The fields used to filter detail actions.
         """
         if self.action == 'retrieve':
-            return 'pk'
+            return self.pk_field
 
         return None
 

@@ -11,7 +11,7 @@ from .base import BaseSerializer
 class BaseSiteUserSerializer(serializers.ModelSerializer):
     """The base site user serializer.
     """
-    user_id = fields.IntegerField(source="pk", help_text="The user identifier")
+    user_id = fields.IntegerField(source='unique_id', help_text="The user identifier")
 
     class Meta:
         model = models.SiteUser
@@ -38,7 +38,7 @@ class SiteUserSerializer(serializers.ModelSerializer):
     """The user serializer.
     """
     badge_counts = UserBadgeCountSerializer(source="*", help_text="The user badge counts")
-    user_id = fields.IntegerField(source="pk", help_text="The user identifier")
+    user_id = fields.IntegerField(source='unique_id', help_text="The user identifier")
 
     class Meta:
         model = models.SiteUser

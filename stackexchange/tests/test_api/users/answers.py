@@ -28,7 +28,7 @@ class UserAnswerTests(base.BaseTestCase):
         """Test the user answer list endpoint
         """
         site_user = random.sample(list(models.SiteUser.objects.all()), 1)[0]
-        response = self.client.get(reverse('api-user-answers', kwargs={'pk': site_user.pk}))
+        response = self.client.get(reverse('api-user-answers', kwargs={'pk': site_user.unique_id}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_answer_response(response)
 
@@ -37,7 +37,7 @@ class UserAnswerTests(base.BaseTestCase):
         """
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
-            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}))
+            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.unique_id) for site_user in site_users)}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_answer_response(response)
 
@@ -47,8 +47,9 @@ class UserAnswerTests(base.BaseTestCase):
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         for order in enums.OrderingDirection:
             response = self.client.get(
-                reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
-                data={'sort': 'activity', 'order': order.value}
+                reverse(
+                    'api-user-answers', kwargs={'pk': ';'.join(str(site_user.unique_id) for site_user in site_users)}
+                ), data={'sort': 'activity', 'order': order.value}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assert_answer_response(response)
@@ -60,8 +61,9 @@ class UserAnswerTests(base.BaseTestCase):
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         for order in enums.OrderingDirection:
             response = self.client.get(
-                reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
-                data={'sort': 'creation', 'order': order.value}
+                reverse(
+                    'api-user-answers', kwargs={'pk': ';'.join(str(site_user.unique_id) for site_user in site_users)}
+                ), data={'sort': 'creation', 'order': order.value}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assert_answer_response(response)
@@ -73,8 +75,9 @@ class UserAnswerTests(base.BaseTestCase):
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         for order in enums.OrderingDirection:
             response = self.client.get(
-                reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
-                data={'sort': 'votes', 'order': order.value}
+                reverse(
+                    'api-user-answers', kwargs={'pk': ';'.join(str(site_user.unique_id) for site_user in site_users)}
+                ), data={'sort': 'votes', 'order': order.value}
             )
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assert_answer_response(response)
@@ -86,7 +89,7 @@ class UserAnswerTests(base.BaseTestCase):
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         min_value, max_value = self.generate_random_date_range()
         response = self.client.get(
-            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
+            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.unique_id) for site_user in site_users)}),
             data={'sort': 'activity', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -99,7 +102,7 @@ class UserAnswerTests(base.BaseTestCase):
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         min_value, max_value = self.generate_random_date_range()
         response = self.client.get(
-            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
+            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.unique_id) for site_user in site_users)}),
             data={'sort': 'creation', 'min': min_value, 'max': max_value}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -112,7 +115,7 @@ class UserAnswerTests(base.BaseTestCase):
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
         min_value, max_value = self.generate_random_integers(max_value=3_000)
         response = self.client.get(
-            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.pk) for site_user in site_users)}),
+            reverse('api-user-answers', kwargs={'pk': ';'.join(str(site_user.unique_id) for site_user in site_users)}),
             data={'sort': 'votes', 'min': min_value, 'max': max_value}
         )
         self.assert_answer_response(response)
@@ -124,7 +127,7 @@ class UserAnswerTests(base.BaseTestCase):
         from_date, to_date = self.generate_random_date_range()
         users = random.sample(list(models.SiteUser.objects.all()), 3)
         response = self.client.get(
-            reverse('api-user-answers', kwargs={'pk': ';'.join(str(user.pk) for user in users)}),
+            reverse('api-user-answers', kwargs={'pk': ';'.join(str(user.unique_id) for user in users)}),
             data={'fromdate': from_date.isoformat(), 'todate': to_date.isoformat()}
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
