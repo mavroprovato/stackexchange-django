@@ -14,20 +14,19 @@ class SiteUserQuerySet(QuerySet):
     """The site user manager.
     """
     def with_badge_counts(self) -> QuerySet:
-        """Annotate the queryset with the badge counts per badge type. Tree fields are added, named
-        `<badge_class>_count`.
+        """Annotate the queryset with the badge counts per badge type. Three fields are added, named `<rank>_count`.
 
         :return: The annotated queryset.
         """
         return self.annotate(**{
-            f"{badge_class.name.lower()}_count": Coalesce(Subquery(
+            f"{rank.name.lower()}_count": Coalesce(Subquery(
                 apps.get_model('stackexchange', 'UserBadge').objects.filter(
-                    user=OuterRef('pk'), badge__badge_class=badge_class.value
-                ).values('badge__badge_class').annotate(
+                    user=OuterRef('pk'), badge__rank=rank.value
+                ).values('badge__rank').annotate(
                     count=Count('pk')
                 ).values('count')
             ), 0)
-            for badge_class in enums.BadgeRank
+            for rank in enums.BadgeRank
         })
 
 

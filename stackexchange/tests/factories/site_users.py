@@ -20,7 +20,7 @@ class SiteUserFactory(factory.django.DjangoModelFactory):
     about = factory.Faker('sentence')
     creation_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
     last_access_date = factory.Faker('date_time_between', start_date='-1y', tzinfo=datetime.UTC)
-    reputation = factory.Faker('pyint')
+    reputation = factory.Faker('pyint', min_value=0, max_value=500_000)
     views = factory.Faker('pyint')
     up_votes = factory.Faker('pyint')
     down_votes = factory.Faker('pyint')

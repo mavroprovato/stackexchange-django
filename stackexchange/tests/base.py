@@ -207,6 +207,29 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(item['excerpt'], tag.excerpt.body)
             self.assertEqual(item['tag_name'], tag.name)
 
+    def assert_user_response(self, response):
+        """Assert that the user response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            user = models.SiteUser.objects.get(id=item['user_id'])
+            self.assertEqual(item['badge_counts']['bronze'], models.UserBadge.objects.filter(
+                user=user, badge__rank=enums.BadgeRank.BRONZE.value
+            ).count())
+            self.assertEqual(item['badge_counts']['silver'], models.UserBadge.objects.filter(
+                user=user, badge__rank=enums.BadgeRank.SILVER.value
+            ).count())
+            self.assertEqual(item['badge_counts']['gold'], models.UserBadge.objects.filter(
+                user=user, badge__rank=enums.BadgeRank.GOLD.value
+            ).count())
+            self.assertEqual(item['reputation'], user.reputation)
+            self.assertEqual(item['location'], user.location)
+            self.assertEqual(item['website_url'], user.website_url)
+            self.assertEqual(item['display_name'], user.display_name)
+            self.assertEqual(dateutil.parser.parse(item['creation_date']), user.creation_date)
+            self.assertEqual(dateutil.parser.parse(item['last_modified_date']), user.last_modified_date)
+
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
 
