@@ -325,11 +325,11 @@ class UserViewSet(BaseViewSet):
             'answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered',
             'top_answer_tags', 'top_question_tags'
         ):
-            return 'owner'
+            return 'owner__unique_id'
         if self.action in ('badges', 'comments'):
-            return 'user'
+            return 'user__unique_id'
         if self.action == 'favorites':
-            return 'votes__user'
+            return 'votes__user__unique_id'
 
         return super().detail_field
 
