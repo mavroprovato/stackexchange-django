@@ -11,11 +11,12 @@ from .base import BaseSerializer
 class BaseSiteUserSerializer(serializers.ModelSerializer):
     """The base site user serializer.
     """
+    account_id = fields.IntegerField(source='id', help_text="The user unique identifier")
     user_id = fields.IntegerField(source='unique_id', help_text="The user identifier")
 
     class Meta:
         model = models.SiteUser
-        fields = ('reputation', 'user_id', 'display_name', 'user_type')
+        fields = ('account_id', 'reputation', 'user_id', 'user_type', 'display_name')
 
 
 class UserBadgeCountSerializer(BaseSerializer):

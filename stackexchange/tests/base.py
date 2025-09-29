@@ -238,10 +238,11 @@ class BaseTestCase(TenantTestCase):
         :param user: The user.
         """
         if item[user_attr] is not None:
+            self.assertEqual(item[user_attr]['account_id'], user.id)
             self.assertEqual(item[user_attr]['reputation'], user.reputation)
             self.assertEqual(item[user_attr]['user_id'], user.unique_id)
-            self.assertEqual(item[user_attr]['display_name'], user.display_name)
             self.assertEqual(item[user_attr]['user_type'], user.user_type())
+            self.assertEqual(item[user_attr]['display_name'], user.display_name)
 
     def assert_tags(self, item: dict, tags: QuerySet):
         """Assert that the tags are correct.
