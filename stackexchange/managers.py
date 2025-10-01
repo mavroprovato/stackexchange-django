@@ -34,14 +34,14 @@ class BadgeQuerySet(QuerySet):
     """The badge queryset
     """
 
-    def named(self):
+    def named(self) -> QuerySet:
         """Return named badges.
 
         :return: The named badges.
         """
         return self.filter(badge_type=enums.BadgeType.NAMED)
 
-    def tag_based(self):
+    def tag_based(self) -> QuerySet:
         """Return tag based badges.
 
         :return: The tag based badges.
@@ -65,19 +65,26 @@ class BadgeQuerySet(QuerySet):
 class PostQuerySet(QuerySet):
     """The post queryset
     """
-    def questions(self):
+    def questions(self) -> QuerySet:
         """Return questions.
 
         :return: The questions.
         """
         return self.filter(type=enums.PostType.QUESTION)
 
-    def answers(self):
+    def answers(self) -> QuerySet:
         """Return answers.
 
         :return: The answers.
         """
         return self.filter(type=enums.PostType.ANSWER)
+
+    def questions_and_answers(self):
+        """Return questions and answers.
+
+        :return: The answers.
+        """
+        return self.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))
 
 
 class UserBadgeQuerySet(QuerySet):

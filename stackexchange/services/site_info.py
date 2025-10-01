@@ -7,7 +7,7 @@ from django.db.models import Count, Max, Min, Q
 from django_tenants.utils import schema_context
 
 from sites import models as site_models
-from stackexchange import enums, models
+from stackexchange import models
 
 # The module logger
 logger = logging.getLogger(__name__)
@@ -42,11 +42,11 @@ class SiteInfo:
                 **models.UserBadge.objects.aggregate(
                     total_badges=Count('*'), first_badge_date=Min('date_awarded'), last_badge_date=Max('date_awarded')
                 ),
-                **models.Post.objects.filter(type=enums.PostType.QUESTION).aggregate(
+                **models.Post.objects.questions().aggregate(
                     total_questions=Count('*'), total_accepted=Count('pk', filter=Q(accepted_answer__isnull=False)),
                     first_question_date=Min('creation_date'), last_question_date=Max('creation_date')
                 ),
-                **models.Post.objects.filter(type=enums.PostType.ANSWER).aggregate(
+                **models.Post.objects.answers().aggregate(
                     total_answers=Count('*'), first_answer_date=Min('creation_date'),
                     last_answer_date=Max('creation_date')
                 ),

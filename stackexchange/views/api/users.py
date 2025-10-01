@@ -160,7 +160,7 @@ class UserViewSet(BaseViewSet):
         :return: The queryset for the action
         """
         if self.action == 'answers':
-            return models.Post.objects.filter(type=enums.PostType.ANSWER).select_related('owner', 'question')
+            return models.Post.objects.answers().select_related('owner', 'question')
         if self.action == 'badges':
             return models.UserBadge.objects.per_user_and_badge()
         if self.action == 'comments':
@@ -173,11 +173,9 @@ class UserViewSet(BaseViewSet):
             return models.SiteUser.objects.with_badge_counts().filter(
                 reputation__gt=enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation)
         if self.action == 'posts':
-            return models.Post.objects.filter(
-                type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER)).select_related('owner')
+            return models.Post.objects.questions_and_answers().select_related('owner')
         if self.action == 'questions':
-            return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
-                'tags')
+            return models.Post.objects.questions().select_related('owner').prefetch_related('tags')
         if self.action == 'questions_no_answers':
             return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
                 'owner').prefetch_related('tags')

@@ -28,7 +28,7 @@ class QuestionAnswerTests(base.BaseTestCase):
     def test(self):
         """Test question list endpoint
         """
-        questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        questions = random.sample(list(models.Post.objects.answers()), 3)
         response = self.client.get(
             reverse('api-question-answers', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
         self.assert_answer_response(response)

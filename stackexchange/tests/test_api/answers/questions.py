@@ -29,7 +29,7 @@ class AnswerQuestionTests(base.BaseTestCase):
     def test(self):
         """Test the answer questions endpoint
         """
-        answer = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 1)[0]
+        answer = random.sample(list(models.Post.objects.answers()), 1)[0]
         response = self.client.get(reverse('api-answer-questions', kwargs={'pk': answer.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_question_response(response)
@@ -37,7 +37,7 @@ class AnswerQuestionTests(base.BaseTestCase):
     def test_multiple(self):
         """Test the answer questions endpoint for multiple answers
         """
-        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        answers = random.sample(list(models.Post.objects.answers()), 3)
         response = self.client.get(
             reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -47,7 +47,7 @@ class AnswerQuestionTests(base.BaseTestCase):
         """Test the answer questions endpoint sorted by activity date.
         """
         for order in enums.OrderingDirection:
-            answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+            answers = random.sample(list(models.Post.objects.answers()), 3)
             response = self.client.get(
                 reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
                 data={'sort': 'activity', 'order': order.value}
@@ -60,7 +60,7 @@ class AnswerQuestionTests(base.BaseTestCase):
         """Test the answer questions list sorted by comment votes.
         """
         for order in enums.OrderingDirection:
-            answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+            answers = random.sample(list(models.Post.objects.answers()), 3)
             response = self.client.get(
                 reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
                 data={'sort': 'creation', 'order': order.value}
@@ -73,7 +73,7 @@ class AnswerQuestionTests(base.BaseTestCase):
         """Test the answer questions endpoint range by activity.
         """
         for order in enums.OrderingDirection:
-            answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+            answers = random.sample(list(models.Post.objects.answers()), 3)
             response = self.client.get(
                 reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
                 data={'sort': 'votes', 'order': order.value}
@@ -85,7 +85,7 @@ class AnswerQuestionTests(base.BaseTestCase):
     def test_sort_by_creation_date(self):
         """Test the answer questions list sorted by comment creation date.
         """
-        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        answers = random.sample(list(models.Post.objects.answers()), 3)
         min_value, max_value = self.generate_random_date_range()
         response = self.client.get(
             reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
@@ -98,7 +98,7 @@ class AnswerQuestionTests(base.BaseTestCase):
     def test_range_by_votes(self):
         """Test the answer questions list endpoint range by comment score.
         """
-        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        answers = random.sample(list(models.Post.objects.answers()), 3)
         min_value, max_value = self.generate_random_integers()
         response = self.client.get(
             reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
@@ -111,7 +111,7 @@ class AnswerQuestionTests(base.BaseTestCase):
     def test_range_by_creation_date(self):
         """Test the answer questions list endpoint range by creation date.
         """
-        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        answers = random.sample(list(models.Post.objects.answers()), 3)
         min_value, max_value = self.generate_random_date_range()
         response = self.client.get(
             reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}),
@@ -124,7 +124,7 @@ class AnswerQuestionTests(base.BaseTestCase):
     def test_date_range(self):
         """Test the answer questions list endpoint date range.
         """
-        answers = random.sample(list(models.Post.objects.filter(type=enums.PostType.ANSWER)), 3)
+        answers = random.sample(list(models.Post.objects.answers()), 3)
         from_date, to_date = self.generate_random_date_range()
         response = self.client.get(
             reverse('api-answer-questions', kwargs={'pk': ';'.join(str(answer.pk) for answer in answers)}), data={
