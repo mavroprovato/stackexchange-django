@@ -53,11 +53,11 @@ class UserBadgeDetailSerializer(BaseSerializer):
     """The user badge detail serializer
     """
     user = fields.SerializerMethodField()
-    badge_type = fields.SerializerMethodField(help_text="The badge type")
+    badge_type = fields.CharField(help_text="The badge type")
     award_count = fields.IntegerField(help_text="The number of times the user has been awarded the badge")
-    rank = fields.SerializerMethodField(help_text="The badge rank")
+    rank = fields.CharField(help_text="The badge rank")
     badge_id = fields.IntegerField(source='badge', help_text="The badge identifier")
-    name = fields.CharField(source='badge__name', help_text="The badge name")
+    name = fields.CharField(help_text="The badge name")
 
     def get_user(self, user_badge: dict) -> dict:
         """Get the user.
@@ -76,24 +76,6 @@ class UserBadgeDetailSerializer(BaseSerializer):
         :return: The user.
         """
         return models.SiteUser.objects.get(pk=user_id)
-
-    @staticmethod
-    def get_badge_type(user_badge: dict) -> str:
-        """Get the user badge type.
-
-        :param user_badge: The user badge info.
-        :return: The badge type.
-        """
-        return str(enums.BadgeType(user_badge['badge__badge_type']).name).lower()
-
-    @staticmethod
-    def get_rank(user_badge: dict) -> str:
-        """Get the user badge rank.
-
-        :param user_badge: The user badge info.
-        :return: The badge type.
-        """
-        return str(enums.BadgeRank(user_badge['badge__badge_class']).name).lower()
 
 
 class UserPrivilegeSerializer(BaseSerializer):

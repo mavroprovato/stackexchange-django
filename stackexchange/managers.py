@@ -4,7 +4,7 @@ import collections.abc
 
 from django.apps import apps
 from django.db import connection
-from django.db.models import OuterRef, Count, Subquery, QuerySet, Min
+from django.db.models import OuterRef, Count, Subquery, QuerySet, Min, F
 from django.db.models.functions import Coalesce
 
 from stackexchange import enums
@@ -83,14 +83,14 @@ class PostQuerySet(QuerySet):
 class UserBadgeQuerySet(QuerySet):
     """The user badge queryset
     """
-    def per_user_and_badge(self) -> dict:
+    def per_user_and_badge(self) -> QuerySet:
         """Returns a distinct queryset per user and badge. The queryset is annotated with the award count and the first
         date that the badge was awarded to the user.
 
         :return: The aggregated queryset.
         """
         return self.values(
-            'user', 'badge', 'badge__badge_class', 'badge__name', 'badge__badge_type'
+            'user', 'badge', name=F('badge__name'), rank=F('badge__rank'), badge_type=F('badge__badge_type')
         ).annotate(award_count=Count('*'), date_awarded=Min('date_awarded'))
 
 

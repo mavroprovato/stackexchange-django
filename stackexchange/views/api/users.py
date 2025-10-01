@@ -287,9 +287,9 @@ class UserViewSet(BaseViewSet):
             )
         if self.action == 'badges':
             return (
-                filters.OrderingField('rank', 'badge__rank', type=enums.OrderingFieldType.RANK),
-                filters.OrderingField('name', 'badge__name', enums.OrderingDirection.ASC),
-                filters.OrderingField('type', 'badge__badge_type', type=enums.OrderingFieldType.BADGE_TYPE),
+                filters.OrderingField('rank', 'rank', type=enums.OrderingFieldType.RANK),
+                filters.OrderingField('name', 'name', enums.OrderingDirection.ASC),
+                filters.OrderingField('type', 'badge_type', type=enums.OrderingFieldType.BADGE_TYPE),
                 filters.OrderingField('awarded', 'date_awarded', type=enums.OrderingFieldType.DATE)
             )
         if self.action == 'comments':
