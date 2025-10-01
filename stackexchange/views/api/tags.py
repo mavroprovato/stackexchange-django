@@ -59,7 +59,7 @@ class TagViewSet(BaseViewSet):
     detail_field = 'name'
     detail_field_integer = False
 
-    def get_queryset(self) -> QuerySet | None:
+    def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
 
         :return: The queryset for the action.
@@ -69,9 +69,9 @@ class TagViewSet(BaseViewSet):
         if self.action == 'required':
             return models.Tag.objects.filter(required=True)
         if self.action == 'synonyms':
-            return models.TagSynonym.objects
+            return models.TagSynonym.objects.all()
         if self.action == 'wikis':
-            return models.Tag.objects.all().select_related('excerpt', 'wiki').order_by('name')
+            return models.Tag.objects.select_related('excerpt', 'wiki').order_by('name')
 
         return models.Tag.objects.all()
 

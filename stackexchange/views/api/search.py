@@ -32,8 +32,7 @@ class SearchViewSet(BaseViewSet):
 
         :return: The queryset for the action.
         """
-        return models.Post.objects.filter(type=enums.PostType.QUESTION).select_related('owner').prefetch_related(
-            'tags')
+        return models.Post.objects.questions().select_related('owner').prefetch_related('tags')
 
     def get_serializer_class(self) -> type[Serializer]:
         """Get the serializer class for the action.
