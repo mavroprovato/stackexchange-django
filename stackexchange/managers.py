@@ -4,7 +4,7 @@ import collections.abc
 
 from django.apps import apps
 from django.db import connection
-from django.db.models import OuterRef, Count, Subquery, QuerySet, Min, F
+from django.db.models import OuterRef, Count, Subquery, QuerySet, Min, F, Exists
 from django.db.models.functions import Coalesce
 
 from stackexchange import enums
@@ -92,6 +92,15 @@ class PostQuerySet(QuerySet):
         :return: The posts with no answers.
         """
         return self.filter(answer_count=0)
+
+    def unanswered(self) -> QuerySet:
+        """Return unanswered posts.
+
+        :return: The posts with no answers.
+        """
+        return self.filter(~Exists(
+            self.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)
+        ))
 
 
 class UserBadgeQuerySet(QuerySet):

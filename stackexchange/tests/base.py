@@ -129,9 +129,7 @@ class BaseTestCase(TenantTestCase):
             if no_answers:
                 self.assertTrue(question.answer_count == 0)
             if unanswered:
-                self.assertTrue(models.Post.objects.filter(~Exists(
-                    models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)
-                )))
+                self.assertTrue(models.Post.objects.filter(pk=question.pk).unanswered().exists())
 
     def assert_post_response(self, response):
         """Assert that the post response schema is correct.
