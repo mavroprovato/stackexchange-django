@@ -72,8 +72,7 @@ class QuestionViewSet(BaseViewSet):
         if self.action == 'comments':
             return models.PostComment.objects.select_related('user')
         if self.action == 'no_answers':
-            return models.Post.objects.questions().filter(answer_count=0).select_related('owner').prefetch_related(
-                'tags')
+            return models.Post.objects.questions().no_answers().select_related('owner').prefetch_related('tags')
         if self.action == 'unanswered':
             return models.Post.objects.questions().filter(~Exists(
                 models.Post.objects.filter(question=OuterRef('pk'), type=enums.PostType.ANSWER, score__gt=0)

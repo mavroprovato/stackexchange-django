@@ -177,8 +177,7 @@ class UserViewSet(BaseViewSet):
         if self.action == 'questions':
             return models.Post.objects.questions().select_related('owner').prefetch_related('tags')
         if self.action == 'questions_no_answers':
-            return models.Post.objects.filter(type=enums.PostType.QUESTION, answer_count=0).select_related(
-                'owner').prefetch_related('tags')
+            return models.Post.objects.questions().no_answer().select_related('owner').prefetch_related('tags')
         if self.action == 'questions_unaccepted':
             return models.Post.objects.filter(type=enums.PostType.QUESTION).filter(
                 answer_count__gt=0, accepted_answer__isnull=True

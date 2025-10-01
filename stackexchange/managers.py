@@ -86,6 +86,13 @@ class PostQuerySet(QuerySet):
         """
         return self.filter(type__in=(enums.PostType.QUESTION, enums.PostType.ANSWER))
 
+    def no_answers(self) -> QuerySet:
+        """Return posts with no answers.
+
+        :return: The posts with no answers.
+        """
+        return self.filter(answer_count=0)
+
 
 class UserBadgeQuerySet(QuerySet):
     """The user badge queryset
