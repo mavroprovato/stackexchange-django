@@ -56,7 +56,7 @@ class AnswerViewSet(BaseViewSet):
     """
     filter_backends = (filters.OrderingRangeFilter, filters.DateRangeFilter)
 
-    def get_queryset(self) -> QuerySet | None:
+    def get_queryset(self) -> QuerySet:
         """Return the queryset for the action.
 
         :return: The queryset for the action.
