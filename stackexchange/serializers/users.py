@@ -55,6 +55,7 @@ class UserBadgeDetailSerializer(BaseSerializer):
     user = fields.SerializerMethodField()
     badge_type = fields.CharField(help_text="The badge type")
     award_count = fields.IntegerField(help_text="The number of times the user has been awarded the badge")
+    date_awarded = fields.DateTimeField(help_text="The date that the badge was awarded.")
     rank = fields.CharField(help_text="The badge rank")
     badge_id = fields.IntegerField(source='badge', help_text="The badge identifier")
     name = fields.CharField(help_text="The badge name")

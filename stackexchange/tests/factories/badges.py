@@ -25,6 +25,7 @@ class UserBadgeFactory(factory.django.DjangoModelFactory):
     """
     class Meta:
         model = models.UserBadge
+        django_get_or_create = ('user', 'badge')
 
     user = factory.SubFactory(SiteUserFactory)
     badge = factory.SubFactory(BadgeFactory)

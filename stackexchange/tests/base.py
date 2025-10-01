@@ -228,6 +228,15 @@ class BaseTestCase(TenantTestCase):
             self.assertEqual(dateutil.parser.parse(item['creation_date']), user.creation_date)
             self.assertEqual(dateutil.parser.parse(item['last_modified_date']), user.last_modified_date)
 
+    def assert_user_badge_response(self, response):
+        """Assert that the user badge response schema is correct.
+
+        :param response: The response.
+        """
+        for item in response.json()['items']:
+            user_badge = models.UserBadge.objects.get(user__unique_id=item['user']['user_id'], badge=item['badge_id'])
+            self.assert_user(item, user_attr='user', user=user_badge.user)
+
     def assert_user(self, item: dict, user_attr: str, user: models.SiteUser):
         """Assert that the user response schema is correct.
 
