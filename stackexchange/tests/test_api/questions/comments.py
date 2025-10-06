@@ -33,7 +33,7 @@ class QuestionCommentsTests(base.BaseTestCase):
             reverse('api-question-comments', kwargs={'pk': ';'.join(str(question.pk) for question in questions)}))
         self.assert_comment_response(response)
 
-    def test_sort_by_creation_date(self):
+    def test_sort_by_creation(self):
         """Test the question comments sorted by comment creation date.
         """
         for order in enums.OrderingDirection:
@@ -59,7 +59,7 @@ class QuestionCommentsTests(base.BaseTestCase):
             self.assert_comment_response(response)
             self.assert_items_sorted(response, 'score', order, enums.OrderingFieldType.INTEGER)
 
-    def test_range_by_creation_date(self):
+    def test_range_by_creation(self):
         """Test the comments list endpoint range by creation date.
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)

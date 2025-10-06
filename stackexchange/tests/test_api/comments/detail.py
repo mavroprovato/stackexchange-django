@@ -43,7 +43,7 @@ class CommentRetrieveTests(base.BaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_comment_response(response)
 
-    def test_sort_by_creation_date(self):
+    def test_sort_by_creation(self):
         """Test the comment detail endpoint sorted by creation date.
         """
         for order in enums.OrderingDirection:
@@ -69,7 +69,7 @@ class CommentRetrieveTests(base.BaseTestCase):
             self.assert_comment_response(response)
             self.assert_items_sorted(response, 'score', order, enums.OrderingFieldType.INTEGER)
 
-    def test_range_by_creation_date(self):
+    def test_range_by_creation(self):
         """Test the comment detail endpoint range by creation date.
         """
         comments = random.sample(list(models.PostComment.objects.all()), 3)

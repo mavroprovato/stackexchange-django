@@ -35,7 +35,7 @@ class PostListTests(base.BaseTestCase):
             self.assert_post_response(response)
             self.assert_items_sorted(response, 'last_activity_date', order, enums.OrderingFieldType.DATE)
 
-    def test_sort_by_creation_date(self):
+    def test_sort_by_creation(self):
         """Test the post list endpoint sorted by creation date.
         """
         for order in enums.OrderingDirection:
@@ -64,7 +64,7 @@ class PostListTests(base.BaseTestCase):
         self.assert_post_response(response)
         self.assert_items_in_range(response, 'last_activity_date', enums.OrderingFieldType.DATE, min_value, max_value)
 
-    def test_range_by_creation_date(self):
+    def test_range_by_creation(self):
         """Test the post list endpoint range by user creation date.
         """
         min_value, max_value = self.generate_random_date_range()

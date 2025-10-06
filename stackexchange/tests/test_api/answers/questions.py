@@ -82,7 +82,7 @@ class AnswerQuestionTests(base.BaseTestCase):
             self.assert_question_response(response)
             self.assert_items_sorted(response, 'score', order, enums.OrderingFieldType.INTEGER)
 
-    def test_sort_by_creation_date(self):
+    def test_sort_by_creation(self):
         """Test the answer questions list sorted by comment creation date.
         """
         answers = random.sample(list(models.Post.objects.answers()), 3)
@@ -108,7 +108,7 @@ class AnswerQuestionTests(base.BaseTestCase):
         self.assert_question_response(response)
         self.assert_items_in_range(response, 'score', enums.OrderingFieldType.INTEGER, min_value, max_value)
 
-    def test_range_by_creation_date(self):
+    def test_range_by_creation(self):
         """Test the answer questions list endpoint range by creation date.
         """
         answers = random.sample(list(models.Post.objects.answers()), 3)

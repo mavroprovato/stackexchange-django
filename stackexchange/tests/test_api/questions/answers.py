@@ -46,7 +46,7 @@ class QuestionAnswerTests(base.BaseTestCase):
             self.assert_answer_response(response)
             self.assert_items_sorted(response, 'last_activity_date', order, enums.OrderingFieldType.DATE)
 
-    def test_sort_by_creation_date(self):
+    def test_sort_by_creation(self):
         """Test the question answers endpoint sorted by creation date.
         """
         for order in enums.OrderingDirection:
@@ -85,7 +85,7 @@ class QuestionAnswerTests(base.BaseTestCase):
         self.assert_answer_response(response)
         self.assert_items_in_range(response, 'last_activity_date', enums.OrderingFieldType.DATE, min_value, max_value)
 
-    def test_range_by_creation_date(self):
+    def test_range_by_creation(self):
         """Test the question answers endpoint range by user creation date.
         """
         questions = random.sample(list(models.Post.objects.filter(type=enums.PostType.QUESTION)), 3)

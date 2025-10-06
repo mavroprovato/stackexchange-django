@@ -96,7 +96,7 @@ class UserAnswerTests(base.BaseTestCase):
         self.assert_answer_response(response)
         self.assert_items_in_range(response, 'last_activity_date', enums.OrderingFieldType.DATE, min_value, max_value)
 
-    def test_range_by_creation_date(self):
+    def test_range_by_creation(self):
         """Test the user answer list endpoint range by creation date.
         """
         site_users = random.sample(list(models.SiteUser.objects.all()), 3)
