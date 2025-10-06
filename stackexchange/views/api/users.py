@@ -62,16 +62,6 @@ from .base import BaseViewSet
             )
         ]
     ),
-    favorites=extend_schema(
-        summary='Get the questions bookmarked (previously known as "favorited") by users identified by a set of ids.',
-        description=render_to_string('doc/users/favorites.md'),
-        parameters=[
-            OpenApiParameter(
-                name='id', type=str, location=OpenApiParameter.PATH,
-                description='A list of semicolon separated user identifiers'
-            )
-        ]
-    ),
     moderators=extend_schema(
         summary='Get the users who have moderation powers on the site. ',
         description=render_to_string('doc/users/moderators.md'),
@@ -165,10 +155,6 @@ class UserViewSet(BaseViewSet):
             return models.UserBadge.objects.per_user_and_badge()
         if self.action == 'comments':
             return models.PostComment.objects.select_related('post', 'user')
-        if self.action == 'favorites':
-            return models.Post.objects.filter(
-                Exists(models.PostVote.objects.filter(type=enums.PostVoteType.FAVORITE))
-            ).select_related('owner').prefetch_related('tags')
         if self.action == 'moderators':
             return models.SiteUser.objects.with_badge_counts().filter(
                 reputation__gt=enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation)
@@ -251,9 +237,7 @@ class UserViewSet(BaseViewSet):
             return serializers.PostSerializer
         if self.action == 'privileges':
             return serializers.UserPrivilegeSerializer
-        if self.action in (
-            'favorites', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
-        ):
+        if self.action in ('questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'):
             return serializers.QuestionSerializer
         if self.action in ('top_answer_tags', 'top_question_tags'):
             return serializers.TopTags
@@ -274,8 +258,7 @@ class UserViewSet(BaseViewSet):
                 filters.OrderingField('modified', 'last_modified_date', type=enums.OrderingFieldType.DATE)
             )
         if self.action in (
-            'answers', 'favorites', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted',
-            'questions_unanswered'
+            'answers', 'posts', 'questions', 'questions_no_answers', 'questions_unaccepted', 'questions_unanswered'
         ):
             return (
                 filters.OrderingField('activity', 'last_activity_date', type=enums.OrderingFieldType.DATE),
@@ -325,8 +308,6 @@ class UserViewSet(BaseViewSet):
             return 'owner__unique_id'
         if self.action in ('badges', 'comments'):
             return 'user__unique_id'
-        if self.action == 'favorites':
-            return 'votes__user__unique_id'
 
         return super().detail_field
 
@@ -375,15 +356,6 @@ class UserViewSet(BaseViewSet):
     @action(detail=True, url_path='comments')
     def comments(self, request: Request, *args, **kwargs) -> Response:
         """Get the comments for a set of users.
-
-        :param request: The request.
-        :return: The response.
-        """
-        return super().list(request, *args, **kwargs)
-
-    @action(detail=True, url_path='favorites')
-    def favorites(self, request: Request, *args, **kwargs) -> Response:
-        """Get the bookmarked questions for a set of user users.
 
         :param request: The request.
         :return: The response.
