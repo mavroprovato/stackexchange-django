@@ -5,3 +5,4 @@ from .badges import *
 from .comments import *
 from .detail import *
 from .list import *
+from .moderators import *

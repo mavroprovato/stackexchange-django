@@ -13,6 +13,13 @@ from stackexchange import enums
 class SiteUserQuerySet(QuerySet):
     """The site user manager.
     """
+    def moderators(self) -> QuerySet:
+        """Returns the moderators for the site.
+
+        :return: The moderators for the site.
+        """
+        return self.filter(is_moderator=True)
+
     def with_badge_counts(self) -> QuerySet:
         """Annotate the queryset with the badge counts per badge type. Three fields are added, named `<rank>_count`.
 

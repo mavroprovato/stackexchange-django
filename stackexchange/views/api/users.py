@@ -156,8 +156,7 @@ class UserViewSet(BaseViewSet):
         if self.action == 'comments':
             return models.PostComment.objects.select_related('post', 'user')
         if self.action == 'moderators':
-            return models.SiteUser.objects.with_badge_counts().filter(
-                reputation__gt=enums.Privilege.ACCESS_TO_MODERATOR_TOOLS.reputation)
+            return models.SiteUser.objects.moderators().with_badge_counts()
         if self.action == 'posts':
             return models.Post.objects.questions_and_answers().select_related('owner')
         if self.action == 'questions':
