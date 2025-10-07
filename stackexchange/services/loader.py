@@ -137,6 +137,7 @@ class SiteUserLoader(BaseFileLoader):
                 site_user.is_employee = user['is_employee']
                 site_user.save()
 
+
 class BadgeLoader(BaseFileLoader):
     """The badge loader.
     """
