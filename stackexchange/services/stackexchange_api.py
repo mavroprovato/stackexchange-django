@@ -33,40 +33,48 @@ class StackExchangeAPI:
         self._cache_dir = pathlib.Path(settings.BASE_DIR) / "var" / "cache" / self.site.name
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
+    def get_moderators(self) -> Iterable[dict]:
+        """Get the users that are moderators of the site.
+
+        :return: The user data.
+        """
+        logger.info("Getting moderators")
+
+        return self._fetch_data('users/moderators')
+
     def get_tags(self, tag_flag: enums.TagFlag) -> Iterable[dict]:
         """Get the tags that have the specified tag flag.
 
         :param tag_flag: The tag flag.
         :return: The tag data.
         """
-        path = f"tags/{tag_flag.api_path}"
-        data = []
-        if self._should_fetch(path):
-            logger.info("Fetching tag flag %s from API", tag_flag.attribute_name)
-            data = self._fetch_data(path)
-            with open(self._cache_file(path), 'wt') as file:
-                json.dump(data, file)
-        else:
-            logger.info("Fetching tag flag %s from cache", tag_flag.attribute_name)
-            with open(self._cache_file(path), 'rt') as file:
-                data = json.load(file)
+        logger.info("Getting tags with flag %s", tag_flag)
 
-        return data
+        return self._fetch_data(f"tags/{tag_flag.api_path}")
 
     def get_tag_synonyms(self) -> Iterable[dict]:
         """Get the tag synonyms.
 
         :return: The tag synonyms.
         """
-        path = "tags/synonyms"
+        logger.info("Getting tag synonyms")
+
+        return self._fetch_data('tags/synonyms')
+
+    def _fetch_data(self, path: str) -> Iterable[dict]:
+        """Fetch the data from the StackExchange API.
+
+        :param path: The API path.
+        :return: The data.
+        """
         data = []
         if self._should_fetch(path):
-            logger.info("Fetching tag synonyms from API")
+            logger.info("Fetching data from API")
             data = self._fetch_data(path)
             with open(self._cache_file(path), 'wt') as file:
                 json.dump(data, file)
         else:
-            logger.info("Fetching tag synonyms from cache")
+            logger.info("Fetching data from cache")
             with open(self._cache_file(path), 'rt') as file:
                 data = json.load(file)
 

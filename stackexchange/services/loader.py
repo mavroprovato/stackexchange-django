@@ -40,6 +40,7 @@ class BaseFileLoader(abc.ABC):
         """
         self.site = site
         self.data_dir = data_dir
+        self.api = services.stackexchange_api.StackExchangeAPI(site=site)
 
     @abc.abstractmethod
     def transform(self, row: dict) -> tuple | list[tuple] | None:
@@ -99,8 +100,15 @@ class SiteUserLoader(BaseFileLoader):
     TABLE_NAME = 'site_users'
     TABLE_COLUMNS = (
         'unique_id', 'display_name', 'website_url', 'location', 'about', 'creation_date', 'last_modified_date',
-        'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes'
+        'last_access_date', 'reputation', 'views', 'up_votes', 'down_votes', 'is_employee', 'is_moderator'
     )
+
+    def perform(self) -> None:
+        """Load users.
+        """
+        super().perform()
+
+        self.update_users()
 
     def transform(self, row) -> tuple | list[tuple] | None:
         """Transform the input row so that it can be loaded to the users table.
@@ -111,9 +119,23 @@ class SiteUserLoader(BaseFileLoader):
         return (
             row['Id'], row['DisplayName'], row.get('WebsiteUrl', '<NULL>'), row.get('Location', '<NULL>'),
             row.get('AboutMe', '<NULL>'), row['CreationDate'], datetime.datetime.now(), row['LastAccessDate'],
-            row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes']
+            row['Reputation'], row['Views'], row['UpVotes'], row['DownVotes'], False, False
         )
 
+    def update_users(self) -> None:
+        """Update the employee and moderator flags for users
+        """
+        logger.info("Updating tag flags")
+        with schema_context(self.site.schema_name):
+            users = self.api.get_moderators()
+            for user in users:
+                site_user = models.SiteUser.objects.filter(unique_id=user['user_id']).first()
+                if site_user is None:
+                    continue
+                site_user = models.SiteUser.objects.get(unique_id=user['user_id'])
+                site_user.is_moderator = True
+                site_user.is_employee = user['is_employee']
+                site_user.save()
 
 class BadgeLoader(BaseFileLoader):
     """The badge loader.
@@ -226,16 +248,6 @@ class TagLoader(BaseFileLoader):
     INPUT_FILENAME = 'Tags.xml'
     TABLE_NAME = 'tags'
     TABLE_COLUMNS = 'id', 'name', 'award_count', 'excerpt_id', 'wiki_id', 'required', 'moderator_only'
-
-    def __init__(self, site: site_models.Site, data_dir: pathlib.Path) -> None:
-        """Initialize the tag loader.
-
-        :param site: The site.
-        :param data_dir: The data directory
-        """
-        super().__init__(site, data_dir)
-
-        self.api = services.stackexchange_api.StackExchangeAPI(site=site)
 
     def perform(self) -> None:
         """Load the tags.

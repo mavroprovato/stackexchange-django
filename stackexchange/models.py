@@ -24,6 +24,8 @@ class SiteUser(models.Model):
     views = models.PositiveIntegerField(default=0, help_text="The site user views")
     up_votes = models.PositiveIntegerField(default=0, help_text="The site user up votes")
     down_votes = models.PositiveIntegerField(default=0, help_text="The site user down votes")
+    is_employee = models.BooleanField(default=False, help_text="True if the user is an employee")
+    is_moderator = models.BooleanField(default=False, help_text="True if the user is a moderator")
 
     objects = managers.SiteUserQuerySet.as_manager()
 
